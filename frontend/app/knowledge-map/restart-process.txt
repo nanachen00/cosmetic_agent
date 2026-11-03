@@ -1,0 +1,9 @@
+postgres  367881       1  0 Oct24 ?        00:00:38 /usr/lib/postgresql/14/bin/p
+postgres  367883  367881  0 Oct24 ?        00:00:00 postgres: checkpointer 
+postgres  367884  367881  0 Oct24 ?        00:00:07 postgres: background writer 
+postgres  367885  367881  0 Oct24 ?        00:00:08 postgres: walwriter 
+postgres  367886  367881  0 Oct24 ?        00:00:13 postgres: autovacuum launche
+postgres  367887  367881  0 Oct24 ?        00:00:44 postgres: stats collector 
+postgres  367888  367881  0 Oct24 ?        00:00:00 postgres: logical replicatio
+root      367910       1  0 Oct24 ?        00:24:32 redis-server 127.0.0.1:6389
+2026-11-03 04:49:20

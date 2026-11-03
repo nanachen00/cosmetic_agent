@@ -1,0 +1,38 @@
+{
+  "reviewed_utc": "2026-11-01",
+  "datasets": [
+    {
+      "name": "ACNE04",
+      "role": "box-level lesion detector baseline and historical comparison",
+      "size": "1457 face images; 18983 source-author boxes in the reviewed mirror",
+      "license_status": "academic/research use only; not for commercial deployment without author permission",
+      "limits": ["boxes are not true masks", "no reliable subject IDs", "lighting/framing vary"],
+      "source": "https://github.com/xpwu95/LDL"
+    },
+    {
+      "name": "AcneSCU",
+      "role": "fine-grained lesion detection/instance segmentation research after access and license verification",
+      "size": "276 images; 31777 instance-level annotations reported by the paper",
+      "license_status": "verify original distribution terms before download or use; third-party mirror labels are not sufficient proof",
+      "limits": ["small image count", "do not assume a third-party mirror preserves patient IDs or original terms"],
+      "source": "https://doi.org/10.1109/JBHI.2023.3304727"
+    },
+    {
+      "name": "SCIN",
+      "role": "external diversity and gradability evaluation, not acne-box training",
+      "size": "10000+ consented condition images",
+      "license_status": "custom SCIN Data Use License; attribution and no re-identification requirements",
+      "limits": ["condition-level labels, not lesion boxes", "US crowdsourced distribution", "known duplicates must be grouped"],
+      "source": "https://github.com/google-research-datasets/scin"
+    },
+    {
+      "name": "CHROMA-FIT",
+      "role": "skin-tone measurement research and colour error analysis",
+      "license_status": "verify dataset terms before training; use primarily as colour-ground-truth evaluation",
+      "limits": ["DSLR indoor/outdoor capture differs from phone app capture", "not an acne dataset"],
+      "source": "https://openaccess.thecvf.com/content/WACV2024W/DVPBA/html/Pangelinan_The_CHROMA-FIT_Dataset_Characterizing_Human_Ranges_of_Melanin_for_Increased_WACVW_2024_paper.html"
+    }
+  ],
+  "rule": "No internet image scraping. Every image must have provenance, permitted purpose, consent/license record, and subject/date/device grouping before ingestion."
+}
+

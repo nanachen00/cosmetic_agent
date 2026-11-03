@@ -1,0 +1,51 @@
+{
+  "protocol_version": "blink-facial-research-v3.0",
+  "frozen_before_real_evaluation": true,
+  "purpose": "Daily skincare image research; visible appearance only; no disease diagnosis.",
+  "split_unit": ["subject_id", "captured_date", "device_id"],
+  "forbidden_tuning_groups": {
+    "v1_locked_test_parent_groups": 48,
+    "v2_locked_test_parent_groups": 48,
+    "rule": "Never use either historical locked test cohort for model selection, threshold tuning, prompt tuning, or error-driven augmentation."
+  },
+  "tracks": {
+    "lesion_detection": {
+      "labels": "expert or source-author boxes/masks; ACNE04 boxes are not masks",
+      "metrics": ["AP50", "precision", "recall", "count MAE"],
+      "candidate_models": ["one-stage small-object detector baseline", "instance segmentation only when true masks exist"]
+    },
+    "colour": {
+      "design": "same subject/region/device, fixed distance, fixed angle, reference colour target, no beauty filter",
+      "metrics": ["CIEDE2000 repeatability", "a* repeatability", "usable ROI fraction"],
+      "claim_limit": "Relative colour only until a physical reference target and ground-truth measurements are present."
+    },
+    "multiview": {
+      "required_views": ["front", "left", "right"],
+      "metrics": ["repeatability across views", "single-view-only rate"],
+      "claim_limit": "Cross-view repetition alone does not prove height; stereo or photometric calibration is required."
+    },
+    "personal_baseline": {
+      "minimum_sessions": 3,
+      "estimator": "median and MAD within subject+device+capture_profile+region",
+      "claim_limit": "Relative diary change only."
+    },
+    "qwen_integration": {
+      "role": "Explain structured evidence and uncertainty, not replace numeric modules",
+      "must_not_output": ["disease diagnosis", "treatment efficacy", "clinical severity", "unsupported exact count"]
+    }
+  },
+  "controlled_variables": {
+    "one_factor_at_a_time": ["exposure EV -1/+1", "warm/cool white balance", "Gaussian blur radius 2", "directional shadow"],
+    "predeclared_interaction": ["warm white balance + directional shadow"],
+    "fixed": ["subject", "region", "camera", "distance", "angle", "resolution", "compression", "model revision", "prompt", "decoder"],
+    "synthetic_probe_limit": "Synthetic variants test sensitivity only and cannot validate real colour or surface-height accuracy."
+  },
+  "research_gates": {
+    "schema_valid_rate_min": 0.98,
+    "mild_transform_tag_consistency_min": 0.85,
+    "calibrated_colour_repeatability_delta_e00_target_max": 3.0,
+    "subgroup_reporting": "Report device and skin-tone strata; do not claim a subgroup result with n<20.",
+    "clinical_gate": "None. Clinical validation requires a separate prospective protocol and expert ground truth."
+  }
+}
+

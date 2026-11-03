@@ -1,0 +1,16 @@
+{
+  "csv": {
+    "status": 200,
+    "bytes": 2285
+  },
+  "report": {
+    "status": 200,
+    "bytes": 7316
+  },
+  "photo_page": {
+    "status": 200,
+    "bytes": 17728
+  },
+  "records_bytes": 65684394,
+  "weights_on_server": true
+}

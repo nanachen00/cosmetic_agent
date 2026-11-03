@@ -1,0 +1,29 @@
+{
+ "_doc": "SHA-256 of every file that can change a hold-out decision or score. Written once, before the hold-out run.",
+ "files": {
+  "gateb.py": "34c4cc2eda2316e4bd687b75546039ded38db53df3a044837176f43563319812",
+  "holdout.py": "c28027639457cd70773550cb4e63667d77e334b74928cb24f41c4db2d28c09e9",
+  "gemma_arms.py": "caa6dc7a45155595ac8b2007d4b2b0c551127e8b68ff82bd0894aa7df19a038c",
+  "prod_replay.py": "627c2421ec656ef5177093dafd92b9c479efc9d34c9a330922f5f2fffd779c5e",
+  "llmclient.py": "8931230be4341531c1b246f705954d9726f47adde0e40bf473da42b1da608157",
+  "extra_safety.py": "615d26b20a55aae8ffa7cb9f33412778f3c889cebee0e7b23db0e9b87a6e998d",
+  "holdout/router_gold.json": "a5eb5eba74067d75e5e32b385905cfb97239c38ad1e11393dda205ff8b013c54",
+  "holdout/frozen_thresholds.json": "6fc0d47ace043b967751cc7dfab6a0d7db0148c95cb6cfd7bb815bd8f7283234",
+  "holdout/SCORING.md": "b05af999f9127f736d007e415a7761c4d656efd3d628e2a33656217a9e37dca8",
+  "vendor_fk/kevlib.py": "1d2be226a720d72ae11569c4ae6afeaf7cb106424299facea2c2ad13a76cd92c",
+  "vendor_fk/gateA.py": "4615f542bf71e1fca5ef96e0ecd167a95084de5a10a131cd8c8335f79834a6da",
+  "vendor_fk/parser_v2.py": "ce96e49826af855218d79e6a6cb2a089c7ecf7324e6e5acb4f3dff3346db36a3",
+  "vendor_fk/payload/kev_slot_parser.py": "84b5fffd647edee2d7d8c51ae08864c57bc69f1c8f765dc7bf5a66b67a6ac457",
+  "vendor_fk/gate_data.py": "f67c7c4b76e2e191911f0eb310092895ec987f71616f22dfd5b95e32002cf11b",
+  "fetch_gguf.py": "d6d0c7c44e30857d37ec91864cefef6d8930fb2cf188d8ef30ecabc9ee83ce27",
+  "prompts/min_system.txt": "12f6f1edb53a91f1e5aadf55398b66d5e5f190ecbedab8c28a2a9968bfe56df9",
+  "prompts/min_fewshot.txt": "70a12d2e506430896e7707f5143d2d89e8baa91feee988e53ccbdd9f32b521f1",
+  "prompts/ext_system.txt": "a30406935c2dc2e36869c05a72da7838076df66abfee286d131685251600d577",
+  "prompts/legacy_system.txt": "595f3d7532370ed93b64ef2deb4e3ffe04c5e4859a32d7ace5c762e51ec386b5",
+  "vendor_prod/tools/agent/intent_parser.py": "5b826495887302264da7f458cd8f25b29e070df95030f4ef71160e08e88cd636",
+  "vendor_prod/tools/agent/product_turn_resolver.py": "622ec7f94f0f29774c7afb1dfa7d3075d4a59a757fc647919c9f54f16bc302fb",
+  "vendor_prod/tools/agent/dialogue_router.py": "c271f218965d9434634d84a92d98a07789bf44014e9ed1c6472762c3b345e942",
+  "vendor_prod/schemas/intent.py": "04ad487ab0b564d62b85d5ab8dc646398133875f54aeaeeb7f471dcdad813d69",
+  "vendor_prod/agents/root/orchestrator.py": "b6e372ec4f8ed10ec4797f6883b5843f814dca8ad622bbb1f0f13836690ce99d"
+ }
+}

@@ -1,0 +1,22 @@
+# PostgreSQL 3 driver used by the backend relational repositories.
+psycopg[binary]==3.3.5
+
+# Better Stack: error events and buffered technical logs.
+sentry-sdk[fastapi]>=2.0,<3.0
+logtail-python>=0.3,<1.0
+
+# Shared rate limits, AI budgets, idempotency keys, and concurrency locks.
+redis>=5,<9
+
+# Prometheus metrics endpoint and production telemetry.
+prometheus-client>=0.25,<1.0
+
+# Better Stack distributed tracing (OTLP/HTTP).
+opentelemetry-api>=1.27,<2
+opentelemetry-sdk>=1.27,<2
+opentelemetry-exporter-otlp-proto-http>=1.27,<2
+opentelemetry-instrumentation-fastapi>=0.48b0,<1
+opentelemetry-instrumentation-httpx>=0.48b0,<1
+opentelemetry-instrumentation-requests>=0.48b0,<1
+opentelemetry-instrumentation-redis>=0.48b0,<1
+opentelemetry-instrumentation-psycopg>=0.48b0,<1

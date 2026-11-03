@@ -1,0 +1,59 @@
+{
+  "baseline": {
+    "n": 96,
+    "tp": 42,
+    "fp": 12,
+    "tn": 36,
+    "fn": 6,
+    "invalid": 0,
+    "precision": 0.7777777777777778,
+    "recall": 0.875,
+    "specificity": 0.75,
+    "macro_f1": 0.8117647058823529,
+    "accuracy": 0.8125
+  },
+  "candidate": {
+    "n": 96,
+    "tp": 37,
+    "fp": 5,
+    "tn": 43,
+    "fn": 11,
+    "invalid": 0,
+    "precision": 0.8809523809523809,
+    "recall": 0.7708333333333334,
+    "specificity": 0.8958333333333334,
+    "macro_f1": 0.8326797385620914,
+    "accuracy": 0.8333333333333334
+  },
+  "delta": {
+    "precision": 0.10317460317460314,
+    "recall": -0.10416666666666663,
+    "macro_f1": 0.020915032679738488
+  },
+  "transitions": {
+    "label_false__base_false__candidate_false": 36,
+    "label_true__base_true__candidate_true": 37,
+    "label_false__base_true__candidate_true": 5,
+    "label_false__base_true__candidate_false": 7,
+    "label_true__base_false__candidate_false": 6,
+    "label_true__base_true__candidate_false": 5
+  },
+  "regressed_ids": [
+    "528c56867e7d03c7274a-positive",
+    "878bb15acaf1348f3f8d-positive",
+    "a5aaac497f0c2b34ace4-positive",
+    "b4836d209843e4ce0c8d-positive",
+    "e51efa439afa58404629-positive"
+  ],
+  "corrected_ids": [
+    "1e66eebf4f149dbabd72-negative",
+    "2550d1d37137d0cd211e-negative",
+    "528c56867e7d03c7274a-negative",
+    "54c44367f7d97203c6a6-negative",
+    "8659adbea0ebbc905fcd-negative",
+    "867830bd26d4f2ca81d9-negative",
+    "a5aaac497f0c2b34ace4-negative"
+  ],
+  "failure_pattern": "candidate_became_too_conservative",
+  "use_restriction": "IDs are audit evidence only. Locked-test errors must not be copied into training or used to choose thresholds."
+}

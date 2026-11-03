@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 624 1039" role="img" aria-labelledby="title desc">
+<title id="title">互動式臉部地圖</title><desc id="desc">可點選額頭、臉頰與下巴區域的正面臉部示意</desc>
+<defs><linearGradient id="skin" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#fff8f3"/><stop offset="1" stop-color="#f0ded8"/></linearGradient><filter id="shadow"><feDropShadow dx="0" dy="12" stdDeviation="18" flood-color="#866978" flood-opacity=".15"/></filter></defs>
+<path d="M141 350C159 171 252 91 312 91s153 80 171 259c12 119-12 330-58 446-35 91-73 151-113 151s-78-60-113-151c-46-116-70-327-58-446Z" fill="url(#skin)" stroke="#b99da8" stroke-width="7" filter="url(#shadow)"/>
+<path d="M145 359C128 177 222 61 312 61s184 116 167 298c-36-52-77-82-118-98-61-24-129-13-216 98Z" fill="#7b5a50" opacity=".92"/>
+<path d="M196 565c25-24 67-28 96-6M332 559c29-22 71-18 96 6" fill="none" stroke="#715b60" stroke-width="11" stroke-linecap="round"/>
+<ellipse cx="248" cy="584" rx="18" ry="10" fill="#6e5758"/><ellipse cx="376" cy="584" rx="18" ry="10" fill="#6e5758"/>
+<path d="M312 596c-13 57-25 102-2 119 10 8 22 8 33 0" fill="none" stroke="#b1847b" stroke-width="8" stroke-linecap="round"/>
+<path d="M250 786c39 28 85 28 124 0-29 64-95 64-124 0Z" fill="#d8959b" opacity=".8"/>
+<path d="M191 674c-27 12-45 36-52 67M433 674c27 12 45 36 52 67" fill="none" stroke="#e6b9b5" stroke-width="9" stroke-linecap="round" opacity=".55"/>
+</svg>

@@ -1,0 +1,36 @@
+{
+ "cand": "laya-mmbert",
+ "thresholds": {
+  "base": {
+   "safety": 0.6,
+   "intent": {
+    "find_product": 0.4,
+    "price_comparison": 0.5,
+    "knowledge": 0.7,
+    "record": 0.95,
+    "chitchat": 0.1,
+    "unclear": 0.55
+   },
+   "avoid": 0.5,
+   "cal_n": 93,
+   "cal_safety_pos": 16
+  },
+  "safety": 0.6,
+  "emergency": 0.95,
+  "cal_emergency_pos": 2,
+  "emergency_cal_fpr": 0.403,
+  "intent": {
+   "find_product": 0.4,
+   "price_comparison": 0.5,
+   "knowledge": 0.7,
+   "record": 0.95,
+   "chitchat": 0.1,
+   "unclear": 0.55
+  },
+  "unclear": "derived"
+ },
+ "cal_run": "/var/lib/jenkins/tomod/ops/p-sys1/runs/laya-mmbert/gd",
+ "n_cal": 95,
+ "noul_true_high": true,
+ "sha256": "331fdc82e316c6e2bfc7e529953e8004b1fbe4067026d10a47eb1e87482d3185"
+}

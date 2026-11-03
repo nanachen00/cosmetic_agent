@@ -1,0 +1,3021 @@
+{
+ "_doc": "Router gold, 300 cases = 24 seed (r01-r24, from the earlier Kev gate list) + 276 synthetic (s001-). Synthetic: hand-authored + template-expanded by the suite author, NOT sampled from :8010 traffic. route labels follow ops/blink-root-intent-system-one-benchmark/gate1 ROUTES; route->agent mapping follows cosmetic-agent orchestrator._dispatch; several routes map to one agent by design. intent_type is the legacy IntentType gold only where one unambiguously exists (None otherwise). Regenerate: tools/gen_router_gold.py.",
+ "routes": {
+  "product": "商品推薦/搜尋",
+  "knowledge": "成分與保養知識",
+  "skin_tracking": "膚況紀錄/追蹤",
+  "conversation": "一般聊天/結束語",
+  "safety": "安全、刺激、禁忌或交互作用",
+  "clarify": "資訊不足需釐清"
+ },
+ "route_to_agent": {
+  "product": "product_agent",
+  "knowledge": "knowledge_agent",
+  "safety": "knowledge_agent",
+  "skin_tracking": "skin_tracking_agent",
+  "clarify": "clarification",
+  "conversation": "chat"
+ },
+ "cases": [
+  {
+   "id": "r01",
+   "query": "我是油性肌，想找一瓶控油的洗面乳",
+   "route": "product",
+   "intent_type": "find_product",
+   "note": "",
+   "source": "seed",
+   "style": "seed",
+   "boundary": false
+  },
+  {
+   "id": "r02",
+   "query": "乾性肌膚用什麼乳液比較滋潤？",
+   "route": "product",
+   "intent_type": "recommendation",
+   "note": "",
+   "source": "seed",
+   "style": "seed",
+   "boundary": false
+  },
+  {
+   "id": "r03",
+   "query": "A 品牌和 B 品牌的精華液哪個比較便宜",
+   "route": "product",
+   "intent_type": "price_comparison",
+   "note": "",
+   "source": "seed",
+   "style": "seed",
+   "boundary": false
+  },
+  {
+   "id": "r04",
+   "query": "想買 500 元以內的保濕面膜",
+   "route": "product",
+   "intent_type": "find_product",
+   "note": "",
+   "source": "seed",
+   "style": "seed",
+   "boundary": false
+  },
+  {
+   "id": "r05",
+   "query": "推薦清爽型的化妝水，混合肌",
+   "route": "product",
+   "intent_type": "recommendation",
+   "note": "",
+   "source": "seed",
+   "style": "seed",
+   "boundary": false
+  },
+  {
+   "id": "r06",
+   "query": "比較保濕乳霜哪一家 CP 值高",
+   "route": "product",
+   "intent_type": "price_comparison",
+   "note": "",
+   "source": "seed",
+   "style": "seed",
+   "boundary": false
+  },
+  {
+   "route": "product",
+   "query": "想買含水楊酸的洗面乳，預算 500",
+   "intent_type": "find_product",
+   "source": "synth",
+   "style": "boundary",
+   "boundary": true,
+   "id": "s001",
+   "note": ""
+  },
+  {
+   "route": "product",
+   "query": "有沒有適合痘痘肌的精華推薦",
+   "intent_type": "recommendation",
+   "source": "synth",
+   "style": "boundary",
+   "boundary": true,
+   "id": "s002",
+   "note": ""
+  },
+  {
+   "route": "product",
+   "query": "推薦修護泛紅的乳霜",
+   "intent_type": "recommendation",
+   "source": "synth",
+   "style": "boundary",
+   "boundary": true,
+   "id": "s003",
+   "note": ""
+  },
+  {
+   "route": "product",
+   "query": "找一款含 A 醇的晚霜，價格不要太高",
+   "intent_type": "find_product",
+   "source": "synth",
+   "style": "boundary",
+   "boundary": true,
+   "id": "s004",
+   "note": ""
+  },
+  {
+   "route": "product",
+   "query": "幫我比較兩款含果酸的化妝水哪個划算",
+   "intent_type": "price_comparison",
+   "source": "synth",
+   "style": "boundary",
+   "boundary": true,
+   "id": "s005",
+   "note": ""
+  },
+  {
+   "route": "product",
+   "query": "哪個牌子的防曬乳 CP 值高，我常戶外活動",
+   "intent_type": "price_comparison",
+   "source": "synth",
+   "style": "boundary",
+   "boundary": true,
+   "id": "s006",
+   "note": ""
+  },
+  {
+   "route": "product",
+   "query": "想找孕期前就在用的保濕乳液品牌",
+   "intent_type": "find_product",
+   "source": "synth",
+   "style": "boundary",
+   "boundary": true,
+   "id": "s007",
+   "note": ""
+  },
+  {
+   "route": "product",
+   "query": "推薦刺痛感低的洗面乳",
+   "intent_type": "recommendation",
+   "source": "synth",
+   "style": "boundary",
+   "boundary": true,
+   "id": "s008",
+   "note": ""
+  },
+  {
+   "route": "product",
+   "query": "有沒有適合上班族的輕薄防曬乳推薦",
+   "intent_type": "recommendation",
+   "source": "synth",
+   "style": "freeform",
+   "boundary": false,
+   "id": "s009",
+   "note": ""
+  },
+  {
+   "route": "product",
+   "query": "想買一罐純素的保濕乳霜",
+   "intent_type": "find_product",
+   "source": "synth",
+   "style": "freeform",
+   "boundary": false,
+   "id": "s010",
+   "note": ""
+  },
+  {
+   "route": "product",
+   "query": "幫我找含神經醯胺的修護乳液",
+   "intent_type": "find_product",
+   "source": "synth",
+   "style": "freeform",
+   "boundary": false,
+   "id": "s011",
+   "note": ""
+  },
+  {
+   "route": "product",
+   "query": "平價又好用的卸妝油有哪些",
+   "intent_type": "find_product",
+   "source": "synth",
+   "style": "freeform",
+   "boundary": false,
+   "id": "s012",
+   "note": ""
+  },
+  {
+   "route": "product",
+   "query": "有什麼推薦的夜間修護面膜",
+   "intent_type": "recommendation",
+   "source": "synth",
+   "style": "freeform",
+   "boundary": false,
+   "id": "s013",
+   "note": ""
+  },
+  {
+   "route": "product",
+   "query": "我想找無香料的化妝水",
+   "intent_type": "find_product",
+   "source": "synth",
+   "style": "freeform",
+   "boundary": false,
+   "id": "s014",
+   "note": ""
+  },
+  {
+   "route": "product",
+   "query": "油皮夏天用的清爽乳液有推薦嗎",
+   "intent_type": "recommendation",
+   "source": "synth",
+   "style": "freeform",
+   "boundary": false,
+   "id": "s015",
+   "note": ""
+  },
+  {
+   "route": "product",
+   "query": "最近想換精華液，預算 1000 左右，有推嗎",
+   "intent_type": "recommendation",
+   "source": "synth",
+   "style": "freeform",
+   "boundary": false,
+   "id": "s016",
+   "note": ""
+  },
+  {
+   "route": "product",
+   "query": "想買 SPF50 的防曬，不要太油",
+   "intent_type": "find_product",
+   "source": "synth",
+   "style": "freeform",
+   "boundary": false,
+   "id": "s017",
+   "note": ""
+  },
+  {
+   "route": "product",
+   "query": "找一款能淡化痘疤的精華",
+   "intent_type": "find_product",
+   "source": "synth",
+   "style": "freeform",
+   "boundary": false,
+   "id": "s018",
+   "note": ""
+  },
+  {
+   "route": "product",
+   "query": "有沒有 300 元以下的洗面乳",
+   "intent_type": "find_product",
+   "source": "synth",
+   "style": "freeform",
+   "boundary": false,
+   "id": "s019",
+   "note": ""
+  },
+  {
+   "route": "product",
+   "query": "推薦一下適合敏感泛紅肌用的乳霜",
+   "intent_type": "recommendation",
+   "source": "synth",
+   "style": "freeform",
+   "boundary": true,
+   "id": "s020",
+   "note": ""
+  },
+  {
+   "route": "product",
+   "query": "哪個牌子的保濕化妝水 CP 值比較高",
+   "intent_type": "price_comparison",
+   "source": "synth",
+   "style": "freeform",
+   "boundary": false,
+   "id": "s021",
+   "note": ""
+  },
+  {
+   "route": "product",
+   "query": "專櫃和開架的眼霜差在哪裡，哪個比較划算",
+   "intent_type": "price_comparison",
+   "source": "synth",
+   "style": "freeform",
+   "boundary": false,
+   "id": "s022",
+   "note": ""
+  },
+  {
+   "route": "product",
+   "query": "幫我比較兩款維他命 C 精華的價格",
+   "intent_type": "price_comparison",
+   "source": "synth",
+   "style": "freeform",
+   "boundary": false,
+   "id": "s023",
+   "note": ""
+  },
+  {
+   "route": "product",
+   "query": "我想要毛孔細緻一點，有什麼產品可以買",
+   "intent_type": "find_product",
+   "source": "synth",
+   "style": "freeform",
+   "boundary": false,
+   "id": "s024",
+   "note": ""
+  },
+  {
+   "route": "product",
+   "query": "想入手一瓶抗老精華，有推薦嗎",
+   "intent_type": "recommendation",
+   "source": "synth",
+   "style": "freeform",
+   "boundary": false,
+   "id": "s025",
+   "note": ""
+  },
+  {
+   "route": "product",
+   "query": "化妝水要買哪一瓶比較好，預算 500",
+   "intent_type": "price_comparison",
+   "source": "synth",
+   "style": "freeform",
+   "boundary": false,
+   "id": "s026",
+   "note": ""
+  },
+  {
+   "route": "product",
+   "query": "給男生用的控油洗面乳有推薦嗎",
+   "intent_type": "recommendation",
+   "source": "synth",
+   "style": "freeform",
+   "boundary": false,
+   "id": "s027",
+   "note": ""
+  },
+  {
+   "route": "product",
+   "query": "有沒有出差方便帶的旅行組保養品",
+   "intent_type": "find_product",
+   "source": "synth",
+   "style": "freeform",
+   "boundary": false,
+   "id": "s028",
+   "note": ""
+  },
+  {
+   "route": "product",
+   "query": "想找無酒精的爽膚水",
+   "intent_type": "find_product",
+   "source": "synth",
+   "style": "freeform",
+   "boundary": false,
+   "id": "s029",
+   "note": ""
+  },
+  {
+   "route": "product",
+   "query": "請推薦台灣品牌的面膜",
+   "intent_type": "recommendation",
+   "source": "synth",
+   "style": "freeform",
+   "boundary": false,
+   "id": "s030",
+   "note": ""
+  },
+  {
+   "route": "product",
+   "query": "適合 40 歲的面霜有哪些",
+   "intent_type": "find_product",
+   "source": "synth",
+   "style": "freeform",
+   "boundary": false,
+   "id": "s031",
+   "note": ""
+  },
+  {
+   "route": "product",
+   "query": "有賣大容量的身體乳嗎",
+   "intent_type": "find_product",
+   "source": "synth",
+   "style": "freeform",
+   "boundary": false,
+   "id": "s032",
+   "note": ""
+  },
+  {
+   "route": "product",
+   "query": "A 款和 B 款防曬乳，哪個比較便宜",
+   "intent_type": "price_comparison",
+   "source": "synth",
+   "style": "freeform",
+   "boundary": false,
+   "id": "s033",
+   "note": ""
+  },
+  {
+   "route": "product",
+   "query": "有沒有含果酸的精華液可以買",
+   "intent_type": "find_product",
+   "source": "synth",
+   "style": "template",
+   "boundary": false,
+   "id": "s034",
+   "note": ""
+  },
+  {
+   "route": "product",
+   "query": "我是痘痘肌，想找一瓶提亮的洗面乳",
+   "intent_type": "find_product",
+   "source": "synth",
+   "style": "template",
+   "boundary": false,
+   "id": "s035",
+   "note": ""
+  },
+  {
+   "route": "product",
+   "query": "毛孔粗大的肌膚用什麼卸妝油比較好用？推薦一下",
+   "intent_type": "recommendation",
+   "source": "synth",
+   "style": "template",
+   "boundary": false,
+   "id": "s036",
+   "note": ""
+  },
+  {
+   "route": "product",
+   "query": "我是乾性肌，想找一瓶抗老的洗面乳",
+   "intent_type": "find_product",
+   "source": "synth",
+   "style": "template",
+   "boundary": false,
+   "id": "s037",
+   "note": ""
+  },
+  {
+   "route": "product",
+   "query": "我是混合肌，想找一瓶美白的卸妝油",
+   "intent_type": "find_product",
+   "source": "synth",
+   "style": "template",
+   "boundary": false,
+   "id": "s038",
+   "note": ""
+  },
+  {
+   "route": "product",
+   "query": "比較A牌和D牌的乳液哪個比較便宜",
+   "intent_type": "price_comparison",
+   "source": "synth",
+   "style": "template",
+   "boundary": false,
+   "id": "s039",
+   "note": ""
+  },
+  {
+   "route": "product",
+   "query": "比較C牌和D牌的防曬乳哪個比較便宜",
+   "intent_type": "price_comparison",
+   "source": "synth",
+   "style": "template",
+   "boundary": false,
+   "id": "s040",
+   "note": ""
+  },
+  {
+   "route": "product",
+   "query": "我是毛孔粗大的肌膚，想找一瓶保濕的卸妝油",
+   "intent_type": "find_product",
+   "source": "synth",
+   "style": "template",
+   "boundary": false,
+   "id": "s041",
+   "note": ""
+  },
+  {
+   "route": "product",
+   "query": "我是熟齡肌，想找一瓶溫和的洗面乳",
+   "intent_type": "find_product",
+   "source": "synth",
+   "style": "template",
+   "boundary": false,
+   "id": "s042",
+   "note": ""
+  },
+  {
+   "route": "product",
+   "query": "想買 800 元以內的溫和化妝水",
+   "intent_type": "find_product",
+   "source": "synth",
+   "style": "template",
+   "boundary": false,
+   "id": "s043",
+   "note": ""
+  },
+  {
+   "route": "product",
+   "query": "想買 300 元以內的保濕防曬乳",
+   "intent_type": "find_product",
+   "source": "synth",
+   "style": "template",
+   "boundary": false,
+   "id": "s044",
+   "note": ""
+  },
+  {
+   "id": "r07",
+   "query": "菸鹼醯胺有什麼功效",
+   "route": "knowledge",
+   "intent_type": "knowledge_query",
+   "note": "",
+   "source": "seed",
+   "style": "seed",
+   "boundary": false
+  },
+  {
+   "id": "r08",
+   "query": "維他命 C 精華液怎麼使用才有效",
+   "route": "knowledge",
+   "intent_type": "knowledge_query",
+   "note": "",
+   "source": "seed",
+   "style": "seed",
+   "boundary": false
+  },
+  {
+   "id": "r09",
+   "query": "視黃醇和 A 醇是同一種東西嗎",
+   "route": "knowledge",
+   "intent_type": "knowledge_query",
+   "note": "",
+   "source": "seed",
+   "style": "seed",
+   "boundary": false
+  },
+  {
+   "id": "r10",
+   "query": "玻尿酸的分子量大小有差別嗎",
+   "route": "knowledge",
+   "intent_type": "knowledge_query",
+   "note": "",
+   "source": "seed",
+   "style": "seed",
+   "boundary": false
+  },
+  {
+   "id": "r11",
+   "query": "毛孔粗大有什麼保養方式",
+   "route": "knowledge",
+   "intent_type": "symptom_solving",
+   "note": "",
+   "source": "seed",
+   "style": "seed",
+   "boundary": false
+  },
+  {
+   "id": "r12",
+   "query": "臉上一直長痘痘該怎麼辦",
+   "route": "knowledge",
+   "intent_type": "symptom_solving",
+   "note": "",
+   "source": "seed",
+   "style": "seed",
+   "boundary": false
+  },
+  {
+   "route": "knowledge",
+   "query": "水楊酸是什麼成分",
+   "intent_type": "knowledge_query",
+   "source": "synth",
+   "style": "boundary",
+   "boundary": true,
+   "id": "s045",
+   "note": ""
+  },
+  {
+   "route": "knowledge",
+   "query": "A 醇為什麼要建立耐受",
+   "intent_type": "knowledge_query",
+   "source": "synth",
+   "style": "boundary",
+   "boundary": true,
+   "id": "s046",
+   "note": ""
+  },
+  {
+   "route": "knowledge",
+   "query": "過敏體質的皮膚屏障有什麼特徵",
+   "intent_type": "knowledge_query",
+   "source": "synth",
+   "style": "boundary",
+   "boundary": true,
+   "id": "s047",
+   "note": ""
+  },
+  {
+   "route": "knowledge",
+   "query": "泛紅的皮膚血管有什麼變化",
+   "intent_type": "symptom_solving",
+   "source": "synth",
+   "style": "boundary",
+   "boundary": true,
+   "id": "s048",
+   "note": ""
+  },
+  {
+   "route": "knowledge",
+   "query": "痘痘肌平常可以怎麼保養",
+   "intent_type": "symptom_solving",
+   "source": "synth",
+   "style": "boundary",
+   "boundary": true,
+   "id": "s049",
+   "note": ""
+  },
+  {
+   "route": "knowledge",
+   "query": "敏感肌的成因是什麼",
+   "intent_type": "knowledge_query",
+   "source": "synth",
+   "style": "boundary",
+   "boundary": true,
+   "id": "s050",
+   "note": ""
+  },
+  {
+   "route": "knowledge",
+   "query": "懷孕時皮膚會出現哪些變化",
+   "intent_type": "symptom_solving",
+   "source": "synth",
+   "style": "boundary",
+   "boundary": true,
+   "id": "s051",
+   "note": ""
+  },
+  {
+   "route": "knowledge",
+   "query": "酸類保養品的作用機轉是什麼",
+   "intent_type": "knowledge_query",
+   "source": "synth",
+   "style": "boundary",
+   "boundary": true,
+   "id": "s052",
+   "note": ""
+  },
+  {
+   "route": "knowledge",
+   "query": "早上保養的步驟順序是什麼",
+   "intent_type": "knowledge_query",
+   "source": "synth",
+   "style": "freeform",
+   "boundary": false,
+   "id": "s053",
+   "note": ""
+  },
+  {
+   "route": "knowledge",
+   "query": "洗臉水溫多少度比較好",
+   "intent_type": "knowledge_query",
+   "source": "synth",
+   "style": "freeform",
+   "boundary": false,
+   "id": "s054",
+   "note": ""
+  },
+  {
+   "route": "knowledge",
+   "query": "為什麼換季時皮膚會變乾",
+   "intent_type": "knowledge_query",
+   "source": "synth",
+   "style": "freeform",
+   "boundary": false,
+   "id": "s055",
+   "note": ""
+  },
+  {
+   "route": "knowledge",
+   "query": "角質層受損是什麼意思",
+   "intent_type": "knowledge_query",
+   "source": "synth",
+   "style": "freeform",
+   "boundary": false,
+   "id": "s056",
+   "note": ""
+  },
+  {
+   "route": "knowledge",
+   "query": "防曬係數 SPF 和 PA 是什麼意思",
+   "intent_type": "knowledge_query",
+   "source": "synth",
+   "style": "freeform",
+   "boundary": false,
+   "id": "s057",
+   "note": ""
+  },
+  {
+   "route": "knowledge",
+   "query": "乳液和乳霜的差別是什麼",
+   "intent_type": "knowledge_query",
+   "source": "synth",
+   "style": "freeform",
+   "boundary": false,
+   "id": "s058",
+   "note": ""
+  },
+  {
+   "route": "knowledge",
+   "query": "什麼是經皮水分散失",
+   "intent_type": "knowledge_query",
+   "source": "synth",
+   "style": "freeform",
+   "boundary": false,
+   "id": "s059",
+   "note": ""
+  },
+  {
+   "route": "knowledge",
+   "query": "化學性防曬和物理性防曬有什麼不同",
+   "intent_type": "knowledge_query",
+   "source": "synth",
+   "style": "freeform",
+   "boundary": false,
+   "id": "s060",
+   "note": ""
+  },
+  {
+   "route": "knowledge",
+   "query": "保養品開封後多久內要用完",
+   "intent_type": "knowledge_query",
+   "source": "synth",
+   "style": "freeform",
+   "boundary": false,
+   "id": "s061",
+   "note": ""
+  },
+  {
+   "route": "knowledge",
+   "query": "一天要塗幾次防曬才夠",
+   "intent_type": "knowledge_query",
+   "source": "synth",
+   "style": "freeform",
+   "boundary": false,
+   "id": "s062",
+   "note": ""
+  },
+  {
+   "route": "knowledge",
+   "query": "精華液要在化妝水之前還是之後使用",
+   "intent_type": "knowledge_query",
+   "source": "synth",
+   "style": "freeform",
+   "boundary": false,
+   "id": "s063",
+   "note": ""
+  },
+  {
+   "route": "knowledge",
+   "query": "油性肌需要保濕嗎",
+   "intent_type": "knowledge_query",
+   "source": "synth",
+   "style": "freeform",
+   "boundary": false,
+   "id": "s064",
+   "note": ""
+  },
+  {
+   "route": "knowledge",
+   "query": "去角質多久做一次比較適當",
+   "intent_type": "knowledge_query",
+   "source": "synth",
+   "style": "freeform",
+   "boundary": false,
+   "id": "s065",
+   "note": ""
+  },
+  {
+   "route": "knowledge",
+   "query": "為什麼晚上睡覺臉會出油",
+   "intent_type": "knowledge_query",
+   "source": "synth",
+   "style": "freeform",
+   "boundary": false,
+   "id": "s066",
+   "note": ""
+  },
+  {
+   "route": "knowledge",
+   "query": "皮膚的 pH 值為什麼重要",
+   "intent_type": "knowledge_query",
+   "source": "synth",
+   "style": "freeform",
+   "boundary": false,
+   "id": "s067",
+   "note": ""
+  },
+  {
+   "route": "knowledge",
+   "query": "什麼是 A 酸建立耐受",
+   "intent_type": "knowledge_query",
+   "source": "synth",
+   "style": "freeform",
+   "boundary": false,
+   "id": "s068",
+   "note": ""
+  },
+  {
+   "route": "knowledge",
+   "query": "戴口罩悶痘要怎麼改善",
+   "intent_type": "knowledge_query",
+   "source": "synth",
+   "style": "freeform",
+   "boundary": false,
+   "id": "s069",
+   "note": ""
+  },
+  {
+   "route": "knowledge",
+   "query": "黑頭粉刺是怎麼形成的",
+   "intent_type": "knowledge_query",
+   "source": "synth",
+   "style": "freeform",
+   "boundary": false,
+   "id": "s070",
+   "note": ""
+  },
+  {
+   "route": "knowledge",
+   "query": "水乳霜的用途各是什麼",
+   "intent_type": "knowledge_query",
+   "source": "synth",
+   "style": "freeform",
+   "boundary": false,
+   "id": "s071",
+   "note": ""
+  },
+  {
+   "route": "knowledge",
+   "query": "肌膚屏障是什麼",
+   "intent_type": "knowledge_query",
+   "source": "synth",
+   "style": "freeform",
+   "boundary": false,
+   "id": "s072",
+   "note": ""
+  },
+  {
+   "route": "knowledge",
+   "query": "紫外線 UVA 和 UVB 差在哪",
+   "intent_type": "knowledge_query",
+   "source": "synth",
+   "style": "freeform",
+   "boundary": false,
+   "id": "s073",
+   "note": ""
+  },
+  {
+   "route": "knowledge",
+   "query": "涂抹順序要怎麼排比較有效",
+   "intent_type": "knowledge_query",
+   "source": "synth",
+   "style": "freeform",
+   "boundary": false,
+   "id": "s074",
+   "note": ""
+  },
+  {
+   "route": "knowledge",
+   "query": "怎麼判斷自己是什麼膚質",
+   "intent_type": "knowledge_query",
+   "source": "synth",
+   "style": "freeform",
+   "boundary": false,
+   "id": "s075",
+   "note": ""
+  },
+  {
+   "route": "knowledge",
+   "query": "濕敷化妝水真的有用嗎",
+   "intent_type": "knowledge_query",
+   "source": "synth",
+   "style": "freeform",
+   "boundary": false,
+   "id": "s076",
+   "note": ""
+  },
+  {
+   "route": "knowledge",
+   "query": "臉部按摩對皮膚有幫助嗎",
+   "intent_type": "knowledge_query",
+   "source": "synth",
+   "style": "freeform",
+   "boundary": false,
+   "id": "s077",
+   "note": ""
+  },
+  {
+   "route": "knowledge",
+   "query": "鋅有什麼功效",
+   "intent_type": "knowledge_query",
+   "source": "synth",
+   "style": "template",
+   "boundary": false,
+   "id": "s078",
+   "note": ""
+  },
+  {
+   "route": "knowledge",
+   "query": "粉刺有什麼保養方式",
+   "intent_type": "symptom_solving",
+   "source": "synth",
+   "style": "template",
+   "boundary": false,
+   "id": "s079",
+   "note": ""
+  },
+  {
+   "route": "knowledge",
+   "query": "視黃醇的建議濃度大概是多少",
+   "intent_type": "knowledge_query",
+   "source": "synth",
+   "style": "template",
+   "boundary": false,
+   "id": "s080",
+   "note": ""
+  },
+  {
+   "route": "knowledge",
+   "query": "黑眼圈的成因是什麼，日常保養可以怎麼做",
+   "intent_type": "symptom_solving",
+   "source": "synth",
+   "style": "template",
+   "boundary": false,
+   "id": "s081",
+   "note": ""
+  },
+  {
+   "route": "knowledge",
+   "query": "黑眼圈有什麼保養方式",
+   "intent_type": "symptom_solving",
+   "source": "synth",
+   "style": "template",
+   "boundary": false,
+   "id": "s082",
+   "note": ""
+  },
+  {
+   "route": "knowledge",
+   "query": "粉刺的成因是什麼，日常保養可以怎麼做",
+   "intent_type": "symptom_solving",
+   "source": "synth",
+   "style": "template",
+   "boundary": false,
+   "id": "s083",
+   "note": ""
+  },
+  {
+   "route": "knowledge",
+   "query": "乾紋的成因是什麼，日常保養可以怎麼做",
+   "intent_type": "symptom_solving",
+   "source": "synth",
+   "style": "template",
+   "boundary": false,
+   "id": "s084",
+   "note": ""
+  },
+  {
+   "route": "knowledge",
+   "query": "角鯊烷有什麼功效",
+   "intent_type": "knowledge_query",
+   "source": "synth",
+   "style": "template",
+   "boundary": false,
+   "id": "s085",
+   "note": ""
+  },
+  {
+   "route": "knowledge",
+   "query": "左旋維他命 C要怎麼搭配保養流程才有效",
+   "intent_type": "knowledge_query",
+   "source": "synth",
+   "style": "template",
+   "boundary": false,
+   "id": "s086",
+   "note": ""
+  },
+  {
+   "route": "knowledge",
+   "query": "茶樹精油的建議濃度大概是多少",
+   "intent_type": "knowledge_query",
+   "source": "synth",
+   "style": "template",
+   "boundary": false,
+   "id": "s087",
+   "note": ""
+  },
+  {
+   "route": "knowledge",
+   "query": "壬二酸的建議濃度大概是多少",
+   "intent_type": "knowledge_query",
+   "source": "synth",
+   "style": "template",
+   "boundary": false,
+   "id": "s088",
+   "note": ""
+  },
+  {
+   "id": "r13",
+   "query": "幫我紀錄今天兩頰偏乾",
+   "route": "skin_tracking",
+   "intent_type": null,
+   "note": "",
+   "source": "seed",
+   "style": "seed",
+   "boundary": false
+  },
+  {
+   "id": "r14",
+   "query": "今天要做膚況打卡：額頭油、臉頰正常",
+   "route": "skin_tracking",
+   "intent_type": null,
+   "note": "",
+   "source": "seed",
+   "style": "seed",
+   "boundary": false
+  },
+  {
+   "id": "r15",
+   "query": "我想看最近幾天的皮膚追蹤",
+   "route": "skin_tracking",
+   "intent_type": null,
+   "note": "",
+   "source": "seed",
+   "style": "seed",
+   "boundary": false
+  },
+  {
+   "id": "r16",
+   "query": "請更新今天肌膚紀錄，不需要任何商品推薦",
+   "route": "skin_tracking",
+   "intent_type": null,
+   "note": "",
+   "source": "seed",
+   "style": "seed",
+   "boundary": false
+  },
+  {
+   "route": "skin_tracking",
+   "query": "幫我記錄今天的膚況：兩頰乾、T 字部位出油",
+   "intent_type": null,
+   "source": "synth",
+   "style": "freeform",
+   "boundary": false,
+   "id": "s089",
+   "note": ""
+  },
+  {
+   "route": "skin_tracking",
+   "query": "打卡：今天完成早晚保養",
+   "intent_type": null,
+   "source": "synth",
+   "style": "freeform",
+   "boundary": false,
+   "id": "s090",
+   "note": ""
+  },
+  {
+   "route": "skin_tracking",
+   "query": "把今天長了 3 顆痘痘記起來",
+   "intent_type": null,
+   "source": "synth",
+   "style": "freeform",
+   "boundary": false,
+   "id": "s091",
+   "note": ""
+  },
+  {
+   "route": "skin_tracking",
+   "query": "我想追蹤四週內的痘痘變化",
+   "intent_type": null,
+   "source": "synth",
+   "style": "freeform",
+   "boundary": false,
+   "id": "s092",
+   "note": ""
+  },
+  {
+   "route": "skin_tracking",
+   "query": "查詢我上個月的保水度紀錄",
+   "intent_type": null,
+   "source": "synth",
+   "style": "freeform",
+   "boundary": false,
+   "id": "s093",
+   "note": ""
+  },
+  {
+   "route": "skin_tracking",
+   "query": "上週我的泛紅有改善嗎？幫我看紀錄",
+   "intent_type": null,
+   "source": "synth",
+   "style": "freeform",
+   "boundary": true,
+   "id": "s094",
+   "note": ""
+  },
+  {
+   "route": "skin_tracking",
+   "query": "我的膚況趨勢怎麼樣",
+   "intent_type": null,
+   "source": "synth",
+   "style": "freeform",
+   "boundary": false,
+   "id": "s095",
+   "note": ""
+  },
+  {
+   "route": "skin_tracking",
+   "query": "今天熬夜皮膚比較暗沉，幫我記一下",
+   "intent_type": null,
+   "source": "synth",
+   "style": "freeform",
+   "boundary": false,
+   "id": "s096",
+   "note": ""
+  },
+  {
+   "route": "skin_tracking",
+   "query": "更新今天的保養紀錄：早上洗臉加防曬",
+   "intent_type": null,
+   "source": "synth",
+   "style": "freeform",
+   "boundary": false,
+   "id": "s097",
+   "note": ""
+  },
+  {
+   "route": "skin_tracking",
+   "query": "請列出我這個月所有的膚況紀錄",
+   "intent_type": null,
+   "source": "synth",
+   "style": "freeform",
+   "boundary": false,
+   "id": "s098",
+   "note": ""
+  },
+  {
+   "route": "skin_tracking",
+   "query": "新增一筆紀錄：今天額頭冒痘",
+   "intent_type": null,
+   "source": "synth",
+   "style": "freeform",
+   "boundary": false,
+   "id": "s099",
+   "note": ""
+  },
+  {
+   "route": "skin_tracking",
+   "query": "幫我看最近兩週的皮膚變化",
+   "intent_type": null,
+   "source": "synth",
+   "style": "freeform",
+   "boundary": false,
+   "id": "s100",
+   "note": ""
+  },
+  {
+   "route": "skin_tracking",
+   "query": "我要開始記錄換季過敏狀況",
+   "intent_type": null,
+   "source": "synth",
+   "style": "freeform",
+   "boundary": true,
+   "id": "s101",
+   "note": ""
+  },
+  {
+   "route": "skin_tracking",
+   "query": "刪除昨天那筆膚況紀錄",
+   "intent_type": null,
+   "source": "synth",
+   "style": "freeform",
+   "boundary": false,
+   "id": "s102",
+   "note": ""
+  },
+  {
+   "route": "skin_tracking",
+   "query": "這週我總共打卡幾天？",
+   "intent_type": null,
+   "source": "synth",
+   "style": "freeform",
+   "boundary": false,
+   "id": "s103",
+   "note": ""
+  },
+  {
+   "route": "skin_tracking",
+   "query": "記一下，今天用了新的精華，沒有不舒服",
+   "intent_type": null,
+   "source": "synth",
+   "style": "freeform",
+   "boundary": false,
+   "id": "s104",
+   "note": ""
+  },
+  {
+   "route": "skin_tracking",
+   "query": "幫我把今天的出油程度記成偏高",
+   "intent_type": null,
+   "source": "synth",
+   "style": "freeform",
+   "boundary": false,
+   "id": "s105",
+   "note": ""
+  },
+  {
+   "route": "skin_tracking",
+   "query": "我想看看用 A 醇一個月前後的追蹤",
+   "intent_type": null,
+   "source": "synth",
+   "style": "freeform",
+   "boundary": false,
+   "id": "s106",
+   "note": ""
+  },
+  {
+   "route": "skin_tracking",
+   "query": "回顧一下我今年夏天的皮膚紀錄",
+   "intent_type": null,
+   "source": "synth",
+   "style": "freeform",
+   "boundary": false,
+   "id": "s107",
+   "note": ""
+  },
+  {
+   "route": "skin_tracking",
+   "query": "今天的保養打卡完成了",
+   "intent_type": null,
+   "source": "synth",
+   "style": "freeform",
+   "boundary": false,
+   "id": "s108",
+   "note": ""
+  },
+  {
+   "route": "skin_tracking",
+   "query": "幫我記下今天沒有出油",
+   "intent_type": null,
+   "source": "synth",
+   "style": "freeform",
+   "boundary": false,
+   "id": "s109",
+   "note": ""
+  },
+  {
+   "route": "skin_tracking",
+   "query": "紀錄今天敷了面膜",
+   "intent_type": null,
+   "source": "synth",
+   "style": "freeform",
+   "boundary": false,
+   "id": "s110",
+   "note": ""
+  },
+  {
+   "route": "skin_tracking",
+   "query": "我今天的肌膚狀態是偏乾，請存檔",
+   "intent_type": null,
+   "source": "synth",
+   "style": "freeform",
+   "boundary": false,
+   "id": "s111",
+   "note": ""
+  },
+  {
+   "route": "skin_tracking",
+   "query": "把這週的保養頻率整理成追蹤表",
+   "intent_type": null,
+   "source": "synth",
+   "style": "freeform",
+   "boundary": false,
+   "id": "s112",
+   "note": ""
+  },
+  {
+   "route": "skin_tracking",
+   "query": "看一下我最近三天的打卡",
+   "intent_type": null,
+   "source": "synth",
+   "style": "freeform",
+   "boundary": false,
+   "id": "s113",
+   "note": ""
+  },
+  {
+   "route": "skin_tracking",
+   "query": "請幫我記錄今天脫皮的位置",
+   "intent_type": null,
+   "source": "synth",
+   "style": "freeform",
+   "boundary": false,
+   "id": "s114",
+   "note": ""
+  },
+  {
+   "route": "skin_tracking",
+   "query": "我想知道這個月膚況有沒有進步，請看我的紀錄",
+   "intent_type": null,
+   "source": "synth",
+   "style": "freeform",
+   "boundary": false,
+   "id": "s115",
+   "note": ""
+  },
+  {
+   "route": "skin_tracking",
+   "query": "加一筆：今天熬夜、皮膚暗沉",
+   "intent_type": null,
+   "source": "synth",
+   "style": "freeform",
+   "boundary": false,
+   "id": "s116",
+   "note": ""
+  },
+  {
+   "route": "skin_tracking",
+   "query": "幫我設定每天保養打卡提醒",
+   "intent_type": null,
+   "source": "synth",
+   "style": "freeform",
+   "boundary": false,
+   "id": "s117",
+   "note": ""
+  },
+  {
+   "route": "skin_tracking",
+   "query": "統計一下我這兩週痘痘數量",
+   "intent_type": null,
+   "source": "synth",
+   "style": "freeform",
+   "boundary": false,
+   "id": "s118",
+   "note": ""
+  },
+  {
+   "route": "skin_tracking",
+   "query": "今天沒有做保養，幫我標記一下",
+   "intent_type": null,
+   "source": "synth",
+   "style": "freeform",
+   "boundary": false,
+   "id": "s119",
+   "note": ""
+  },
+  {
+   "route": "skin_tracking",
+   "query": "把今天的膚況評分記成 7 分",
+   "intent_type": null,
+   "source": "synth",
+   "style": "freeform",
+   "boundary": false,
+   "id": "s120",
+   "note": ""
+  },
+  {
+   "route": "skin_tracking",
+   "query": "我想追蹤最近3週的痘痘變化",
+   "intent_type": null,
+   "source": "synth",
+   "style": "template",
+   "boundary": false,
+   "id": "s121",
+   "note": ""
+  },
+  {
+   "route": "skin_tracking",
+   "query": "請記錄今天眼周長痘",
+   "intent_type": null,
+   "source": "synth",
+   "style": "template",
+   "boundary": false,
+   "id": "s122",
+   "note": ""
+  },
+  {
+   "route": "skin_tracking",
+   "query": "請記錄今天下巴泛紅",
+   "intent_type": null,
+   "source": "synth",
+   "style": "template",
+   "boundary": true,
+   "id": "s123",
+   "note": ""
+  },
+  {
+   "route": "skin_tracking",
+   "query": "幫我記錄今天的閉口狀況",
+   "intent_type": null,
+   "source": "synth",
+   "style": "template",
+   "boundary": false,
+   "id": "s124",
+   "note": ""
+  },
+  {
+   "route": "skin_tracking",
+   "query": "我想追蹤最近4週的乾紋變化",
+   "intent_type": null,
+   "source": "synth",
+   "style": "template",
+   "boundary": false,
+   "id": "s125",
+   "note": ""
+  },
+  {
+   "route": "skin_tracking",
+   "query": "我想追蹤最近2週的毛孔粗大變化",
+   "intent_type": null,
+   "source": "synth",
+   "style": "template",
+   "boundary": false,
+   "id": "s126",
+   "note": ""
+  },
+  {
+   "route": "skin_tracking",
+   "query": "幫我記錄今天的斑點狀況",
+   "intent_type": null,
+   "source": "synth",
+   "style": "template",
+   "boundary": false,
+   "id": "s127",
+   "note": ""
+  },
+  {
+   "route": "skin_tracking",
+   "query": "我想追蹤最近6週的閉口變化",
+   "intent_type": null,
+   "source": "synth",
+   "style": "template",
+   "boundary": false,
+   "id": "s128",
+   "note": ""
+  },
+  {
+   "route": "skin_tracking",
+   "query": "幫我記錄今天的痘痘狀況",
+   "intent_type": null,
+   "source": "synth",
+   "style": "template",
+   "boundary": false,
+   "id": "s129",
+   "note": ""
+  },
+  {
+   "route": "skin_tracking",
+   "query": "請記錄今天鼻翼正常",
+   "intent_type": null,
+   "source": "synth",
+   "style": "template",
+   "boundary": false,
+   "id": "s130",
+   "note": ""
+  },
+  {
+   "route": "skin_tracking",
+   "query": "請記錄今天額頭正常",
+   "intent_type": null,
+   "source": "synth",
+   "style": "template",
+   "boundary": false,
+   "id": "s131",
+   "note": ""
+  },
+  {
+   "route": "skin_tracking",
+   "query": "幫我記錄今天的毛孔粗大狀況",
+   "intent_type": null,
+   "source": "synth",
+   "style": "template",
+   "boundary": false,
+   "id": "s132",
+   "note": ""
+  },
+  {
+   "route": "skin_tracking",
+   "query": "幫我記錄今天的粉刺狀況",
+   "intent_type": null,
+   "source": "synth",
+   "style": "template",
+   "boundary": false,
+   "id": "s133",
+   "note": ""
+  },
+  {
+   "route": "skin_tracking",
+   "query": "我想追蹤最近3週的粉刺變化",
+   "intent_type": null,
+   "source": "synth",
+   "style": "template",
+   "boundary": false,
+   "id": "s134",
+   "note": ""
+  },
+  {
+   "id": "r23",
+   "query": "你好",
+   "route": "conversation",
+   "intent_type": null,
+   "note": "",
+   "source": "seed",
+   "style": "seed",
+   "boundary": false
+  },
+  {
+   "id": "r24",
+   "query": "謝謝，今天先到這裡",
+   "route": "conversation",
+   "intent_type": null,
+   "note": "",
+   "source": "seed",
+   "style": "seed",
+   "boundary": false
+  },
+  {
+   "route": "conversation",
+   "query": "哈囉",
+   "intent_type": null,
+   "source": "synth",
+   "style": "freeform",
+   "boundary": false,
+   "id": "s135",
+   "note": ""
+  },
+  {
+   "route": "conversation",
+   "query": "嗨",
+   "intent_type": null,
+   "source": "synth",
+   "style": "freeform",
+   "boundary": false,
+   "id": "s136",
+   "note": ""
+  },
+  {
+   "route": "conversation",
+   "query": "早安",
+   "intent_type": null,
+   "source": "synth",
+   "style": "freeform",
+   "boundary": false,
+   "id": "s137",
+   "note": ""
+  },
+  {
+   "route": "conversation",
+   "query": "午安",
+   "intent_type": null,
+   "source": "synth",
+   "style": "freeform",
+   "boundary": false,
+   "id": "s138",
+   "note": ""
+  },
+  {
+   "route": "conversation",
+   "query": "晚安",
+   "intent_type": null,
+   "source": "synth",
+   "style": "freeform",
+   "boundary": false,
+   "id": "s139",
+   "note": ""
+  },
+  {
+   "route": "conversation",
+   "query": "你好呀",
+   "intent_type": null,
+   "source": "synth",
+   "style": "freeform",
+   "boundary": false,
+   "id": "s140",
+   "note": ""
+  },
+  {
+   "route": "conversation",
+   "query": "謝謝你的幫忙",
+   "intent_type": null,
+   "source": "synth",
+   "style": "freeform",
+   "boundary": false,
+   "id": "s141",
+   "note": ""
+  },
+  {
+   "route": "conversation",
+   "query": "好的我知道了",
+   "intent_type": null,
+   "source": "synth",
+   "style": "freeform",
+   "boundary": false,
+   "id": "s142",
+   "note": ""
+  },
+  {
+   "route": "conversation",
+   "query": "沒事了，謝謝",
+   "intent_type": null,
+   "source": "synth",
+   "style": "freeform",
+   "boundary": false,
+   "id": "s143",
+   "note": ""
+  },
+  {
+   "route": "conversation",
+   "query": "再見",
+   "intent_type": null,
+   "source": "synth",
+   "style": "freeform",
+   "boundary": false,
+   "id": "s144",
+   "note": ""
+  },
+  {
+   "route": "conversation",
+   "query": "掰掰",
+   "intent_type": null,
+   "source": "synth",
+   "style": "freeform",
+   "boundary": false,
+   "id": "s145",
+   "note": ""
+  },
+  {
+   "route": "conversation",
+   "query": "先這樣，下次再聊",
+   "intent_type": null,
+   "source": "synth",
+   "style": "freeform",
+   "boundary": false,
+   "id": "s146",
+   "note": ""
+  },
+  {
+   "route": "conversation",
+   "query": "你是誰",
+   "intent_type": null,
+   "source": "synth",
+   "style": "freeform",
+   "boundary": false,
+   "id": "s147",
+   "note": ""
+  },
+  {
+   "route": "conversation",
+   "query": "你叫什麼名字",
+   "intent_type": null,
+   "source": "synth",
+   "style": "freeform",
+   "boundary": false,
+   "id": "s148",
+   "note": ""
+  },
+  {
+   "route": "conversation",
+   "query": "你可以做什麼",
+   "intent_type": null,
+   "source": "synth",
+   "style": "freeform",
+   "boundary": false,
+   "id": "s149",
+   "note": ""
+  },
+  {
+   "route": "conversation",
+   "query": "你是真人嗎",
+   "intent_type": null,
+   "source": "synth",
+   "style": "freeform",
+   "boundary": false,
+   "id": "s150",
+   "note": ""
+  },
+  {
+   "route": "conversation",
+   "query": "哈哈好有趣",
+   "intent_type": null,
+   "source": "synth",
+   "style": "freeform",
+   "boundary": false,
+   "id": "s151",
+   "note": ""
+  },
+  {
+   "route": "conversation",
+   "query": "你好棒喔",
+   "intent_type": null,
+   "source": "synth",
+   "style": "freeform",
+   "boundary": false,
+   "id": "s152",
+   "note": ""
+  },
+  {
+   "route": "conversation",
+   "query": "今天天氣好熱",
+   "intent_type": null,
+   "source": "synth",
+   "style": "freeform",
+   "boundary": false,
+   "id": "s153",
+   "note": ""
+  },
+  {
+   "route": "conversation",
+   "query": "辛苦了",
+   "intent_type": null,
+   "source": "synth",
+   "style": "freeform",
+   "boundary": false,
+   "id": "s154",
+   "note": ""
+  },
+  {
+   "route": "conversation",
+   "query": "感謝，很有幫助",
+   "intent_type": null,
+   "source": "synth",
+   "style": "freeform",
+   "boundary": false,
+   "id": "s155",
+   "note": ""
+  },
+  {
+   "route": "conversation",
+   "query": "好喔",
+   "intent_type": null,
+   "source": "synth",
+   "style": "freeform",
+   "boundary": false,
+   "id": "s156",
+   "note": ""
+  },
+  {
+   "route": "conversation",
+   "query": "OK 收到",
+   "intent_type": null,
+   "source": "synth",
+   "style": "freeform",
+   "boundary": false,
+   "id": "s157",
+   "note": ""
+  },
+  {
+   "route": "conversation",
+   "query": "你們公司在哪裡",
+   "intent_type": null,
+   "source": "synth",
+   "style": "freeform",
+   "boundary": false,
+   "id": "s158",
+   "note": ""
+  },
+  {
+   "route": "conversation",
+   "query": "我心情不太好",
+   "intent_type": null,
+   "source": "synth",
+   "style": "freeform",
+   "boundary": false,
+   "id": "s159",
+   "note": ""
+  },
+  {
+   "route": "conversation",
+   "query": "週末愉快",
+   "intent_type": null,
+   "source": "synth",
+   "style": "freeform",
+   "boundary": false,
+   "id": "s160",
+   "note": ""
+  },
+  {
+   "route": "conversation",
+   "query": "新年快樂",
+   "intent_type": null,
+   "source": "synth",
+   "style": "freeform",
+   "boundary": false,
+   "id": "s161",
+   "note": ""
+  },
+  {
+   "route": "conversation",
+   "query": "笑死",
+   "intent_type": null,
+   "source": "synth",
+   "style": "freeform",
+   "boundary": false,
+   "id": "s162",
+   "note": ""
+  },
+  {
+   "route": "conversation",
+   "query": "你會講英文嗎",
+   "intent_type": null,
+   "source": "synth",
+   "style": "freeform",
+   "boundary": false,
+   "id": "s163",
+   "note": ""
+  },
+  {
+   "route": "conversation",
+   "query": "太好了",
+   "intent_type": null,
+   "source": "synth",
+   "style": "freeform",
+   "boundary": false,
+   "id": "s164",
+   "note": ""
+  },
+  {
+   "route": "conversation",
+   "query": "感恩",
+   "intent_type": null,
+   "source": "synth",
+   "style": "freeform",
+   "boundary": false,
+   "id": "s165",
+   "note": ""
+  },
+  {
+   "route": "conversation",
+   "query": "Hi there",
+   "intent_type": null,
+   "source": "synth",
+   "style": "freeform",
+   "boundary": false,
+   "id": "s166",
+   "note": ""
+  },
+  {
+   "route": "conversation",
+   "query": "thanks a lot",
+   "intent_type": null,
+   "source": "synth",
+   "style": "freeform",
+   "boundary": false,
+   "id": "s167",
+   "note": ""
+  },
+  {
+   "route": "conversation",
+   "query": "bye bye",
+   "intent_type": null,
+   "source": "synth",
+   "style": "freeform",
+   "boundary": false,
+   "id": "s168",
+   "note": ""
+  },
+  {
+   "route": "conversation",
+   "query": "拜拜，晚點再來",
+   "intent_type": null,
+   "source": "synth",
+   "style": "freeform",
+   "boundary": false,
+   "id": "s169",
+   "note": ""
+  },
+  {
+   "route": "conversation",
+   "query": "你今天過得好嗎",
+   "intent_type": null,
+   "source": "synth",
+   "style": "freeform",
+   "boundary": false,
+   "id": "s170",
+   "note": ""
+  },
+  {
+   "route": "conversation",
+   "query": "可以聊聊天嗎",
+   "intent_type": null,
+   "source": "synth",
+   "style": "freeform",
+   "boundary": false,
+   "id": "s171",
+   "note": ""
+  },
+  {
+   "route": "conversation",
+   "query": "不用了，謝謝",
+   "intent_type": null,
+   "source": "synth",
+   "style": "freeform",
+   "boundary": false,
+   "id": "s172",
+   "note": ""
+  },
+  {
+   "route": "conversation",
+   "query": "嗯嗯",
+   "intent_type": null,
+   "source": "synth",
+   "style": "freeform",
+   "boundary": false,
+   "id": "s173",
+   "note": ""
+  },
+  {
+   "route": "conversation",
+   "query": "了解",
+   "intent_type": null,
+   "source": "synth",
+   "style": "freeform",
+   "boundary": false,
+   "id": "s174",
+   "note": ""
+  },
+  {
+   "route": "conversation",
+   "query": "你今天好嗎",
+   "intent_type": null,
+   "source": "synth",
+   "style": "freeform",
+   "boundary": false,
+   "id": "s175",
+   "note": ""
+  },
+  {
+   "route": "conversation",
+   "query": "好久不見",
+   "intent_type": null,
+   "source": "synth",
+   "style": "freeform",
+   "boundary": false,
+   "id": "s176",
+   "note": ""
+  },
+  {
+   "route": "conversation",
+   "query": "哈哈哈",
+   "intent_type": null,
+   "source": "synth",
+   "style": "freeform",
+   "boundary": false,
+   "id": "s177",
+   "note": ""
+  },
+  {
+   "route": "conversation",
+   "query": "太棒了，謝謝你",
+   "intent_type": null,
+   "source": "synth",
+   "style": "freeform",
+   "boundary": false,
+   "id": "s178",
+   "note": ""
+  },
+  {
+   "route": "conversation",
+   "query": "你有名字嗎",
+   "intent_type": null,
+   "source": "synth",
+   "style": "freeform",
+   "boundary": false,
+   "id": "s179",
+   "note": ""
+  },
+  {
+   "route": "conversation",
+   "query": "你是哪家公司做的",
+   "intent_type": null,
+   "source": "synth",
+   "style": "freeform",
+   "boundary": false,
+   "id": "s180",
+   "note": ""
+  },
+  {
+   "route": "conversation",
+   "query": "晚點再問你",
+   "intent_type": null,
+   "source": "synth",
+   "style": "freeform",
+   "boundary": false,
+   "id": "s181",
+   "note": ""
+  },
+  {
+   "route": "conversation",
+   "query": "好，那就這樣",
+   "intent_type": null,
+   "source": "synth",
+   "style": "freeform",
+   "boundary": false,
+   "id": "s182",
+   "note": ""
+  },
+  {
+   "id": "r17",
+   "query": "我懷孕中，水楊酸可以用嗎？",
+   "route": "safety",
+   "intent_type": "knowledge_query",
+   "note": "",
+   "source": "seed",
+   "style": "seed",
+   "boundary": false
+  },
+  {
+   "id": "r18",
+   "query": "擦了 A 醇之後一直刺痛，怎麼辦",
+   "route": "safety",
+   "intent_type": "symptom_solving",
+   "note": "",
+   "source": "seed",
+   "style": "seed",
+   "boundary": false
+  },
+  {
+   "id": "r19",
+   "query": "敏感肌可以和果酸一起用嗎",
+   "route": "safety",
+   "intent_type": "find_product",
+   "note": "",
+   "source": "seed",
+   "style": "seed",
+   "boundary": false
+  },
+  {
+   "id": "r20",
+   "query": "臉頰突然泛紅又灼熱，是過敏嗎",
+   "route": "safety",
+   "intent_type": "symptom_solving",
+   "note": "",
+   "source": "seed",
+   "style": "seed",
+   "boundary": false
+  },
+  {
+   "route": "safety",
+   "query": "推薦的那款防曬乳對孕婦安全嗎",
+   "intent_type": null,
+   "source": "synth",
+   "style": "boundary",
+   "boundary": true,
+   "id": "s183",
+   "note": ""
+  },
+  {
+   "route": "safety",
+   "query": "這瓶精華適合敏感肌嗎",
+   "intent_type": null,
+   "source": "synth",
+   "style": "boundary",
+   "boundary": true,
+   "id": "s184",
+   "note": ""
+  },
+  {
+   "route": "safety",
+   "query": "你剛剛推薦的面膜會不會讓我過敏",
+   "intent_type": null,
+   "source": "synth",
+   "style": "boundary",
+   "boundary": true,
+   "id": "s185",
+   "note": ""
+  },
+  {
+   "route": "safety",
+   "query": "那個乳霜孕婦可以用嗎",
+   "intent_type": null,
+   "source": "synth",
+   "style": "boundary",
+   "boundary": true,
+   "id": "s186",
+   "note": ""
+  },
+  {
+   "route": "safety",
+   "query": "想買 A 醇，但我正在哺乳可以嗎",
+   "intent_type": null,
+   "source": "synth",
+   "style": "boundary",
+   "boundary": true,
+   "id": "s187",
+   "note": ""
+  },
+  {
+   "route": "safety",
+   "query": "這款洗面乳可以用在小朋友臉上嗎",
+   "intent_type": null,
+   "source": "synth",
+   "style": "boundary",
+   "boundary": true,
+   "id": "s188",
+   "note": ""
+  },
+  {
+   "route": "safety",
+   "query": "有推薦的保養品嗎？我懷孕了怕不安全",
+   "intent_type": null,
+   "source": "synth",
+   "style": "boundary",
+   "boundary": true,
+   "id": "s189",
+   "note": ""
+  },
+  {
+   "route": "safety",
+   "query": "精華液成分有酒精，敏感肌安全嗎",
+   "intent_type": null,
+   "source": "synth",
+   "style": "boundary",
+   "boundary": true,
+   "id": "s190",
+   "note": ""
+  },
+  {
+   "route": "safety",
+   "query": "哺乳期間可以擦視黃醇嗎",
+   "intent_type": null,
+   "source": "synth",
+   "style": "freeform",
+   "boundary": false,
+   "id": "s191",
+   "note": ""
+  },
+  {
+   "route": "safety",
+   "query": "小孩可以用大人的防曬嗎",
+   "intent_type": null,
+   "source": "synth",
+   "style": "freeform",
+   "boundary": false,
+   "id": "s192",
+   "note": ""
+  },
+  {
+   "route": "safety",
+   "query": "懷孕初期能用果酸換膚嗎",
+   "intent_type": null,
+   "source": "synth",
+   "style": "freeform",
+   "boundary": false,
+   "id": "s193",
+   "note": ""
+  },
+  {
+   "route": "safety",
+   "query": "貓咪舔到我臉上的精華液會怎樣",
+   "intent_type": null,
+   "source": "synth",
+   "style": "freeform",
+   "boundary": false,
+   "id": "s194",
+   "note": ""
+  },
+  {
+   "route": "safety",
+   "query": "晚上用 A 醇早上可以用維他命 C 嗎",
+   "intent_type": null,
+   "source": "synth",
+   "style": "freeform",
+   "boundary": false,
+   "id": "s195",
+   "note": ""
+  },
+  {
+   "route": "safety",
+   "query": "角質調理後臉很紅，這是正常的嗎",
+   "intent_type": null,
+   "source": "synth",
+   "style": "freeform",
+   "boundary": false,
+   "id": "s196",
+   "note": ""
+  },
+  {
+   "route": "safety",
+   "query": "擦了新的精華後起紅疹，要停用嗎",
+   "intent_type": null,
+   "source": "synth",
+   "style": "freeform",
+   "boundary": false,
+   "id": "s197",
+   "note": ""
+  },
+  {
+   "route": "safety",
+   "query": "敏感肌能用水楊酸洗面乳嗎",
+   "intent_type": null,
+   "source": "synth",
+   "style": "freeform",
+   "boundary": false,
+   "id": "s198",
+   "note": ""
+  },
+  {
+   "route": "safety",
+   "query": "我有酒糟，可以使用酸類產品嗎",
+   "intent_type": null,
+   "source": "synth",
+   "style": "freeform",
+   "boundary": false,
+   "id": "s199",
+   "note": ""
+  },
+  {
+   "route": "safety",
+   "query": "孕婦可以用茶樹精油嗎",
+   "intent_type": null,
+   "source": "synth",
+   "style": "freeform",
+   "boundary": false,
+   "id": "s200",
+   "note": ""
+  },
+  {
+   "route": "safety",
+   "query": "剛做完雷射可以擦保養品嗎",
+   "intent_type": null,
+   "source": "synth",
+   "style": "freeform",
+   "boundary": false,
+   "id": "s201",
+   "note": ""
+  },
+  {
+   "route": "safety",
+   "query": "吃異維 A 酸期間可以用 A 醇嗎",
+   "intent_type": null,
+   "source": "synth",
+   "style": "freeform",
+   "boundary": false,
+   "id": "s202",
+   "note": ""
+  },
+  {
+   "route": "safety",
+   "query": "傷口還沒好可以擦保養品嗎",
+   "intent_type": null,
+   "source": "synth",
+   "style": "freeform",
+   "boundary": false,
+   "id": "s203",
+   "note": ""
+  },
+  {
+   "route": "safety",
+   "query": "同時使用兩種酸類會不會太刺激",
+   "intent_type": null,
+   "source": "synth",
+   "style": "freeform",
+   "boundary": false,
+   "id": "s204",
+   "note": ""
+  },
+  {
+   "route": "safety",
+   "query": "臉上突然很癢又起疹子是怎麼回事",
+   "intent_type": null,
+   "source": "synth",
+   "style": "freeform",
+   "boundary": false,
+   "id": "s205",
+   "note": ""
+  },
+  {
+   "route": "safety",
+   "query": "皮膚對酒精過敏能用含酒精的化妝水嗎",
+   "intent_type": null,
+   "source": "synth",
+   "style": "freeform",
+   "boundary": false,
+   "id": "s206",
+   "note": ""
+  },
+  {
+   "route": "safety",
+   "query": "用完面膜後臉刺刺的正常嗎",
+   "intent_type": null,
+   "source": "synth",
+   "style": "freeform",
+   "boundary": false,
+   "id": "s207",
+   "note": ""
+  },
+  {
+   "route": "safety",
+   "query": "含香料的乳液對過敏體質安全嗎",
+   "intent_type": null,
+   "source": "synth",
+   "style": "freeform",
+   "boundary": false,
+   "id": "s208",
+   "note": ""
+  },
+  {
+   "route": "safety",
+   "query": "果酸和視黃醇能一起用嗎",
+   "intent_type": null,
+   "source": "synth",
+   "style": "freeform",
+   "boundary": false,
+   "id": "s209",
+   "note": ""
+  },
+  {
+   "route": "safety",
+   "query": "擦完防曬眼睛一直刺痛怎麼辦",
+   "intent_type": null,
+   "source": "synth",
+   "style": "freeform",
+   "boundary": false,
+   "id": "s210",
+   "note": ""
+  },
+  {
+   "route": "safety",
+   "query": "我是過敏體質，新產品要怎麼先測試",
+   "intent_type": null,
+   "source": "synth",
+   "style": "freeform",
+   "boundary": false,
+   "id": "s211",
+   "note": ""
+  },
+  {
+   "route": "safety",
+   "query": "懷孕可以做臉部去角質嗎",
+   "intent_type": null,
+   "source": "synth",
+   "style": "freeform",
+   "boundary": false,
+   "id": "s212",
+   "note": ""
+  },
+  {
+   "route": "safety",
+   "query": "水楊酸跟菸鹼醯胺一起擦會不會有問題",
+   "intent_type": null,
+   "source": "synth",
+   "style": "freeform",
+   "boundary": false,
+   "id": "s213",
+   "note": ""
+  },
+  {
+   "route": "safety",
+   "query": "每天用 A 醇會不會傷皮膚",
+   "intent_type": null,
+   "source": "synth",
+   "style": "freeform",
+   "boundary": false,
+   "id": "s214",
+   "note": ""
+  },
+  {
+   "route": "safety",
+   "query": "拔完智齒可以擦臉嗎",
+   "intent_type": null,
+   "source": "synth",
+   "style": "freeform",
+   "boundary": false,
+   "id": "s215",
+   "note": ""
+  },
+  {
+   "route": "safety",
+   "query": "懷孕可以使用視黃醇嗎",
+   "intent_type": null,
+   "source": "synth",
+   "style": "template",
+   "boundary": false,
+   "id": "s216",
+   "note": ""
+  },
+  {
+   "route": "safety",
+   "query": "懷孕可以使用水楊酸嗎",
+   "intent_type": null,
+   "source": "synth",
+   "style": "template",
+   "boundary": false,
+   "id": "s217",
+   "note": ""
+  },
+  {
+   "route": "safety",
+   "query": "敏感肌可以用傳明酸嗎",
+   "intent_type": null,
+   "source": "synth",
+   "style": "template",
+   "boundary": false,
+   "id": "s218",
+   "note": ""
+  },
+  {
+   "route": "safety",
+   "query": "懷孕可以使用壬二酸嗎",
+   "intent_type": null,
+   "source": "synth",
+   "style": "template",
+   "boundary": false,
+   "id": "s219",
+   "note": ""
+  },
+  {
+   "route": "safety",
+   "query": "懷孕可以使用維他命 C嗎",
+   "intent_type": null,
+   "source": "synth",
+   "style": "template",
+   "boundary": false,
+   "id": "s220",
+   "note": ""
+  },
+  {
+   "route": "safety",
+   "query": "菸鹼醯胺和左旋維他命 C能一起用嗎",
+   "intent_type": null,
+   "source": "synth",
+   "style": "template",
+   "boundary": false,
+   "id": "s221",
+   "note": ""
+  },
+  {
+   "route": "safety",
+   "query": "擦了壬二酸之後一直刺痛，怎麼辦",
+   "intent_type": null,
+   "source": "synth",
+   "style": "template",
+   "boundary": false,
+   "id": "s222",
+   "note": ""
+  },
+  {
+   "route": "safety",
+   "query": "懷孕可以使用果酸嗎",
+   "intent_type": null,
+   "source": "synth",
+   "style": "template",
+   "boundary": false,
+   "id": "s223",
+   "note": ""
+  },
+  {
+   "route": "safety",
+   "query": "擦了果酸之後一直刺痛，怎麼辦",
+   "intent_type": null,
+   "source": "synth",
+   "style": "template",
+   "boundary": false,
+   "id": "s224",
+   "note": ""
+  },
+  {
+   "route": "safety",
+   "query": "壬二酸和果酸能一起用嗎",
+   "intent_type": null,
+   "source": "synth",
+   "style": "template",
+   "boundary": false,
+   "id": "s225",
+   "note": ""
+  },
+  {
+   "route": "safety",
+   "query": "敏感肌可以用果酸嗎",
+   "intent_type": null,
+   "source": "synth",
+   "style": "template",
+   "boundary": false,
+   "id": "s226",
+   "note": ""
+  },
+  {
+   "route": "safety",
+   "query": "敏感肌可以用左旋維他命 C嗎",
+   "intent_type": null,
+   "source": "synth",
+   "style": "template",
+   "boundary": false,
+   "id": "s227",
+   "note": ""
+  },
+  {
+   "route": "safety",
+   "query": "敏感肌可以用杏仁酸嗎",
+   "intent_type": null,
+   "source": "synth",
+   "style": "template",
+   "boundary": false,
+   "id": "s228",
+   "note": ""
+  },
+  {
+   "id": "r21",
+   "query": "幫我推薦一下",
+   "route": "clarify",
+   "intent_type": "unclear",
+   "note": "",
+   "source": "seed",
+   "style": "seed",
+   "boundary": false
+  },
+  {
+   "id": "r22",
+   "query": "我想買東西",
+   "route": "clarify",
+   "intent_type": "unclear",
+   "note": "",
+   "source": "seed",
+   "style": "seed",
+   "boundary": false
+  },
+  {
+   "route": "clarify",
+   "query": "推薦一個",
+   "intent_type": "unclear",
+   "source": "synth",
+   "style": "boundary",
+   "boundary": true,
+   "id": "s229",
+   "note": ""
+  },
+  {
+   "route": "clarify",
+   "query": "我皮膚過敏",
+   "intent_type": "unclear",
+   "source": "synth",
+   "style": "boundary",
+   "boundary": true,
+   "id": "s230",
+   "note": ""
+  },
+  {
+   "route": "clarify",
+   "query": "我懷孕了",
+   "intent_type": "unclear",
+   "source": "synth",
+   "style": "boundary",
+   "boundary": true,
+   "id": "s231",
+   "note": ""
+  },
+  {
+   "route": "clarify",
+   "query": "幫我看有沒有問題",
+   "intent_type": "unclear",
+   "source": "synth",
+   "style": "boundary",
+   "boundary": true,
+   "id": "s232",
+   "note": ""
+  },
+  {
+   "route": "clarify",
+   "query": "這個會不會有影響",
+   "intent_type": "unclear",
+   "source": "synth",
+   "style": "boundary",
+   "boundary": true,
+   "id": "s233",
+   "note": ""
+  },
+  {
+   "route": "clarify",
+   "query": "我想買但不知道買什麼",
+   "intent_type": "unclear",
+   "source": "synth",
+   "style": "boundary",
+   "boundary": true,
+   "id": "s234",
+   "note": ""
+  },
+  {
+   "route": "clarify",
+   "query": "可以用嗎",
+   "intent_type": "unclear",
+   "source": "synth",
+   "style": "boundary",
+   "boundary": true,
+   "id": "s235",
+   "note": ""
+  },
+  {
+   "route": "clarify",
+   "query": "安全嗎",
+   "intent_type": "unclear",
+   "source": "synth",
+   "style": "boundary",
+   "boundary": true,
+   "id": "s236",
+   "note": ""
+  },
+  {
+   "route": "clarify",
+   "query": "幫我推薦",
+   "intent_type": "unclear",
+   "source": "synth",
+   "style": "freeform",
+   "boundary": false,
+   "id": "s237",
+   "note": ""
+  },
+  {
+   "route": "clarify",
+   "query": "有推薦的嗎",
+   "intent_type": "unclear",
+   "source": "synth",
+   "style": "freeform",
+   "boundary": false,
+   "id": "s238",
+   "note": ""
+  },
+  {
+   "route": "clarify",
+   "query": "這個可以嗎",
+   "intent_type": "unclear",
+   "source": "synth",
+   "style": "freeform",
+   "boundary": false,
+   "id": "s239",
+   "note": ""
+  },
+  {
+   "route": "clarify",
+   "query": "那個呢",
+   "intent_type": "unclear",
+   "source": "synth",
+   "style": "freeform",
+   "boundary": false,
+   "id": "s240",
+   "note": ""
+  },
+  {
+   "route": "clarify",
+   "query": "哪一個比較好",
+   "intent_type": "unclear",
+   "source": "synth",
+   "style": "freeform",
+   "boundary": false,
+   "id": "s241",
+   "note": ""
+  },
+  {
+   "route": "clarify",
+   "query": "幫我選",
+   "intent_type": "unclear",
+   "source": "synth",
+   "style": "freeform",
+   "boundary": false,
+   "id": "s242",
+   "note": ""
+  },
+  {
+   "route": "clarify",
+   "query": "怎麼辦",
+   "intent_type": "unclear",
+   "source": "synth",
+   "style": "freeform",
+   "boundary": false,
+   "id": "s243",
+   "note": ""
+  },
+  {
+   "route": "clarify",
+   "query": "我想問個問題",
+   "intent_type": "unclear",
+   "source": "synth",
+   "style": "freeform",
+   "boundary": false,
+   "id": "s244",
+   "note": ""
+  },
+  {
+   "route": "clarify",
+   "query": "可以幫我嗎",
+   "intent_type": "unclear",
+   "source": "synth",
+   "style": "freeform",
+   "boundary": false,
+   "id": "s245",
+   "note": ""
+  },
+  {
+   "route": "clarify",
+   "query": "我想要那個",
+   "intent_type": "unclear",
+   "source": "synth",
+   "style": "freeform",
+   "boundary": false,
+   "id": "s246",
+   "note": ""
+  },
+  {
+   "route": "clarify",
+   "query": "有什麼好用的",
+   "intent_type": "unclear",
+   "source": "synth",
+   "style": "freeform",
+   "boundary": false,
+   "id": "s247",
+   "note": ""
+  },
+  {
+   "route": "clarify",
+   "query": "我皮膚不好",
+   "intent_type": "unclear",
+   "source": "synth",
+   "style": "freeform",
+   "boundary": false,
+   "id": "s248",
+   "note": ""
+  },
+  {
+   "route": "clarify",
+   "query": "我不知道要買什麼",
+   "intent_type": "unclear",
+   "source": "synth",
+   "style": "freeform",
+   "boundary": false,
+   "id": "s249",
+   "note": ""
+  },
+  {
+   "route": "clarify",
+   "query": "它會不會有效",
+   "intent_type": "unclear",
+   "source": "synth",
+   "style": "freeform",
+   "boundary": true,
+   "id": "s250",
+   "note": ""
+  },
+  {
+   "route": "clarify",
+   "query": "請問一下",
+   "intent_type": "unclear",
+   "source": "synth",
+   "style": "freeform",
+   "boundary": false,
+   "id": "s251",
+   "note": ""
+  },
+  {
+   "route": "clarify",
+   "query": "你覺得呢",
+   "intent_type": "unclear",
+   "source": "synth",
+   "style": "freeform",
+   "boundary": false,
+   "id": "s252",
+   "note": ""
+  },
+  {
+   "route": "clarify",
+   "query": "多少錢",
+   "intent_type": "unclear",
+   "source": "synth",
+   "style": "freeform",
+   "boundary": false,
+   "id": "s253",
+   "note": ""
+  },
+  {
+   "route": "clarify",
+   "query": "有嗎",
+   "intent_type": "unclear",
+   "source": "synth",
+   "style": "freeform",
+   "boundary": false,
+   "id": "s254",
+   "note": ""
+  },
+  {
+   "route": "clarify",
+   "query": "再說一次",
+   "intent_type": "unclear",
+   "source": "synth",
+   "style": "freeform",
+   "boundary": false,
+   "id": "s255",
+   "note": ""
+  },
+  {
+   "route": "clarify",
+   "query": "我要保養",
+   "intent_type": "unclear",
+   "source": "synth",
+   "style": "freeform",
+   "boundary": false,
+   "id": "s256",
+   "note": ""
+  },
+  {
+   "route": "clarify",
+   "query": "想改善",
+   "intent_type": "unclear",
+   "source": "synth",
+   "style": "freeform",
+   "boundary": false,
+   "id": "s257",
+   "note": ""
+  },
+  {
+   "route": "clarify",
+   "query": "能不能便宜一點的",
+   "intent_type": "unclear",
+   "source": "synth",
+   "style": "freeform",
+   "boundary": false,
+   "id": "s258",
+   "note": ""
+  },
+  {
+   "route": "clarify",
+   "query": "剛剛那個",
+   "intent_type": "unclear",
+   "source": "synth",
+   "style": "freeform",
+   "boundary": false,
+   "id": "s259",
+   "note": ""
+  },
+  {
+   "route": "clarify",
+   "query": "這樣好嗎",
+   "intent_type": "unclear",
+   "source": "synth",
+   "style": "freeform",
+   "boundary": false,
+   "id": "s260",
+   "note": ""
+  },
+  {
+   "route": "clarify",
+   "query": "哪裡買",
+   "intent_type": "unclear",
+   "source": "synth",
+   "style": "freeform",
+   "boundary": false,
+   "id": "s261",
+   "note": ""
+  },
+  {
+   "route": "clarify",
+   "query": "適合嗎",
+   "intent_type": "unclear",
+   "source": "synth",
+   "style": "freeform",
+   "boundary": true,
+   "id": "s262",
+   "note": ""
+  },
+  {
+   "route": "clarify",
+   "query": "我要退貨",
+   "intent_type": "unclear",
+   "source": "synth",
+   "style": "freeform",
+   "boundary": false,
+   "id": "s263",
+   "note": ""
+  },
+  {
+   "route": "clarify",
+   "query": "還有別的嗎",
+   "intent_type": "unclear",
+   "source": "synth",
+   "style": "freeform",
+   "boundary": false,
+   "id": "s264",
+   "note": ""
+  },
+  {
+   "route": "clarify",
+   "query": "幫我看一下",
+   "intent_type": "unclear",
+   "source": "synth",
+   "style": "freeform",
+   "boundary": false,
+   "id": "s265",
+   "note": ""
+  },
+  {
+   "route": "clarify",
+   "query": "推薦給我朋友",
+   "intent_type": "unclear",
+   "source": "synth",
+   "style": "freeform",
+   "boundary": false,
+   "id": "s266",
+   "note": ""
+  },
+  {
+   "route": "clarify",
+   "query": "我想變好看",
+   "intent_type": "unclear",
+   "source": "synth",
+   "style": "freeform",
+   "boundary": false,
+   "id": "s267",
+   "note": ""
+  },
+  {
+   "route": "clarify",
+   "query": "我想要有效的",
+   "intent_type": "unclear",
+   "source": "synth",
+   "style": "freeform",
+   "boundary": false,
+   "id": "s268",
+   "note": ""
+  },
+  {
+   "route": "clarify",
+   "query": "用哪個",
+   "intent_type": "unclear",
+   "source": "synth",
+   "style": "freeform",
+   "boundary": false,
+   "id": "s269",
+   "note": ""
+  },
+  {
+   "route": "clarify",
+   "query": "我該怎麼做",
+   "intent_type": "unclear",
+   "source": "synth",
+   "style": "freeform",
+   "boundary": false,
+   "id": "s270",
+   "note": ""
+  },
+  {
+   "route": "clarify",
+   "query": "請給我建議",
+   "intent_type": "unclear",
+   "source": "synth",
+   "style": "freeform",
+   "boundary": false,
+   "id": "s271",
+   "note": ""
+  },
+  {
+   "route": "clarify",
+   "query": "最好的是哪個",
+   "intent_type": "unclear",
+   "source": "synth",
+   "style": "freeform",
+   "boundary": false,
+   "id": "s272",
+   "note": ""
+  },
+  {
+   "route": "clarify",
+   "query": "不太確定",
+   "intent_type": "unclear",
+   "source": "synth",
+   "style": "freeform",
+   "boundary": false,
+   "id": "s273",
+   "note": ""
+  },
+  {
+   "route": "clarify",
+   "query": "有沒有更好的",
+   "intent_type": "unclear",
+   "source": "synth",
+   "style": "freeform",
+   "boundary": false,
+   "id": "s274",
+   "note": ""
+  },
+  {
+   "route": "clarify",
+   "query": "可以介紹一下嗎",
+   "intent_type": "unclear",
+   "source": "synth",
+   "style": "freeform",
+   "boundary": false,
+   "id": "s275",
+   "note": ""
+  },
+  {
+   "route": "clarify",
+   "query": "我需要幫助",
+   "intent_type": "unclear",
+   "source": "synth",
+   "style": "freeform",
+   "boundary": false,
+   "id": "s276",
+   "note": ""
+  }
+ ]
+}

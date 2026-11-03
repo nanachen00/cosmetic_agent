@@ -1,0 +1,2771 @@
+"""
+Root Agent Orchestrator v2
+1. Input Guard 防護（惡意/無關輸入攔截）
+2. 支援使用者長文字輸入
+3. Pain & Gain 分析 → 需求摘要確認對話
+4. End-to-end output 回應使用者痛點
+5. 排序不符時繼續對話了解原因
+6. Cycle Loop + Global Memory
+"""
+import sys
+sys.path.insert(0, '/var/lib/jenkins/tomod/cosmetic-agent')
+
+
+import os
+import json
+import requests
+import time
+from core.observability import observe_pipeline_stage
+from typing import Optional
+from dotenv import load_dotenv
+from openai import OpenAI
+from tools.agent.intent_parser import OPENAI_API_KEY, OPENAI_MODEL, parse_intent
+from tools.agent.response_composer import ResponseComposer
+from tools.agent.experience_parser import (
+    looks_like_experience,
+    parse_product_experience,
+)
+from tools.getzep.zep_memory_adapter import ZepMemoryAdapter
+from tools.getzep.conversation_memory_service import (
+    ConversationMemoryService,
+    ConversationMemoryContext,
+)
+from tools.getzep.conversation_title_service import (
+    ConversationTitleService,
+)
+from tools.user.profile_context_bridge import (
+    ProfileContextBridge,
+    ProfileSyncResult,
+)
+from tools.user.user_analysis_context_bridge import (
+    UserAnalysisContextBridge,
+)
+from tools.agent.clarification_tool import (
+    get_clarification,
+    QuickReply,
+    SKIN_TYPE_REPLIES,
+    CONCERN_REPLIES,
+    CATEGORY_REPLIES,
+)
+from schemas.intent import (
+    IntentParseResult,
+    IntentType,
+    calculate_ambiguity_score,
+    calculate_routing_confidence,
+    calculate_task_completeness,
+)
+try:
+    from tools.a2a.productknowledge_orchestrator import run as product_agent_run
+    print("[INIT] 使用 A2A 包裝層（Gate + 知識庫補強）")
+except Exception as _e:
+    print(f"[WARNING] A2A 包裝層載入失敗，直呼 product_agent：{_e}")
+    from agents.product.product_agent import run as product_agent_run
+from agents.product.product_agent import product_stable_key
+from tools.agent.input_guard import guard_input
+from tools.search.product_web_search import (
+    search_named_product,
+    should_search_named_product,
+)
+from tools.agent.dialogue_router import (
+    classify_dialogue_route,
+    conversation_recall_reply,
+)
+from core.observability import monitor_agent_turn
+
+
+try:
+    from agents.knowledge.knowledge_sub_agent import run as knowledge_agent_run
+except Exception as e:
+    print(f"[WARNING] knowledge_agent 載入失敗：{e}")
+    def knowledge_agent_run(**kwargs):
+        return {"reply": "知識庫暫時維護中，請稍後再試。"}
+
+
+try:
+    from agents.skin_tracking.tracking_agent import run as skin_tracking_run
+except Exception as e:
+    print(f"[WARNING] skin_tracking_agent 載入失敗：{e}")
+    def skin_tracking_run(**kwargs):
+        return {"reply": "好的！請問您現在有什麼膚況困擾？"}
+
+
+try:
+    from tools.a2a.skin_product_bridge import get_skin_context
+except Exception as _e:
+    print(f"[WARNING] skin_product_bridge 載入失敗：{_e}")
+    def get_skin_context(*a, **k):
+        return None
+
+
+load_dotenv()
+
+
+OPENAI_CLIENT = OpenAI(
+    api_key=OPENAI_API_KEY,
+    timeout=max(10.0, float(os.getenv("OPENAI_REQUEST_TIMEOUT_SECONDS", "60"))),
+    max_retries=max(0, min(2, int(os.getenv("OPENAI_MAX_RETRIES", "1")))),
+)
+TAIDE_URL = os.getenv("TAIDE_BASE_URL", "http://localhost:8000/v1")
+
+
+AMBIGUITY_THRESHOLD = 0.7
+_MAX_SESSION_HISTORY_MESSAGES = max(
+    6,
+    int(os.getenv("CHAT_MAX_SESSION_HISTORY_MESSAGES", "20")),
+)
+_MAX_SESSION_HISTORY_CHARS = max(
+    4000,
+    int(os.getenv("CHAT_MAX_SESSION_HISTORY_CHARS", "12000")),
+)
+
+
+SAFETY_KEYWORDS = [
+    '適合嗎', '能用嗎', '安全嗎', '會怎樣', '適合我嗎',
+    '可以用嗎', '會刺激嗎', '敏感肌能', '敏感肌可以',
+    '能一起用嗎',
+    '會不會', '有沒有問題', '有影響嗎',
+]
+
+
+# 使用者正在回答商品經驗追問時，如果又明確提出另一個請求，
+# 必須先離開商品經驗等待狀態，再交由 intent_parser 重新路由。
+# 這些字只負責辨識「換話題」，不負責決定要呼叫哪一個 Agent。
+EXPERIENCE_TOPIC_SWITCH_MARKERS = (
+    "我想問",
+    "請問",
+    "想知道",
+    "想了解",
+    "幫我查",
+    "幫我找",
+    "幫我推薦",
+    "推薦我",
+    "為什麼",
+    "怎麼",
+    "如何",
+    "是什麼",
+    "有什麼功用",
+    "有什麼作用",
+    "有什麼功效",
+)
+
+
+
+
+def _trim_to_sentence(text: str, limit: int = 80) -> str:
+    """截斷到 limit 內最後一個完整句子；找不到句尾標點就整句保留到 limit"""
+    if not text or len(text) <= limit:
+        return text or ""
+    cut = text[:limit]
+    for punct in ('。', '！', '？', '～'):
+        idx = cut.rfind(punct)
+        if idx > 20:          # 至少留 20 字才截，避免只剩一小段
+            return cut[:idx + 1]
+    return cut + "…"
+
+
+
+
+# ──────────────────────────────────────────
+# ConversationState
+# ──────────────────────────────────────────
+
+
+class ConversationState:
+    def __init__(self):
+        self.intent: Optional[IntentParseResult] = None
+        self.clarify_dimension: str = ""
+        self.is_waiting_clarification: bool = False
+        self.is_waiting_confirm: bool = False       # 等待使用者確認需求摘要
+        self.is_waiting_rank_feedback: bool = False # 等待使用者對排序的回饋
+        self.is_waiting_experience_product: bool = False
+        self.is_waiting_experience_detail: bool = False
+        self.pending_product_name: str = ""
+        self.is_waiting_skin_tracking: bool = False
+        self.skin_session: Optional[dict] = None
+        self.skin_type_skipped: bool = False
+        self.history: list = []
+        self.turn_count: int = 0
+        self.pain_gain: dict = {}       # Pain & Gain 分析結果
+        self.last_products: list = []
+        self.seen_product_ids: set[str] = set()   # 上次推薦的商品列表
+
+
+    def add_turn(self, role: str, content: str):
+        normalized_content = str(content or "")[:6000]
+        self.history.append({"role": role, "content": normalized_content})
+        self.history = self.history[-_MAX_SESSION_HISTORY_MESSAGES:]
+        while (
+            len(self.history) > 2
+            and sum(len(str(turn.get("content", ""))) for turn in self.history)
+            > _MAX_SESSION_HISTORY_CHARS
+        ):
+            self.history.pop(0)
+        if role == "user":
+            self.turn_count += 1
+
+
+    def reset(self):
+        self.__init__()
+
+
+
+
+# ──────────────────────────────────────────
+# Pain & Gain 分析（Terra）
+# ──────────────────────────────────────────
+
+
+def _analyze_pain_gain(user_input: str) -> dict:
+    """用 Terra 從使用者長文字中萃取 pain/gain/skin_summary/key_concerns"""
+    system_prompt = """你是台灣藥妝保養品小幫手。
+請從使用者的描述中，萃取以下資訊，用繁體中文輸出 JSON：
+{
+  "pain": "痛點描述，以「您」為主詞，禁止出現「使用者」三個字（1-2句）",
+  "gain": "期待描述，以「您」為主詞，禁止出現「使用者」三個字（1-2句）",
+  "skin_summary": "膚質與膚況摘要（1句）",
+  "key_concerns": ["主要訴求1", "主要訴求2"],
+  "budget_hint": "預算線索（若有提到，否則為null）",
+  "special_notes": "其他特殊需求或限制（若有）"
+}
+只輸出 JSON，不要其他說明。"""
+
+
+    try:
+        response = OPENAI_CLIENT.chat.completions.create(
+            model=OPENAI_MODEL,
+            messages=[
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": user_input},
+            ],
+            reasoning_effort="none",
+            max_completion_tokens=300,
+            response_format={"type": "json_object"},
+        )
+        text = (response.choices[0].message.content or "").strip()
+
+        start = text.find('{')
+        end   = text.rfind('}') + 1
+        if start != -1 and end > start:
+            parsed = json.loads(text[start:end])
+            for k in ('pain', 'gain', 'skin_summary', 'special_notes'):
+                if isinstance(parsed.get(k), str):
+                    parsed[k] = parsed[k].replace('使用者', '您')
+            return parsed
+    except Exception as e:
+        print(f"[Pain&Gain] 分析失敗：{e}")
+
+
+    return {
+        "pain":          "您提到了一些肌膚困擾",
+        "gain":          "希望找到適合的保養品",
+        "skin_summary":  "待確認",
+        "key_concerns":  [],
+        "budget_hint":   None,
+        "special_notes": None,
+    }
+
+
+
+
+def _build_confirm_message(pain_gain: dict, intent: IntentParseResult) -> str:
+    """根據 Pain & Gain 分析結果，產出需求確認訊息"""
+    skin_map = {
+        "oily": "油性肌", "dry": "乾性肌",
+        "sensitive": "敏感肌", "combination": "混合肌",
+        "normal": "中性肌", "unknown": "尚待確認",
+    }
+    skin_label   = skin_map.get(intent.skin_type.value, "尚待確認")
+    concerns_str = "、".join(intent.concern) if intent.concern else pain_gain.get('key_concerns', [])
+    if isinstance(concerns_str, list):
+        concerns_str = "、".join(concerns_str)
+
+
+    msg = "讓我確認一下您的需求 🌸\n\n"
+    if pain_gain.get('pain'):
+        msg += f"😟 您的困擾：{pain_gain['pain']}\n"
+    if pain_gain.get('gain'):
+        msg += f"✨ 您希望達到：{pain_gain['gain']}\n"
+    msg += f"💆 膚質：{skin_label}\n"
+    if concerns_str:
+        msg += f"🎯 主要訴求：{concerns_str}\n"
+    if pain_gain.get('budget_hint'):
+        msg += f"💰 預算：{pain_gain['budget_hint']}\n"
+    if pain_gain.get('special_notes'):
+        msg += f"📝 特別注意：{pain_gain['special_notes']}\n"
+
+
+    msg += "\n這樣理解正確嗎？\n還是有什麼需要補充或調整的？"
+    return msg
+
+
+
+
+# ──────────────────────────────────────────
+# 商品推薦格式化（含排序理由 & 比較）
+# ──────────────────────────────────────────
+def _format_ranked_products(
+    result: dict,
+    pain_gain: dict,
+    intent: IntentParseResult,
+) -> str:
+    """
+    將 Product Agent 已排序的商品整理成前端顯示文字。
+
+    注意：
+    1. 這裡不會重新排序商品。
+    2. 商品順序由 Product Agent 決定。
+    3. 最多顯示五項商品。
+    4. 排名只顯示 1、2、3、4、5。
+    """
+
+    products = (
+        result.get("products")
+        or []
+    )
+    seen_product_keys: set[str] = set()
+    deduped_products = []
+    for product in products:
+        if not isinstance(product, dict):
+            continue
+        product_key = str(
+            product.get("name")
+            or product.get("id")
+            or ""
+        ).strip().casefold()
+        if not product_key or product_key in seen_product_keys:
+            continue
+        seen_product_keys.add(product_key)
+        deduped_products.append(product)
+    products = deduped_products
+
+    warnings = (
+        result.get("warnings")
+        or []
+    )
+
+    if not products:
+        return (
+            "目前沒有找到很符合的商品。"
+            "你可以再告訴我預算、偏好的品牌，"
+            "或喜歡清爽還是滋潤的質地，我再幫你找。"
+        )
+
+    # =====================================================
+    # 開頭文字
+    # =====================================================
+
+    pain_gain = (
+        pain_gain
+        or {}
+    )
+
+    generic_pain = (
+        "您提到了一些肌膚困擾"
+    )
+
+    generic_gain = (
+        "希望找到適合的保養品"
+    )
+
+    pain = str(
+        pain_gain.get("pain")
+        or ""
+    ).strip()
+
+    gain = str(
+        pain_gain.get("gain")
+        or ""
+    ).strip()
+
+    # 避免顯示分析失敗時的預設文字。
+    if pain == generic_pain:
+        pain = ""
+
+    if gain == generic_gain:
+        gain = ""
+
+    # 把偏系統分析的語氣改得自然一點。
+    pain = (
+        pain
+        .replace(
+            "使用者",
+            "你",
+        )
+        .replace(
+            "您的",
+            "你的",
+        )
+    )
+
+    gain = (
+        gain
+        .replace(
+            "使用者",
+            "你",
+        )
+        .replace(
+            "您的",
+            "你的",
+        )
+    )
+
+    reply = ""
+
+    if pain and gain:
+        reply += (
+            f"依照你提到的情況，"
+            f"我先找了幾款比較接近「{gain}」需求的商品：\n\n"
+        )
+
+    elif gain:
+        reply += (
+            f"我先找了幾款比較接近「{gain}」需求的商品：\n\n"
+        )
+
+    elif pain:
+        reply += (
+            "依照你剛剛提到的肌膚情況，"
+            "我先整理了幾款可以參考的商品：\n\n"
+        )
+
+    else:
+        reply += (
+            "我先整理了幾款比較符合你目前需求的商品：\n\n"
+        )
+
+    # =====================================================
+    # 商品內容
+    # =====================================================
+
+    for index, product in enumerate(
+        products[:5]
+    ):
+        # 只顯示數字排名。
+        label = (
+            f"{index + 1}."
+        )
+
+        partner_tag = (
+            " 三友獨家"
+            if product.get("is_partner")
+            else ""
+        )
+
+        name = str(
+            product.get("name")
+            or "未提供商品名稱"
+        ).strip()
+
+        brand = str(
+            product.get("brand")
+            or ""
+        ).strip()
+
+        category = str(
+            product.get("category")
+            or ""
+        ).strip()
+
+        price = product.get(
+            "price"
+        )
+
+        rank_reason = str(
+            product.get("rank_reason")
+            or ""
+        ).strip()
+
+        copy_text = str(
+            product.get("copy")
+            or ""
+        ).strip()
+
+        trending = str(
+            product.get("trending")
+            or ""
+        ).strip()
+
+        over_budget = bool(
+            product.get("over_budget")
+        )
+
+        budget_tag = (
+            "（略超預算）"
+            if over_budget
+            else ""
+        )
+
+        # 例如：1. 三友獨家
+        reply += (
+            f"{label}{partner_tag}\n"
+        )
+
+        # 商品名稱
+        reply += (
+            f"**{name}**\n"
+        )
+
+        # 商品資料只顯示有內容的欄位，
+        # 避免出現「品牌： | 面膜」。
+        product_information = []
+
+        if (
+            brand
+            and brand not in {
+                "未知品牌",
+                "未提供",
+            }
+        ):
+            product_information.append(
+                f"品牌：{brand}"
+            )
+
+        if (
+            category
+            and category not in {
+                "未知分類",
+            }
+        ):
+            product_information.append(
+                category
+            )
+
+        if price not in {
+            None,
+            "",
+        }:
+            product_information.append(
+                f"NT${price}{budget_tag}"
+            )
+
+        if product_information:
+            reply += (
+                "，".join(
+                    product_information
+                )
+                + "\n"
+            )
+
+        # 推薦原因
+        if rank_reason:
+            natural_reason = (
+                rank_reason
+                .replace(
+                    "使用者",
+                    "你",
+                )
+                .replace(
+                    "您的",
+                    "你的",
+                )
+            )
+
+            reply += (
+                f"適合你的原因：{natural_reason}\n"
+            )
+
+        # 商品介紹
+        if copy_text:
+            reply += (
+                "商品介紹："
+                f"{_trim_to_sentence(copy_text, 120)}\n"
+            )
+
+        sources = product.get("sources") or []
+        source_links = []
+        for source in sources[:1]:
+            if not isinstance(source, dict):
+                continue
+            source_url = str(source.get("url") or "").strip()
+            if source_url.startswith(("https://", "http://")):
+                source_links.append(f"[查看來源]({source_url})")
+        if source_links:
+            reply += "參考資料：" + source_links[0] + "\n"
+
+        # 熱門資訊
+        if trending:
+            reply += (
+                f"熱門資訊：{trending}\n"
+            )
+
+        reply += "\n"
+
+    # =====================================================
+    # 注意事項
+    # =====================================================
+
+    if warnings:
+        warning_text = "；".join(
+            str(item)
+            for item in warnings[:2]
+            if item
+        )
+
+        if warning_text:
+            reply += (
+                f"注意事項：{warning_text}\n\n"
+            )
+
+    # =====================================================
+    # Neo4j 成分資訊
+    # =====================================================
+
+    graph_summary = str(
+        result.get("graph_summary")
+        or ""
+    ).strip()
+
+    if (
+        graph_summary
+        and "無特殊禁忌"
+        not in graph_summary
+    ):
+        graph_lines = [
+            line.strip()
+            for line in graph_summary.splitlines()
+            if (
+                "邊1" in line
+                or "警告" in line
+            )
+        ]
+
+        if graph_lines:
+            ingredient_note = (
+                graph_lines[0]
+                .replace(
+                    "【邊1 含有成分】",
+                    "",
+                )
+                .strip()
+            )
+
+            if ingredient_note:
+                reply += (
+                    f"成分方面要注意：{ingredient_note}\n\n"
+                )
+
+    # =====================================================
+    # 結尾
+    # =====================================================
+
+    reply += "─────────────────\n"
+    reply += "以上是依照你的膚質和需求整理的結果。\n"
+    reply += (
+        "如果你比較在意價格、品牌或質地，"
+        "可以直接告訴我，我再幫你調整。"
+    )
+
+
+    
+
+    return reply
+
+
+
+
+
+
+# ──────────────────────────────────────────
+# 排序回饋處理
+# ──────────────────────────────────────────
+
+
+def _handle_rank_feedback(user_feedback: str, products: list, intent: IntentParseResult) -> str:
+    """使用者對排序不滿意時，用 TAIDE 分析回饋並回應"""
+    system_prompt = """你是台灣藥妝保養小幫手。
+使用者對商品排序有意見，請：
+1. 理解使用者的回饋重點
+2. 解釋調整後的排序邏輯
+3. 給出簡短的回應（不超過100字）
+【鐵則】只能提及「目前推薦排序」清單內的商品，嚴禁提及、編造清單外任何商品名稱或價格
+語氣親切，用繁體中文回覆。"""
+
+
+    product_names = "、".join([f"{p['name'][:20]}(NT${p.get('price','?')})" for p in products[:5]])
+    user_prompt   = f"""
+目前推薦排序：{product_names}
+使用者回饋：{user_feedback}
+使用者膚質：{intent.skin_type.value if intent else 'unknown'}
+使用者訴求：{'、'.join(intent.concern) if intent and intent.concern else '未指定'}
+請回應使用者的回饋，並說明如何調整。"""
+
+
+    try:
+        resp = requests.post(
+            f"{TAIDE_URL}/chat/completions",
+            json={
+                "model": "taide-12b",
+                "messages": [
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user",   "content": user_prompt},
+                ],
+                "max_tokens": 200,
+                "temperature": 0.5,
+            },
+            timeout=20,
+        )
+        reply = resp.json()["choices"][0]["message"]["content"].strip()
+        reply += "\n\n請問您希望優先考慮哪個方向？\n"
+        reply += "（例如：更注重價格 / 更在意某個成分 / 偏好某個品牌）"
+        return reply
+    except Exception:
+        return (
+            "感謝您的回饋！\n"
+            "了解您認為目前的排序不太符合您的需求。\n"
+            "請問您最在意的是哪個面向？\n"
+            "（價格、成分、品牌、功效、我的膚質）\n"
+            "我來根據您的優先考量為您打造最適合的推薦😊"
+        )
+
+
+
+
+# ──────────────────────────────────────────
+# RootAgentOrchestrator
+# ──────────────────────────────────────────
+
+
+
+def _clean_internal_user_message(value: str) -> str:
+    """
+    移除只供 Root Agent 分流使用的內部標記。
+    這個標記不能寫入 GetZep、對話標題或前端紀錄。
+    """
+    message = str(value or "").strip()
+
+    internal_prefixes = (
+        "__knowledge_consult__:",
+    )
+
+    for prefix in internal_prefixes:
+        if message.startswith(prefix):
+            return message[len(prefix):].strip()
+
+    return message
+
+
+class RootAgentOrchestrator:
+
+
+    def __init__(
+        self,
+        model: str = "gpt-5.6-terra",
+        user_id: str = "anonymous",
+        conversation_id: str = "default",
+    ):
+        """
+        建立 Root Agent 對話實例。
+
+        user_id：
+            登入帳號 ID。
+            同一帳號的 Profile 與長期偏好共用。
+
+        conversation_id：
+            目前獨立對話 ID。
+            每個 conversation_id 使用不同 GetZep Thread。
+
+        未傳 conversation_id 時使用 default，
+        保持舊程式相容。
+        """
+
+        self.model = model
+
+        self.user_id = (
+            user_id
+            or "anonymous"
+        ).strip()
+
+        self.conversation_id = (
+            conversation_id
+            or "default"
+        ).strip()
+
+        if not self.user_id:
+            self.user_id = "anonymous"
+
+        if not self.conversation_id:
+            self.conversation_id = "default"
+
+        self.state = ConversationState()
+
+        self.memory = ZepMemoryAdapter(
+            user_id=self.user_id,
+            conversation_id=self.conversation_id,
+        )
+
+        self.memory_service = ConversationMemoryService(
+            self.memory
+        )
+
+        self.title_service = ConversationTitleService()
+        self.response_composer = ResponseComposer()
+
+        self._turn_memory: Optional[
+            ConversationMemoryContext
+        ] = None
+
+        self.profile_bridge = ProfileContextBridge(
+            user_id=self.user_id,
+        )
+
+        # User Analysis 只提供補充背景與商品排序權重，不參與 Root 路由。
+        # Bridge 內所有資料庫與分析錯誤都會 fail-open，不中斷聊天。
+        self.user_analysis_bridge = UserAnalysisContextBridge(
+            user_id=self.user_id,
+            conversation_id=self.conversation_id,
+        )
+
+        self.user_analysis_context: dict = {}
+
+        self.basic_profile: dict = {}
+
+        self._profile_load_error: str = ""
+
+        self._pending_profile_sync: Optional[
+            ProfileSyncResult
+        ] = None
+
+
+    def _memory_prompt(self) -> str:
+        return self._turn_memory.prompt if self._turn_memory else ""
+
+
+    def _intent_memory_context(self) -> str:
+        if not self._turn_memory:
+            return self.memory.to_summary() or ""
+        parts = []
+        if self._turn_memory.profile_summary:
+            parts.append(self._turn_memory.profile_summary)
+        if self._turn_memory.zep_context:
+            parts.append(self._turn_memory.zep_context)
+        return "\n\n".join(parts)
+
+
+    def refresh_profile_context(self) -> dict:
+        """Reload the canonical member profile and mirror safe fields to Zep."""
+        self.basic_profile = self.profile_bridge.refresh(
+            memory=self.memory,
+        )
+        self._profile_load_error = ""
+        return self.basic_profile
+
+
+    def _profile_summary_for_prompt(self) -> str:
+        parts = []
+        verified_profile = self.profile_bridge.build_prompt_context(
+            self.basic_profile,
+        )
+        consumer_profile = self.user_analysis_bridge.build_prompt_context(
+            self.user_analysis_context,
+        )
+        zep_summary = self.memory.to_summary() or ""
+
+        if verified_profile:
+            parts.append(verified_profile)
+        if consumer_profile:
+            parts.append(consumer_profile)
+        if zep_summary:
+            parts.append("【長期對話偏好】\n" + zep_summary)
+
+        return "\n\n".join(parts)
+
+
+    def _prepare_profile_context(
+        self,user_input: str,
+    ) -> None:
+        """
+        每輪重新載入正式基本資料。
+    
+        聊天內容只作為本輪推理參考，
+        不直接修改使用者正式基本資料。
+        正式資料只能從基本資料頁儲存。
+        """
+    
+        # 明確清除舊的聊天同步結果，
+        # 避免上一輪的更新狀態被重複使用。
+        self._pending_profile_sync = None
+    
+        try:
+            self.refresh_profile_context()
+        except Exception as error:
+            self.basic_profile = {}
+            self._profile_load_error = str(error)
+            self._log(
+                "PROFILE",
+                f"載入基本資料失敗：{error}",
+    )
+
+
+    def _handle_profile_interaction(
+        self,
+        user_input: str,
+    ) -> Optional[dict]:
+        """
+        回答使用者對自己基本資料的查詢。
+    
+        此函式只讀取資料，不進行任何資料庫寫入。
+        """
+    
+        profile_reply = self.profile_bridge.answer_profile_question(
+            message=user_input,
+            profile=self.basic_profile,
+        )
+    
+        if not profile_reply:
+            return None
+    
+        if self._profile_load_error:
+            profile_reply = "目前無法讀取您的基本資料，請稍後再試。"
+    
+        self.state.add_turn(
+            "assistant",
+            profile_reply,
+        )
+    
+        return {
+            "reply": profile_reply,
+            "quick_replies": [],
+            "intent": {},
+            "stage": "profile_query",
+        }
+
+
+    def _run_product_agent(
+        self,
+        intent: IntentParseResult,
+        excluded_product_ids: Optional[set[str]] = None,
+    ) -> dict:
+        disliked = list(self.memory.get("disliked_ingredients", []) or [])
+        for ingredient in self.user_analysis_context.get("avoid_ingredients", []):
+            if ingredient not in disliked:
+                disliked.append(ingredient)
+        memory_parts = [self._memory_prompt()]
+        consumer_prompt = self.user_analysis_bridge.build_prompt_context(
+            self.user_analysis_context,
+        )
+        if consumer_prompt and consumer_prompt not in memory_parts[0]:
+            memory_parts.append(consumer_prompt)
+
+        if excluded_product_ids is None:
+            self.state.seen_product_ids.clear()
+
+        result = product_agent_run(
+            intent,
+            disliked_ingredients=disliked,
+            memory_context="\n".join(part for part in memory_parts if part),
+            preference_context=self.user_analysis_context,
+            excluded_product_ids=sorted(excluded_product_ids or set()),
+        )
+        products = result.get("products") or []
+        self.state.last_products = products
+        self.state.seen_product_ids.update(
+            product_stable_key(product)
+            for product in products
+            if product_stable_key(product)
+        )
+        return result
+
+    def _log(self, stage: str, message: str):
+        print(f"[{stage}] {message}")
+
+
+    def _skin_label(self, skin: str) -> str:
+        mapping = {
+            "oily": "油性肌", "dry": "乾性肌",
+            "combination": "混合肌", "sensitive": "敏感肌",
+            "normal": "中性肌", "unknown": "各膚質",
+        }
+        return mapping.get(skin, skin)
+
+
+    def _normalize_clarification_answer(
+        self,
+        dimension: str,
+        user_input: str,
+    ) -> Optional[str]:
+        text = (user_input or "").strip()
+        if text in ("skip", "跳過", "⏭️ 跳過"):
+            return "skip"
+
+
+        aliases = {
+            "skin_type": {
+                "油性肌": "oily", "油肌": "oily", "oily": "oily",
+                "乾性肌": "dry", "乾肌": "dry", "dry": "dry",
+                "混合肌": "combination", "混合性肌膚": "combination",
+                "combination": "combination",
+                "敏感肌": "sensitive", "敏感性肌膚": "sensitive",
+                "sensitive": "sensitive",
+                "中性肌": "normal", "一般膚質": "normal", "normal": "normal",
+            },
+            "concern": {
+                "痘痘": "抗痘", "粉刺": "抗痘", "抗痘": "抗痘",
+                "毛孔": "毛孔", "乾燥": "保濕", "保濕": "保濕",
+                "泛紅": "舒敏", "敏感": "舒敏", "舒緩": "舒緩",
+                "出油": "控油", "控油": "控油", "暗沉": "透亮",
+                "美白": "美白", "淡斑": "淡斑", "皺紋": "抗皺",
+            },
+            "product_category": {
+                "洗面乳": "洗面乳", "化妝水": "化妝水", "面膜": "面膜",
+                "精華": "精華液", "精華液": "精華液", "乳液": "乳液",
+                "乳液/乳霜": "乳液",
+                "乳霜": "乳霜", "保濕棉片": "保濕棉片", "防曬": "防曬乳",
+                "防曬乳": "防曬乳",
+            },
+        }
+
+
+        topic_switch_markers = (
+            "換個問題", "另外想問", "順便問", "是什麼", "有什麼作用",
+            "如何使用", "怎麼使用", "幫我比較", "哪個比較", "多少錢",
+            "分享使用心得", "記錄膚況", "膚況紀錄",
+        )
+        if any(marker in text for marker in topic_switch_markers):
+            return None
+
+        dimension_aliases = aliases.get(dimension, {})
+        if dimension == "concern" and text:
+            return text
+        if text in dimension_aliases:
+            return dimension_aliases[text]
+        for label, value in dimension_aliases.items():
+            if label in text:
+                return value
+        return None
+
+
+    def _clear_experience_state(self):
+        self.state.is_waiting_experience_product = False
+        self.state.is_waiting_experience_detail = False
+        self.state.pending_product_name = ""
+
+
+    def _clear_skin_tracking_state(self):
+        self.state.is_waiting_skin_tracking = False
+        self.state.skin_session = None
+
+
+    def _handle_skin_tracking_input(self, user_input: str) -> dict:
+        """續接 Skin Tracking 多輪對話，並保存 Agent 回傳的 session。"""
+        try:
+            result = skin_tracking_run(
+                user_message=user_input,
+                user_id=self.memory.user_id,
+                session=self.state.skin_session,
+            )
+        except Exception as e:
+            self._clear_skin_tracking_state()
+            self._log("ERROR", f"skin_tracking_agent 執行失敗：{e}")
+            reply = "抱歉，膚況紀錄暫時無法使用，請稍後再試一次。"
+            self.state.add_turn("assistant", reply)
+            return {
+                "reply": reply,
+                "quick_replies": [],
+                "intent": self.state.intent.model_dump() if self.state.intent else {},
+                "stage": "skin_tracking_error",
+            }
+
+
+        if not isinstance(result, dict):
+            self._clear_skin_tracking_state()
+            reply = "抱歉，膚況紀錄服務回傳格式異常，請稍後再試一次。"
+            self._log("ERROR", "skin_tracking_agent 未回傳 dict")
+            self.state.add_turn("assistant", reply)
+            return {
+                "reply": reply,
+                "quick_replies": [],
+                "intent": self.state.intent.model_dump() if self.state.intent else {},
+                "stage": "skin_tracking_error",
+            }
+
+
+        done = bool(result.get("done", False))
+        next_session = result.get("session")
+
+
+        if not done and not isinstance(next_session, dict):
+            self._clear_skin_tracking_state()
+            reply = "抱歉，膚況紀錄無法保存目前進度，請稍後再試一次。"
+            self._log("ERROR", "skin_tracking_agent 未回傳可續接的 session")
+            self.state.add_turn("assistant", reply)
+            return {
+                "reply": reply,
+                "quick_replies": [],
+                "intent": self.state.intent.model_dump() if self.state.intent else {},
+                "stage": "skin_tracking_session_error",
+            }
+
+
+        if done:
+            self._clear_skin_tracking_state()
+        else:
+            self.state.skin_session = next_session
+            self.state.is_waiting_skin_tracking = True
+
+
+        reply = result.get("reply", "好的，請繼續描述今天的膚況。")
+        self.state.add_turn("assistant", reply)
+        self._log(
+            "SKIN_TRACKING",
+            f"stage={result.get('stage', 'unknown')}, done={done}",
+        )
+
+
+        return {
+            "reply": reply,
+            "quick_replies": result.get("quick_replies", []),
+            "intent": self.state.intent.model_dump() if self.state.intent else {},
+            "stage": result.get(
+                "stage",
+                "skin_tracking_done" if done else "skin_tracking_collect",
+            ),
+        }
+
+
+    def _is_experience_topic_switch(self, user_input: str) -> bool:
+        """判斷等待商品資料期間，使用者是否明確提出另一個新請求。"""
+        text = (user_input or "").strip()
+        if not text:
+            return False
+        return any(marker in text for marker in EXPERIENCE_TOPIC_SWITCH_MARKERS)
+
+
+    def _merge_product_identity_answer(
+        self,
+        user_input: str,
+    ) -> tuple[str, str]:
+        """
+        合併等待中的泛稱商品與使用者補充的品牌／完整名稱。
+
+        例：
+        pending="美白面膜", answer="未來美" -> "未來美 美白面膜"
+        pending="美白面膜", answer="未來美美白面膜" -> "未來美美白面膜"
+        """
+        answer = (user_input or "").strip(" ，,。！!？?")
+        pending = (self.state.pending_product_name or "").strip()
+
+        for prefix in ("品牌是", "牌子是", "商品是", "名稱是", "叫做", "是"):
+            if answer.startswith(prefix):
+                answer = answer[len(prefix):].strip(" ：:，,。")
+                break
+
+        if not answer:
+            return pending, ""
+
+        if pending and pending in answer:
+            product_name = answer
+            brand_name = answer.split(pending, 1)[0].strip(" 的-－：:")
+        elif pending and answer in pending:
+            product_name = pending
+            brand_name = ""
+        elif pending:
+            product_name = f"{answer} {pending}".strip()
+            brand_name = answer
+        else:
+            product_name = answer
+            brand_name = ""
+
+        return product_name, brand_name
+
+
+    def _handle_experience_input(self, user_input: str) -> Optional[dict]:
+        if (
+            self.state.is_waiting_experience_product
+            and self.state.pending_product_name
+        ):
+            stage = "waiting_product_identity"
+        elif self.state.is_waiting_experience_product:
+            stage = "waiting_product_name"
+        elif self.state.is_waiting_experience_detail:
+            stage = "waiting_experience_detail"
+        else:
+            stage = ""
+
+
+        last_product_names = [
+            product.get("name", "")
+            for product in self.state.last_products
+            if product.get("name")
+        ]
+
+
+        parsed = parse_product_experience(
+            user_input=user_input,
+            pending_product_name=self.state.pending_product_name,
+            conversation_stage=stage,
+            session_history=self.state.history[:-1],
+            memory_context=self._memory_prompt(),
+            last_product_names=last_product_names,
+            model=self.model,
+        )
+
+
+        # 已經明確追問品牌／完整名稱後，只要使用者正常補充商品資訊，
+        # 就視為完成商品識別，不再因「美白面膜」等通用詞重複追問。
+        if stage == "waiting_product_identity":
+            merged_product_name, inferred_brand_name = (
+                self._merge_product_identity_answer(user_input)
+            )
+            if merged_product_name:
+                parsed["is_experience"] = True
+                parsed["product_name"] = merged_product_name
+                parsed["needs_product_name"] = False
+                parsed["needs_product_identity"] = False
+
+                if inferred_brand_name and not parsed.get("brand_name"):
+                    parsed["brand_name"] = inferred_brand_name
+
+                if not parsed.get("attributes"):
+                    parsed["needs_experience_detail"] = True
+                    parsed["reply"] = (
+                        f"了解，是「{merged_product_name}」。"
+                        "使用後的感受如何呢？"
+                    )
+
+
+        if not parsed.get("is_experience"):
+            self._clear_experience_state()
+            return None
+
+
+        product_name = (parsed.get("product_name") or "").strip()
+        reply = (parsed.get("reply") or "").strip()
+
+
+        if parsed.get("needs_product_name"):
+            self.state.is_waiting_experience_product = True
+            self.state.is_waiting_experience_detail = False
+            self.state.pending_product_name = ""
+            if not reply:
+                reply = (
+                    "了解，您之前有買過相關商品。"
+                    "可以告訴我是什麼品牌，或包裝上的完整商品名稱嗎？"
+                )
+            stage_name = "experience_waiting_product"
+        elif parsed.get("needs_product_identity"):
+            self.state.is_waiting_experience_product = True
+            self.state.is_waiting_experience_detail = False
+            self.state.pending_product_name = product_name
+            # 結構性追問由 Orchestrator 固定，避免模型跳過品牌問題。
+            reply = (
+                f"了解，您買過「{product_name}」。"
+                "可以再告訴我是什麼品牌，或提供包裝上的完整商品名稱嗎？"
+            )
+            stage_name = "experience_waiting_identity"
+        elif parsed.get("needs_experience_detail"):
+            self.state.is_waiting_experience_product = False
+            self.state.is_waiting_experience_detail = True
+            self.state.pending_product_name = product_name
+            if not reply:
+                reply = (
+                    f"了解，我記下您買過「{product_name}」。"
+                    "使用後的感受如何呢？"
+                )
+            stage_name = "experience_waiting_detail"
+        else:
+            self.memory.record_product_experience(
+                product_name=product_name,
+                brand_name=parsed.get("brand_name", ""),
+                sentiment=parsed.get("sentiment", "unknown"),
+                attributes=parsed.get("attributes") or [],
+                avoid_preferences=parsed.get("avoid_preferences") or [],
+                preferred_features=parsed.get("preferred_features") or [],
+            )
+            self._clear_experience_state()
+            if not reply:
+                reply = "了解，我已記下這次使用經驗，之後推薦時會一起參考。"
+            stage_name = "experience_recorded"
+            self._log(
+                "EXPERIENCE",
+                json.dumps(parsed, ensure_ascii=False),
+            )
+
+
+        self.state.is_waiting_clarification = False
+        self.state.clarify_dimension = ""
+        self.state.add_turn("assistant", reply)
+
+
+        return {
+            "reply": reply,
+            "quick_replies": [],
+            "intent": self.state.intent.model_dump() if self.state.intent else {},
+            "stage": stage_name,
+        }
+
+
+    def _update_intent(self, dimension: str, value: str):
+        current = self.state.intent.model_dump()
+        if dimension == "skin_type":
+            current["skin_type"] = value
+        elif dimension == "concern":
+            if value not in current.get("concern", []):
+                current.setdefault("concern", []).append(value)
+        elif dimension == "product_category":
+            current["product_category"] = value
+        current["ambiguity_score"] = max(0.0, current.get("ambiguity_score", 1.0) - 0.4)
+        try:
+            self.state.intent = IntentParseResult(**current)
+        except Exception as e:
+            self._log("ERROR", f"更新 intent 失敗：{e}")
+
+
+    def _refresh_intent_scores(self) -> None:
+        """Refresh routing certainty and target Agent readiness after enrichment."""
+        if self.state.intent is None:
+            return
+        current = self.state.intent.model_dump()
+        current["routing_confidence"] = calculate_routing_confidence(self.state.intent)
+        current["task_completeness"] = calculate_task_completeness(self.state.intent)
+        try:
+            self.state.intent = IntentParseResult(**current)
+        except Exception as error:
+            self._log("ERROR", f"更新 intent 分數失敗：{error}")
+
+    def _fix_unclear_intent(self):
+        if self.state.intent.intent_type != IntentType.UNCLEAR:
+            return
+        current = self.state.intent.model_dump()
+        if self.state.intent.product_category.value != "不明":
+            current["intent_type"] = "find_product"
+        elif self.state.intent.concern:
+            current["intent_type"] = "symptom_solving"
+        else:
+            current["intent_type"] = "recommendation"
+        try:
+            self.state.intent = IntentParseResult(**current)
+        except Exception as e:
+            self._log("ERROR", f"推斷 intent_type 失敗：{e}")
+
+
+    def _next_missing_dimension(self) -> Optional[str]:
+        intent = self.state.intent
+        if intent.skin_type.value == "unknown" and not self.state.skin_type_skipped:
+            return "skin_type"
+        if not intent.concern:
+            return "concern"
+        if intent.product_category.value == "不明":
+            return "product_category"
+        return None
+
+
+    def _ask_clarification(self, dimension: str) -> dict:
+        questions = {
+            "routing": (
+                "想先確認一下：您現在主要想找產品、處理肌膚狀況、了解成分用法、比較產品，還是分享使用心得？",
+                [
+                    QuickReply(
+                        label="🔎 找適合產品",
+                        value="我想找適合的保養品",
+                    ),
+                    QuickReply(
+                        label="🧴 改善肌膚狀況",
+                        value="我想改善目前的肌膚問題",
+                    ),
+                    QuickReply(
+                        label="💡 詢問成分用法",
+                        value="我想了解保養成分或使用方式",
+                    ),
+                    QuickReply(label="⚖️ 比較產品", value="我想比較保養品"),
+                    QuickReply(label="✍️ 分享使用心得", value="我想分享產品使用心得"),
+                ],
+            ),
+            "skin_type": (
+                "請問您是什麼膚質呢？選擇後我可以幫您推薦最適合的保養品！",
+                SKIN_TYPE_REPLIES,
+            ),
+            "concern": (
+                "您最想改善哪個肌膚問題呢？",
+                CONCERN_REPLIES,
+            ),
+            "product_category": (
+                "您想找哪種類型的保養品呢？",
+                CATEGORY_REPLIES,
+            ),
+        }
+        question_text, quick_replies = questions[dimension]
+        self.state.is_waiting_clarification = True
+        self.state.clarify_dimension = dimension
+        self.state.add_turn("assistant", question_text)
+        self._log("STEP", f"追問維度：{dimension}")
+        return {
+            "reply": question_text,
+            "quick_replies": [{"label": qr.label, "value": qr.value} for qr in quick_replies],
+            "intent": self.state.intent.model_dump(),
+            "stage": f"clarification_{dimension}",
+        }
+
+
+    def _get_cycle_replies(
+        self,
+        intent: IntentParseResult,
+        include_more: bool = True,
+    ) -> list:
+        replies = [
+            {"label": "看更多商品", "value": "cycle_more", "action": "more"},
+            {"label": "更換商品類型", "value": "cycle_change_category", "action": "change_category"},
+            {"label": "換搜尋條件", "value": "cycle_change_condition", "action": "change_condition"},
+            {"label": "我要記錄膚況", "value": "cycle_skin_tracking", "action": "skin_tracking"},
+            {"label": "排序不對，幫我調整", "value": "cycle_rank_feedback", "action": "rank_feedback"},
+        ]
+        if include_more:
+            return replies
+        return [reply for reply in replies if reply["value"] != "cycle_more"]
+
+    def _normalize_cycle_action(self, user_input: str) -> Optional[str]:
+        value = (user_input or "").strip()
+        if value.startswith("cycle_"):
+            return value
+
+        aliases = {
+            "看更多": "cycle_more",
+            "看更多商品": "cycle_more",
+            "換一批": "cycle_more",
+            "下一批": "cycle_more",
+            "更換商品類型": "cycle_change_category",
+            "換品類": "cycle_change_category",
+            "換個品類": "cycle_change_category",
+            "換商品類別": "cycle_change_category",
+            "換搜尋條件": "cycle_change_condition",
+            "重新搜尋": "cycle_change_condition",
+        }
+        if value in {"skip", "跳過"}:
+            return "cycle_stale_skip"
+
+        if self.state.intent:
+            category = self.state.intent.product_category.value
+            if category and category != "不明" and value == f"換個{category}":
+                return "cycle_more"
+
+        return aliases.get(value)
+
+    def _enrich_intent_from_memory(self, intent: IntentParseResult) -> IntentParseResult:
+        if intent is None:
+            return intent
+        current = intent.model_dump()
+        changed = False
+        if current['skin_type'] == 'unknown' and self.memory.get('skin_type'):
+            memory_skin = str(self.memory.get('skin_type') or '').strip()
+
+            skin_type_map = {
+                '油性肌': 'oily',
+                '油肌': 'oily',
+                'oily': 'oily',
+                '乾性肌': 'dry',
+                '乾肌': 'dry',
+                'dry': 'dry',
+                '混合肌': 'combination',
+                '混合性肌': 'combination',
+                'combination': 'combination',
+                '敏感肌': 'sensitive',
+                'sensitive': 'sensitive',
+                '中性肌': 'normal',
+                'normal': 'normal',
+            }
+
+            normalized_skin = skin_type_map.get(
+                memory_skin.lower(),
+                skin_type_map.get(memory_skin),
+            )
+
+            if normalized_skin:
+                current['skin_type'] = normalized_skin
+                self._log(
+                    "MEMORY",
+                    f"補入膚質：{memory_skin} -> {normalized_skin}",
+                )
+                changed = True
+        if not current['concern'] and self.memory.get('concerns'):
+            current['concern'] = self.memory.get('concerns')[-2:]
+            self._log("MEMORY", f"補入訴求：{current['concern']}")
+            changed = True
+        raw_query = str(current.get("raw_query") or "")
+        no_budget_markers = (
+            "\u50f9\u683c\u4e0d\u9650",
+            "\u50f9\u9322\u4e0d\u9650",
+            "\u9810\u7b97\u4e0d\u9650",
+            "\u4e0d\u9650\u9810\u7b97",
+            "\u6c92\u6709\u9810\u7b97\u9650\u5236",
+            "\u4e0d\u8a2d\u9810\u7b97",
+        )
+        explicitly_unlimited_budget = any(
+            marker in raw_query for marker in no_budget_markers
+        )
+        if (
+            not explicitly_unlimited_budget
+            and not current.get('budget_range')
+            and self.memory.get('budget_range')
+        ):
+            current['budget_range'] = self.memory.get('budget_range')
+            self._log("MEMORY", f"補入預算：{current['budget_range']}")
+            changed = True
+        if changed:
+            try:
+                if current.get('intent_type') == 'unclear':
+                    if current.get('product_category', '不明') != '不明':
+                        current['intent_type'] = 'find_product'
+                    elif current.get('concern'):
+                        current['intent_type'] = 'symptom_solving'
+                    else:
+                        current['intent_type'] = 'recommendation'
+                    self._log("MEMORY", f"修正 intent_type：{current['intent_type']}")
+                new_intent = IntentParseResult(**current)
+                new_intent.ambiguity_score = calculate_ambiguity_score(new_intent)
+                self._log("MEMORY", f"補齊後 ambiguity_score：{new_intent.ambiguity_score}")
+                return new_intent
+            except Exception as e:
+                self._log("ERROR", f"補齊 intent 失敗：{e}")
+                return intent
+        return intent
+
+
+    def _handle_cycle_action(self, action: str) -> dict:
+        self._log("CYCLE", f"action={action}")
+
+
+        if action == "cycle_more":
+            if not self.state.intent:
+                return {
+                    "reply": "目前沒有可延續的商品搜尋，請先告訴我想找的商品。",
+                    "quick_replies": [],
+                    "intent": {},
+                    "stage": "cycle_more_missing_intent",
+                }
+
+            product_result = self._run_product_agent(
+                self.state.intent,
+                excluded_product_ids=set(self.state.seen_product_ids),
+            )
+            products = product_result.get("products") or []
+            self.state.last_products = products
+            self.state.seen_product_ids.update(
+                product_stable_key(product)
+                for product in products
+                if product_stable_key(product)
+            )
+            if not products:
+                return {
+                    "reply": "已經沒有更多符合目前條件的商品了。您可以更換商品類型或搜尋條件。",
+                    "quick_replies": self._get_cycle_replies(
+                        self.state.intent,
+                        include_more=False,
+                    ),
+                    "intent": self.state.intent.model_dump(),
+                    "stage": "cycle_more_exhausted",
+                }
+
+            return {
+                "reply": _format_ranked_products(
+                    product_result,
+                    self.state.pain_gain,
+                    self.state.intent,
+                ),
+                "quick_replies": self._get_cycle_replies(self.state.intent),
+                "intent": self.state.intent.model_dump(),
+                "products": products,
+                "stage": "cycle_more",
+            }
+        elif action == "cycle_change_category":
+            current = self.state.intent.model_dump()
+            current["product_category"] = "不明"
+            self.state.intent = IntentParseResult(**current)
+            self.state.is_waiting_clarification = False
+            self.state.skin_type_skipped = False
+            self.state.seen_product_ids.clear()
+            self.state.last_products = []
+            return self._ask_clarification("product_category")
+        elif action == "cycle_change_condition":
+            self.state.reset()
+            return {
+                "reply": "沒問題！重新幫您搜尋，請告訴我您的需求（請詳細說明您的膚況和商品期待）",
+                "quick_replies": [],
+                "intent": {},
+                "stage": "cycle_reset",
+            }
+        elif action == "cycle_skin_tracking":
+            self._clear_experience_state()
+            self.state.is_waiting_clarification = False
+            self.state.clarify_dimension = ""
+            self.state.is_waiting_confirm = False
+            self.state.is_waiting_rank_feedback = False
+            self._clear_skin_tracking_state()
+            return self._handle_skin_tracking_input("開始記錄膚況")
+        elif action == "cycle_rank_feedback":
+            self.state.is_waiting_rank_feedback = True
+            return {
+                "reply": "好的！請告訴我您覺得這樣的排序哪裡不滿意呢？\n（例如：價格太高、想要某個成分、偏好某個品牌...）",
+                "quick_replies": [],
+                "intent": self.state.intent.model_dump() if self.state.intent else {},
+                "stage": "rank_feedback_waiting",
+            }
+        elif action == "cycle_stale_skip":
+            return {
+                "reply": "這個跳過選項已失效，請使用目前顯示的最新選項。",
+                "quick_replies": self._get_cycle_replies(self.state.intent) if self.state.intent else [],
+                "intent": self.state.intent.model_dump() if self.state.intent else {},
+                "stage": "cycle_stale_skip",
+            }
+        return {
+            "reply": "請選擇一個選項",
+            "quick_replies": self._get_cycle_replies(self.state.intent),
+            "intent": self.state.intent.model_dump(),
+            "stage": "cycle_unknown",
+        }
+
+
+    def _dispatch(self, intent: IntentParseResult) -> str:
+        self._log("DISPATCH", f"intent_type={intent.intent_type.value}")
+
+
+        # 特判：安全性諮詢
+        if (intent.intent_type == IntentType.FIND_PRODUCT and
+                any(kw in (intent.raw_query or '') for kw in SAFETY_KEYWORDS)):
+            self._log("DISPATCH", "偵測到安全性諮詢")
+            return self._handle_safety_query(intent)
+
+
+        if intent.intent_type == IntentType.FIND_PRODUCT:
+            return self._handle_find_product(intent)
+        elif intent.intent_type == IntentType.SYMPTOM_SOLVING:
+            return self._handle_symptom_solving(intent)
+        elif intent.intent_type == IntentType.RECOMMENDATION:
+            return self._handle_recommendation(intent)
+        elif intent.intent_type == IntentType.PRICE_COMPARISON:
+            return self._handle_price_comparison(intent)
+        elif intent.intent_type == IntentType.KNOWLEDGE_QUERY:
+            if should_search_named_product(intent):
+                web_result = search_named_product(
+                    intent.raw_query,
+                    skin_type=intent.skin_type.value,
+                    concerns=intent.concern,
+                    category=intent.product_category.value,
+                    brand_hint="、".join(intent.brand_preference or []),
+                    max_results=1,
+                )
+                if web_result.get("products"):
+                    return _format_ranked_products(
+                        web_result,
+                        self.state.pain_gain,
+                        intent,
+                    )
+            result = knowledge_agent_run(
+                user_query=intent.raw_query,
+                user_skin_type=intent.skin_type.value,
+                session_id=f"{self.user_id}:{self.conversation_id}",
+                memory_context=self._memory_prompt(),
+                parsed_intent=intent,
+            )
+            return result.get("reply", "抱歉，查詢知識庫時發生錯誤。")
+        else:
+            return "抱歉，我不太理解您的需求，可以再詳細說明一下嗎？"
+
+
+    def _handle_find_product(self, intent: IntentParseResult) -> str:
+        result = self._run_product_agent(intent)
+        products = result.get("products") or []
+        self.state.last_products = products
+        self.state.seen_product_ids = {
+            product_stable_key(product)
+            for product in products
+            if product_stable_key(product)
+        }
+        return _format_ranked_products(result, self.state.pain_gain, intent)
+
+
+    def _handle_symptom_solving(self, intent: IntentParseResult) -> str:
+        result = knowledge_agent_run(
+            user_query=intent.raw_query,
+            user_skin_type=intent.skin_type.value,
+            session_id=f"{self.user_id}:{self.conversation_id}",
+            memory_context=self._memory_prompt(),
+            parsed_intent=intent,
+        )
+        return result.get("reply", "目前無法取得相關膚況知識，請稍後再試。")
+
+
+    def _handle_recommendation(self, intent: IntentParseResult) -> str:
+        result = self._run_product_agent(intent)
+        self.state.last_products = result.get('products', [])
+        self._log("RECOMMENDATION", f"skin={intent.skin_type.value}")
+        reply = _format_ranked_products(result, self.state.pain_gain, intent)
+        reply += "\n（如需結合您的膚況紀錄做個人化調整，請選擇「記錄膚況」）"
+        return reply
+
+
+    def _handle_safety_query(self, intent: IntentParseResult) -> str:
+        skin  = intent.skin_type.value
+        reply = ""
+        try:
+            knowledge_result = knowledge_agent_run(
+                user_query=intent.raw_query,
+                user_skin_type=skin,
+                session_id=f"{self.user_id}:{self.conversation_id}",
+                memory_context=self._memory_prompt(),
+                parsed_intent=intent,
+            )
+            k_reply = knowledge_result.get("reply", "")
+            if k_reply:
+                reply += f"【成分安全諮詢】\n{k_reply}\n\n"
+        except Exception as e:
+            self._log("WARNING", f"knowledge_agent 查詢失敗：{e}")
+
+
+        product_result = self._run_product_agent(intent)
+        self.state.last_products = product_result.get('products', [])
+
+
+        if product_result.get('products'):
+            reply += "【相關保養品推薦】\n"
+            reply += _format_ranked_products(product_result, self.state.pain_gain, intent)
+        return reply
+
+
+    def _handle_price_comparison(self, intent: IntentParseResult) -> str:
+        category = intent.product_category.value
+        budget   = f"預算 {intent.budget_range} 元內" if intent.budget_range else "不限預算"
+        self._log("PRICE_COMPARISON", f"category={category}, budget={budget}")
+
+
+        result = self._run_product_agent(intent)
+        self.state.last_products = result.get('products', [])
+
+
+        if not result.get('products'):
+            return f"目前找不到{category}的比較結果，請試試調整條件。"
+
+
+        reply = f"幫您比較{category}的 CP 值（{budget}）：\n\n"
+        for i, p in enumerate(result['products']):
+            partner_tag = " ⭐三友" if p.get('is_partner') else ""
+            budget_tag  = "（超預算）" if p.get('over_budget') else ""
+            ings = "、".join((p.get('ingredients') or [])[:3]) or "—"
+            reply += f"{i+1}. {p['name']}{partner_tag}\n"
+            reply += f"   NT${p['price']}{budget_tag}｜主要成分：{ings}\n"
+            if p.get('copy'):
+                reply += f"   {_trim_to_sentence(p.get('copy',''), 120)}\n"
+            reply += "\n"
+        reply += "💡 排序已綜合考量價格、成分與您的膚質訴求。"
+        return reply
+
+
+    # ─── 主流程 ───
+
+
+    def get_welcome(self) -> dict:
+        """
+        對話開場：尚未輸入前的歡迎訊息 + 引導按鈕
+        按鈕對應三個 sub-agent 能力：商品推薦 / 藥妝知識 / 膚況記錄
+        老用戶根據 Global Memory 個人化建議
+        """
+        skin    = self.memory.get('skin_type')
+        cats    = self.memory.get('preferred_categories') or []
+        skin_zh = self._skin_label(skin) if skin else None
+
+
+        if skin_zh and cats:
+            # 老用戶：個人化開場
+            reply = (f"歡迎回來！上次您找過{cats[-1]}，"
+                     f"今天想繼續為您的{skin_zh}找保養品，"
+                     f"還是查成分知識、記錄膚況呢？")
+            suggestions = [
+                {"label": f"{skin_zh}找{cats[-1]}", "value": f"{skin_zh}找{cats[-1]}"},
+                {"label": "換個品類逛逛",           "value": "推薦其他保養品"},
+                {"label": "查成分知識",             "value": "我想了解保養品成分"},
+                {"label": "記錄今天膚況",           "value": "cycle_skin_tracking"},
+            ]
+        else:
+            # 新用戶：能力導覽開場
+            reply = ("嗨！我是您的藥妝保養小幫手\n"
+                     "可以幫您：\n"
+                     "1️⃣ 依膚質推薦保養品（含成分安全把關）\n"
+                     "2️⃣ 解答成分知識\n"
+                     "3️⃣ 記錄追蹤您的膚況變化\n\n"
+                     "請直接輸入需求，或點下方簡易範例：")
+            suggestions = [
+                {"label": "油肌找抗痘洗面乳",   "value": "油肌找抗痘洗面乳"},
+                {"label": "乾肌找保濕面膜",     "value": "乾肌找保濕面膜"},
+                {"label": "敏感肌找舒緩精華",   "value": "敏感肌找舒緩精華液"},
+                {"label": "水楊酸適合每天用嗎", "value": "水楊酸可以每天用嗎"},
+                {"label": "記錄我的膚況",       "value": "cycle_skin_tracking"},
+            ]
+
+
+        return {"reply": reply, "quick_replies": suggestions,
+                "intent": {}, "stage": "welcome"}
+
+
+    @monitor_agent_turn
+    def process(
+        self,
+        user_input: str,
+        conversation_flow: str | None = None,
+        on_delta=None,
+    ) -> dict:
+        """每輪統一載入 GetZep context，並在任何回覆路徑寫回 assistant 訊息。"""
+        # 每一輪都重新讀取主資料庫，避免 Profile 頁面更新後，既有
+        # Agent session 仍使用舊值；同時只同步本輪明確自述的穩定膚質資料。
+        profile_started = time.perf_counter()
+        self._prepare_profile_context(user_input)
+        observe_pipeline_stage("root", "profile_context", profile_started)
+
+        # 先讀取既有分析，讓本輪 intent parser 與其他 Agent 都能看到
+        # 消費人格背景。此步驟不會觸發重新分析，也不改變 Root 路由。
+        user_analysis_started = time.perf_counter()
+        self.user_analysis_context = self.user_analysis_bridge.refresh(
+            basic_profile=self.basic_profile,
+        )
+        observe_pipeline_stage(
+            "root",
+            "user_analysis_preload",
+            user_analysis_started,
+        )
+
+        # 必須在 begin_turn 寫入本輪 user message 前執行，
+        # 才能確認這是不是目前 conversation 的第一句真實訊息。
+        # Terra 或標題寫入失敗時，不能中斷原本聊天流程。
+        title_updated = False
+        title_started = time.perf_counter()
+
+        try:
+            title_updated = bool(
+                self.title_service.maybe_title_conversation(
+                    adapter=self.memory,
+                    first_message=_clean_internal_user_message(user_input),
+                    flow=conversation_flow,
+                )
+            )
+        except Exception as e:
+            self._log(
+                "WARNING",
+                f"ConversationTitleService 失敗：{e}",
+            )
+        observe_pipeline_stage("root", "conversation_title", title_started)
+
+        # touch_conversation 同時負責刷新對話列表的 updated_at。
+        # 第一輪已由 TitleService 呼叫；後續輪次只更新時間，不改標題。
+        if not title_updated:
+            try:
+                self.memory.touch_conversation()
+            except Exception as e:
+                self._log(
+                    "WARNING",
+                    f"更新 conversation 時間失敗：{e}",
+                )
+
+        memory_started = time.perf_counter()
+        if str(self.user_id).startswith("guest-"):
+            self._turn_memory = None
+            self._log("MEMORY", "訪客工作階段略過遠端長期記憶")
+        else:
+            try:
+                self._turn_memory = self.memory_service.begin_turn(
+                    user_message=_clean_internal_user_message(user_input),
+                    profile_summary=self._profile_summary_for_prompt(),
+                )
+            except Exception as e:
+                self._turn_memory = None
+                self._log("WARNING", f"ConversationMemoryService.begin_turn 失敗：{e}")
+        observe_pipeline_stage("root", "memory_begin_turn", memory_started)
+
+
+        try:
+            result = self._process_current_turn(
+                user_input,
+                on_delta=on_delta,
+            )
+        except Exception:
+            self._pending_profile_sync = None
+            self.memory_service.finish_error_turn(
+                "抱歉，系統忙碌中，請稍後再試一次。"
+            )
+            raise
+
+
+        sync_result = self._pending_profile_sync
+        if (
+            sync_result is not None
+            and sync_result.changed_fields
+            and not sync_result.update_only
+            and isinstance(result.get("reply"), str)
+        ):
+            result["reply"] = sync_result.acknowledgement + "\n\n" + result["reply"]
+
+
+        response_metadata = {
+
+
+            "quick_replies": result.get("quick_replies", []),
+
+
+            "cards": result.get("cards", []),
+
+
+            "route": result.get("route"),
+
+
+            "stage": result.get("stage"),
+
+
+        }
+
+
+        memory_finish_started = time.perf_counter()
+        self.memory_service.finish_turn(
+
+
+            result.get("reply", ""),
+
+
+            metadata=response_metadata,
+
+
+        )
+        observe_pipeline_stage(
+            "root",
+            "memory_finish_turn",
+            memory_finish_started,
+        )
+        self._pending_profile_sync = None
+        return result
+
+
+    def _process_current_turn(
+        self,
+        user_input: str,
+        on_delta=None,
+    ) -> dict:
+        self.state.add_turn("user", _clean_internal_user_message(user_input))
+        self._log("INPUT", f"turn={self.state.turn_count}, input={user_input!r}")
+
+        # 基本資料查詢與純資料更新不交給 LLM 猜測，也必須放在
+        # Input Guard 與多輪狀態之前，避免「我是什麼膚質」被誤攔截。
+        profile_result = self._handle_profile_interaction(user_input)
+        if profile_result is not None:
+            return profile_result
+
+        dialogue_route = classify_dialogue_route(user_input)
+        if dialogue_route and dialogue_route["route"] == "emergency":
+            self._log("SAFETY", f"緊急症狀攔截：{dialogue_route['reason']}")
+            return {
+                "reply": (
+                    "這可能是嚴重過敏反應。請立即撥打 119，或請身旁的人協助叫救護車；"
+                    "不要自行駕車，也不要等待症狀自行消退。若您有醫師開立的緊急藥物，"
+                    "請依醫囑使用。"
+                ),
+                "quick_replies": [],
+                "intent": {},
+                "stage": "emergency",
+            }
+
+        recall_reply = None
+        if (
+            self._turn_memory
+            and self._turn_memory.context_loaded
+        ):
+            recall_reply = conversation_recall_reply(
+                user_input,
+                self._turn_memory.zep_context,
+            )
+        if recall_reply is not None:
+            self._log(
+                "MEMORY",
+                "使用同一 conversation 的明確使用者陳述回答回憶問題",
+            )
+            return {
+                "reply": recall_reply,
+                "quick_replies": [],
+                "intent": {
+                    "intent_type": IntentType.KNOWLEDGE_QUERY.value,
+                },
+                "stage": "dispatch",
+            }
+
+
+        # ── Default question deterministic routing ──
+        #
+        # 這兩類入口不交給 LLM 自由判斷：
+        #
+        # 1. 「你最想改善哪個肌膚問題？」
+        #    → 固定進 concern clarification
+        #
+        # 2. 「你的/我的膚質最適合哪個保養品？」
+        #    → 有已知膚質：改寫成明確商品推薦 query
+        #    → 無已知膚質：固定進 skin_type clarification
+        #
+        normalized_input = (
+            user_input
+            .strip()
+            .replace("？", "")
+            .replace("?", "")
+        )
+
+        concern_default_triggers = (
+            "你最想改善哪個肌膚問題",
+            "您最想改善哪個肌膚問題",
+            "我最想改善哪個肌膚問題",
+        )
+
+        if any(
+            trigger in normalized_input
+            for trigger in concern_default_triggers
+        ):
+            self.state.intent = IntentParseResult(
+                raw_query=user_input,
+            )
+            return self._ask_clarification(
+                "concern"
+            )
+
+        skin_product_triggers = (
+            "你的膚質最適合哪個保養品",
+            "我的膚質最適合哪個保養品",
+            "依我的膚質推薦保養品",
+            "依膚質推薦保養品",
+            "什麼保養品適合我的膚質",
+            "什麼保養品最適合我的膚質",
+        )
+
+        if any(
+            trigger in normalized_input
+            for trigger in skin_product_triggers
+        ):
+            memory_skin = str(
+                self.memory.get("skin_type")
+                or ""
+            ).strip()
+
+            skin_type_map = {
+                "油性肌": "oily",
+                "油肌": "oily",
+                "oily": "oily",
+                "乾性肌": "dry",
+                "乾肌": "dry",
+                "dry": "dry",
+                "混合肌": "combination",
+                "混合性肌": "combination",
+                "combination": "combination",
+                "敏感肌": "sensitive",
+                "sensitive": "sensitive",
+                "中性肌": "normal",
+                "normal": "normal",
+            }
+
+            normalized_skin = (
+                skin_type_map.get(
+                    memory_skin.lower()
+                )
+                or skin_type_map.get(
+                    memory_skin
+                )
+            )
+
+            if not normalized_skin:
+                self.state.intent = IntentParseResult(
+                    raw_query=user_input,
+                )
+                return self._ask_clarification(
+                    "skin_type"
+                )
+
+            skin_zh_map = {
+                "oily": "油性肌",
+                "dry": "乾性肌",
+                "combination": "混合肌",
+                "sensitive": "敏感肌",
+                "normal": "中性肌",
+            }
+
+            original_input = user_input
+
+            user_input = (
+                f"{skin_zh_map[normalized_skin]}"
+                "找適合的保養品"
+            )
+
+            self._log(
+                "DEFAULT_ROUTE",
+                (
+                    f"{original_input!r} -> "
+                    f"{user_input!r}"
+                ),
+            )
+
+
+        # ── Unsupported product category guard ──
+        # 商品資料庫目前沒有粉底液。
+        # 不可因 category 無法解析，就 fallback 成一般保養品推薦。
+        normalized_product_input = (
+            user_input
+            .strip()
+            .replace(" ", "")
+        )
+
+        unsupported_product_terms = (
+            "粉底液",
+        )
+
+        matched_unsupported_product = next(
+            (
+                term
+                for term in unsupported_product_terms
+                if term in normalized_product_input
+            ),
+            None,
+        )
+
+        if matched_unsupported_product:
+            self._log(
+                "UNSUPPORTED_PRODUCT",
+                f"目前資料庫未支援：{matched_unsupported_product}",
+            )
+
+            return {
+                "reply": (
+                    f"目前商品資料庫還沒有「{matched_unsupported_product}」的資料，"
+                    "所以我不會用其他保養品代替推薦。"
+                    "目前可以幫你找洗面乳、化妝水、精華液、乳液／乳霜、"
+                    "面膜、防曬乳或保濕棉片。"
+                ),
+                "quick_replies": [
+                    {"label": "精華液", "value": "精華液"},
+                    {"label": "乳液／乳霜", "value": "乳液"},
+                    {"label": "面膜", "value": "面膜"},
+                    {"label": "防曬乳", "value": "防曬乳"},
+                ],
+                "intent": {},
+                "stage": "clarification_unsupported_product",
+            }
+
+
+        # ── ① Input Guard（最前面）──
+        # 按鈕指令（cycle_/confirm_/skip）不用檢查
+        # Normalize quick-reply values and persisted display labels before Guard/LLM.
+        if not self.state.is_waiting_clarification:
+            cycle_action = self._normalize_cycle_action(user_input)
+            if cycle_action:
+                return self._handle_cycle_action(cycle_action)
+
+        if not self.state.is_waiting_skin_tracking and \
+           not user_input.startswith(("__", "cycle_", "confirm_")) and \
+           user_input.strip() not in ["skip", "⏭️ 跳過", "跳過"]:
+            guard = guard_input(user_input)
+            if not guard["allowed"]:
+                self._log("GUARD", f"攔截：{guard['reason']}")
+                return {
+                    "reply": guard.get("reply", "請輸入與保養相關的問題喔！"),
+                    "quick_replies": [],
+                    "intent": {},
+                    "stage": f"guarded_{guard['reason']}",
+                }
+
+
+        # ── ② Cycle 指令 ──
+        if user_input.startswith("cycle_"):
+            return self._handle_cycle_action(user_input)
+
+        # 膚況諮詢由 API 明確指定時，固定交給 Knowledge Agent。
+        # 放在膚況追蹤狀態判斷之前，避免被追蹤流程或商品意圖攔截。
+        if user_input.startswith("__knowledge_consult__:"):
+            knowledge_query = user_input.split(":", 1)[1].strip()
+            try:
+                knowledge_result = knowledge_agent_run(
+                    user_query=knowledge_query,
+                    user_skin_type="unknown",
+                    session_id=f"{self.user_id}:{self.conversation_id}",
+                    memory_context=self._memory_prompt(),
+                    on_delta=on_delta,
+                )
+                knowledge_reply = knowledge_result.get(
+                    "reply",
+                    "目前無法取得相關肌膚知識，請稍後再試。",
+                )
+            except Exception as error:
+                self._log("WARNING", f"knowledge_consult 查詢失敗：{error}")
+                knowledge_reply = "目前無法取得相關肌膚知識，請稍後再試。"
+            return {
+                "reply": knowledge_reply,
+                "intent": {
+                    "intent_type": IntentType.KNOWLEDGE_QUERY.value,
+                },
+                "stage": "dispatch",
+            }
+
+
+        # ── ③ 膚況紀錄多輪流程 ──
+        # 進入 Skin Tracking 後，下一句必須優先交回 Skin Tracking Agent，
+        # 不再送進一般 intent_parser，直到 Agent 回傳 done=True。
+        if self.state.is_waiting_skin_tracking:
+            return self._handle_skin_tracking_input(user_input)
+
+
+        # ── ④ 商品購買／使用經驗（優先於 clarification）──
+        # 等待商品品牌／感受期間，使用者可能直接換話題。
+        # 例如「我想問 A 酸功用是什麼」應離開商品經驗狀態，
+        # 再由 intent_parser 判斷並交給 Knowledge Agent。
+        if (
+            (
+                self.state.is_waiting_experience_product
+                or self.state.is_waiting_experience_detail
+            )
+            and self._is_experience_topic_switch(user_input)
+        ):
+            self._clear_experience_state()
+            self.state.is_waiting_clarification = False
+            self.state.clarify_dimension = ""
+            self._log("EXPERIENCE", "偵測到新話題，退出商品經驗等待狀態")
+            return self._handle_new_input(
+                user_input,
+                ignore_history=True,
+            )
+
+
+        is_experience_input = looks_like_experience(user_input)
+        if (
+            is_experience_input
+            and self.state.is_waiting_clarification
+            and self.state.clarify_dimension == "routing"
+        ):
+            self.state.is_waiting_clarification = False
+            self.state.clarify_dimension = ""
+
+        if (
+            self.state.is_waiting_experience_product
+            or self.state.is_waiting_experience_detail
+            or is_experience_input
+        ):
+            experience_result = self._handle_experience_input(user_input)
+            if experience_result is not None:
+                return experience_result
+
+
+        # ── ⑤ 等待排序回饋 ──
+        if self.state.is_waiting_rank_feedback:
+            return self._handle_rank_feedback_reply(user_input)
+
+
+        # ── ⑥ 等待需求確認 ──
+        if self.state.is_waiting_confirm:
+            return self._handle_confirm_reply(user_input)
+
+
+        # ── ⑦ 等待 clarification ──
+        if self.state.is_waiting_clarification:
+            normalized = self._normalize_clarification_answer(
+                self.state.clarify_dimension,
+                user_input,
+            )
+            if normalized is not None:
+                return self._handle_clarification_reply(normalized)
+
+
+            # 使用者插入了另一段話，不可硬當成上一題的答案。
+            self.state.is_waiting_clarification = False
+            self.state.clarify_dimension = ""
+            self._log("CLARIFICATION", "偵測到插話，改按新輸入重新理解")
+
+
+        if dialogue_route:
+            route = dialogue_route["route"]
+            self._log("ROUTE_GUARD", f"{route}：{dialogue_route['reason']}")
+
+            if route == "small_talk":
+                return {
+                    "reply": (
+                        "嗨～很高興見到你！你可以直接告訴我想了解膚況、"
+                        "記錄今天的狀況，或找／比較商品。"
+                    ),
+                    "quick_replies": [
+                        {"label": "了解膚況", "value": "__knowledge_consult__:我想了解目前的膚況該怎麼處理"},
+                        {"label": "記錄膚況", "value": "cycle_skin_tracking"},
+                        {"label": "找保養品", "value": "我想找適合目前膚況的保養品"},
+                    ],
+                    "intent": {},
+                    "stage": "small_talk",
+                    "route": "clarify",
+                }
+
+            if route == "incomplete":
+                return {
+                    "reply": (
+                        "我在聽，你可以把話說完～如果還不確定怎麼描述，"
+                        "也可以先選一個方向。"
+                    ),
+                    "quick_replies": [
+                        {"label": "了解膚況", "value": "__knowledge_consult__:我想了解目前的膚況該怎麼處理"},
+                        {"label": "記錄膚況", "value": "cycle_skin_tracking"},
+                        {"label": "找保養品", "value": "我想找適合目前膚況的保養品"},
+                    ],
+                    "intent": {},
+                    "stage": "incomplete_utterance",
+                    "route": "clarify",
+                }
+
+            if route == "skin_record":
+                self._clear_experience_state()
+                self.state.is_waiting_clarification = False
+                self.state.clarify_dimension = ""
+                self.state.is_waiting_confirm = False
+                self.state.is_waiting_rank_feedback = False
+                self._clear_skin_tracking_state()
+                return self._handle_skin_tracking_input(user_input)
+
+            if route == "skin_consult":
+                self.state.intent = IntentParseResult(
+                    intent_type=IntentType.KNOWLEDGE_QUERY,
+                    raw_query=user_input,
+                )
+                self._refresh_intent_scores()
+                return self._do_dispatch(self.state.intent)
+
+            if route == "clarify":
+                return {
+                    "reply": "我先確認一下：您想了解膚況怎麼處理、記錄今天的膚況，還是找適合的商品？",
+                    "quick_replies": [
+                        {"label": "了解膚況", "value": "__knowledge_consult__:我想了解目前的膚況該怎麼處理"},
+                        {"label": "記錄膚況", "value": "cycle_skin_tracking"},
+                        {"label": "找保養品", "value": "我想找適合目前膚況的保養品"},
+                    ],
+                    "intent": {},
+                    "stage": "route_clarification",
+                }
+
+            if route == "multi_intent":
+                return {
+                    "reply": (
+                        "我辨識到您同時想記錄膚況與找商品。為避免誤存資料，"
+                        "請先選一件開始；完成後再處理另一件。"
+                    ),
+                    "quick_replies": [
+                        {"label": "先記錄膚況", "value": "cycle_skin_tracking"},
+                        {"label": "先找商品", "value": "我想先找適合目前膚況的保養品"},
+                    ],
+                    "intent": {},
+                    "stage": "multi_intent_plan",
+                }
+
+        # ── ⑧ 新輸入 ──
+        return self._handle_new_input(user_input)
+
+
+    def _handle_new_input(
+        self,
+        user_input: str,
+        ignore_history: bool = False,
+    ) -> dict:
+        self._log("STEP", "先解析 intent；只有需要時才補做 Pain & Gain 分析")
+
+
+        long_term = self._intent_memory_context()
+        if long_term:
+            self._log("MEMORY", f"已載入個人資料與 GetZep context，長度={len(long_term)}")
+
+
+        # 商品意圖已包含膚質、需求、類別與預算；不要先做第二次重複的 LLM 分析。
+        self.state.pain_gain = {}
+
+
+        # Intent 解析
+        intent_started = time.perf_counter()
+        intent = parse_intent(
+            user_query=user_input,
+            session_history=([] if ignore_history else self.state.history[:-1]),
+            long_term_summary=long_term,
+            model=self.model,
+        )
+        observe_pipeline_stage("root", "intent_parse", intent_started)
+        if intent is None:
+            self._log("ERROR", "intent_parser 回傳 None")
+            intent = IntentParseResult(
+                intent_type=IntentType.UNCLEAR,
+                raw_query=user_input,
+                ambiguity_score=1.0,
+            )
+
+
+        intent = self._enrich_intent_from_memory(intent)
+        self.state.intent = intent
+        self._refresh_intent_scores()
+        intent = self.state.intent
+
+        if intent.intent_type in (IntentType.FIND_PRODUCT, IntentType.RECOMMENDATION):
+            raw_concerns = intent.concern or []
+            if not isinstance(raw_concerns, (list, tuple, set)):
+                raw_concerns = [raw_concerns]
+            concerns = [
+                str(getattr(item, "value", item)).strip()
+                for item in raw_concerns
+                if str(getattr(item, "value", item)).strip()
+            ]
+            skin_type = str(getattr(intent.skin_type, "value", intent.skin_type) or "")
+            category = str(
+                getattr(intent.product_category, "value", intent.product_category) or "商品"
+            )
+            budget = getattr(intent, "budget_range", None)
+            self.state.pain_gain = {
+                "pain": "、".join(concerns),
+                "gain": f"找到符合條件的{category if category and category != '不明' else '商品'}",
+                "skin_summary": skin_type,
+                "key_concerns": concerns,
+                "budget_hint": str(budget) if budget else "",
+                "special_notes": "",
+            }
+            self._log(
+                "PAIN_GAIN_FAST_PATH",
+                json.dumps(self.state.pain_gain, ensure_ascii=False),
+            )
+        elif len(user_input) > 20:
+            pain_gain_started = time.perf_counter()
+            self.state.pain_gain = _analyze_pain_gain(user_input)
+            observe_pipeline_stage("root", "pain_gain_analysis", pain_gain_started)
+            self._log(
+                "PAIN_GAIN", json.dumps(self.state.pain_gain, ensure_ascii=False)
+            )
+
+
+        self._log("INTENT", json.dumps({
+            "intent_type":      intent.intent_type.value,
+            "skin_type":        intent.skin_type.value,
+            "concern":          intent.concern,
+            "product_category": intent.product_category.value,
+            "ambiguity_score":  intent.ambiguity_score,
+            "routing_confidence": intent.routing_confidence,
+            "task_completeness": intent.task_completeness,
+        }, ensure_ascii=False))
+
+        if intent.routing_confidence < 0.5:
+            self._log("STEP", "目標 Agent 不明，先確認使用者要做的事")
+            return self._ask_clarification("routing")
+
+
+        # 長文字 + 意圖明確 → 先做需求確認對話
+        if len(user_input) > 40 and intent.ambiguity_score < 0.7:
+            confirm_msg = _build_confirm_message(self.state.pain_gain, intent)
+            self.state.is_waiting_confirm = True
+            self.state.add_turn("assistant", confirm_msg)
+            return {
+                "reply": confirm_msg,
+                "quick_replies": [
+                    {"label": "✅ 對，就是這樣", "value": "confirm_yes"},
+                    {"label": "❌ 需要調整",     "value": "confirm_no"},
+                ],
+                "intent": intent.model_dump(),
+                "stage":  "pain_gain_confirm",
+            }
+
+
+        # Agent 已確定，但資料不足時，只追問能讓該 Agent 開始工作的必要資訊。
+        if intent.task_completeness < 1.0 and intent.intent_type in (IntentType.FIND_PRODUCT, IntentType.RECOMMENDATION):
+            self._log("STEP", "產品 Agent 已確定，但缺少需求；只追問主要肌膚問題")
+            return self._ask_clarification("concern")
+
+
+        self._log("STEP", "意圖明確，直接分派")
+        return self._do_dispatch(intent)
+
+
+    def _handle_confirm_reply(self, user_input: str) -> dict:
+        """使用者確認/修正需求摘要"""
+        self.state.is_waiting_confirm = False
+        lower = user_input.lower().strip()
+
+
+        # 使用者確認
+        if any(kw in lower for kw in ['對', '是', 'yes', '確認', '沒錯', '正確', 'confirm_yes', '好', 'ok', 'next', '下一步']):
+            self._log("CONFIRM", "使用者確認需求，直接分派")
+            return self._do_dispatch(self.state.intent)
+
+
+        # 使用者要修正 → 重新收集
+        self._log("CONFIRM", "使用者要修正需求")
+        intent = parse_intent(
+            user_query=user_input,
+            session_history=self.state.history[:-1],
+            long_term_summary=self._intent_memory_context(),
+            model=self.model,
+        )
+        if intent:
+            self.state.intent = self._enrich_intent_from_memory(intent)
+
+
+        confirm_msg = _build_confirm_message(self.state.pain_gain, self.state.intent)
+        self.state.is_waiting_confirm = True
+        self.state.add_turn("assistant", confirm_msg)
+        return {
+            "reply": f"了解！讓我重新整理一下：\n\n{confirm_msg}",
+            "quick_replies": [
+                {"label": "✅ 對，就是這樣", "value": "confirm_yes"},
+                {"label": "❌ 需要調整",     "value": "confirm_no"},
+            ],
+            "intent": self.state.intent.model_dump(),
+            "stage":  "pain_gain_confirm_retry",
+        }
+
+
+    def _handle_rank_feedback_reply(self, user_input: str) -> dict:
+        """使用者對排序的回饋"""
+        self.state.is_waiting_rank_feedback = False
+        self.user_analysis_bridge.record_rank_feedback(
+            user_input,
+            self.state.last_products,
+        )
+        self.user_analysis_context = self.user_analysis_bridge.refresh(
+            basic_profile=self.basic_profile,
+            analyze_if_needed=True,
+            force=True,
+        )
+        reply = _handle_rank_feedback(
+            user_input,
+            self.state.last_products,
+            self.state.intent
+        )
+        self.state.add_turn("assistant", reply)
+        return {
+            "reply": reply,
+            "quick_replies": [
+                {"label": "重新推薦",     "value": "cycle_change_condition"},
+                {"label": "換搜尋條件",   "value": "cycle_change_condition"},
+                {"label": "我要記錄膚況", "value": "cycle_skin_tracking"},
+            ],
+            "intent": self.state.intent.model_dump() if self.state.intent else {},
+            "stage":  "rank_feedback_done",
+        }
+
+
+    def _compose_agent_reply(
+        self,
+        intent: IntentParseResult,
+        raw_reply: str,
+    ) -> str:
+        protected_terms: list[str] = []
+        for product in self.state.last_products[:10]:
+            if not isinstance(product, dict):
+                continue
+            for key in ("name", "brand"):
+                value = str(product.get(key) or "").strip()
+                if value and value not in protected_terms:
+                    protected_terms.append(value)
+
+        context = [
+            {
+                "role": str(turn.get("role") or ""),
+                "content": str(turn.get("content") or ""),
+            }
+            for turn in self.state.history[-6:]
+            if isinstance(turn, dict)
+        ]
+        result = self.response_composer.compose(
+            user_query=intent.raw_query,
+            intent_type=intent.intent_type.value,
+            raw_reply=raw_reply,
+            conversation_context=context,
+            protected_terms=protected_terms,
+        )
+        if result.used_model:
+            self._log("COMPOSER", "已完成自然語氣組裝")
+        else:
+            self._log(
+                "COMPOSER",
+                f"保留原始 Agent 回覆: {result.fallback_reason}",
+            )
+        return result.reply
+
+    def _do_dispatch(self, intent: IntentParseResult) -> dict:
+        """分派並回傳"""
+        # A2A：膚況追蹤 context 併入訴求（有紀錄才生效）
+        skin_context_started = time.perf_counter()
+        skin_ctx = get_skin_context(self.memory.user_id)
+        observe_pipeline_stage(
+            "root",
+            "skin_context",
+            skin_context_started,
+        )
+        if skin_ctx and skin_ctx.get('concern_hints'):
+            current = intent.model_dump()
+            added = [c for c in skin_ctx['concern_hints'] if c not in current.get('concern', [])]
+            if added:
+                current.setdefault('concern', []).extend(added)
+                try:
+                    intent = IntentParseResult(**current)
+                    self.state.intent = intent
+                    self._log("SKIN_A2A", f"膚況紀錄補入訴求：{added}")
+                except Exception as e:
+                    self._log("SKIN_A2A", f"併入失敗：{e}")
+
+
+        # Root 已完成原本的意圖判斷後，才把本輪選購訊號交給
+        # UserAnalysisAgent。分析結果只作為推理背景與排序加權；
+        # 不會反向改寫 intent，也不會改變要分派到哪個 Agent。
+        user_analysis_dispatch_started = time.perf_counter()
+        self.user_analysis_bridge.record_intent(
+            intent,
+            source_text=intent.raw_query,
+        )
+        self.user_analysis_context = self.user_analysis_bridge.refresh(
+            basic_profile=self.basic_profile,
+            analyze_if_needed=True,
+        )
+        observe_pipeline_stage(
+            "root",
+            "user_analysis_dispatch",
+            user_analysis_dispatch_started,
+        )
+
+        agent_dispatch_started = time.perf_counter()
+        raw_reply = self._dispatch(intent)
+        observe_pipeline_stage(
+            "root",
+            "agent_dispatch",
+            agent_dispatch_started,
+        )
+
+        response_compose_started = time.perf_counter()
+        reply = self._compose_agent_reply(intent, raw_reply)
+        observe_pipeline_stage(
+            "root",
+            "response_compose",
+            response_compose_started,
+        )
+
+        self.state.add_turn("assistant", reply)
+
+        memory_save_started = time.perf_counter()
+        self.memory.update_from_intent(intent)
+        self.memory.save()
+        observe_pipeline_stage(
+            "root",
+            "memory_update_save",
+            memory_save_started,
+        )
+        self._log("MEMORY", f"已更新：{self.memory.to_summary()}")
+        route = (
+            "skin_consult"
+            if intent.intent_type in (
+                IntentType.SYMPTOM_SOLVING,
+                IntentType.KNOWLEDGE_QUERY,
+            )
+            else "product_search"
+        )
+        return {
+            "reply":         reply,
+            "quick_replies": self._get_cycle_replies(intent),
+            "intent":        intent.model_dump(),
+            "stage":         "dispatch",
+            "route":         route,
+            "products":      (
+                self.state.last_products
+                if route == "product_search"
+                else None
+            ),
+        }
+
+
+    def _handle_clarification_reply(self, user_input: str) -> dict:
+        self._log("STEP", f"處理追問回覆，維度：{self.state.clarify_dimension}")
+        is_skip = user_input.strip() in ["skip", "⏭️ 跳過", "跳過"]
+        self.state.is_waiting_clarification = False
+
+
+        if not is_skip:
+            self._update_intent(self.state.clarify_dimension, user_input.strip())
+        else:
+            self._log("CLARIFICATION", "使用者選擇跳過")
+            if self.state.clarify_dimension == "skin_type":
+                self.state.skin_type_skipped = True
+            current = self.state.intent.model_dump()
+            current["ambiguity_score"] = max(0.0, current.get("ambiguity_score", 1.0) - 0.4)
+            try:
+                self.state.intent = IntentParseResult(**current)
+            except Exception as e:
+                self._log("ERROR", f"跳過更新失敗：{e}")
+
+
+        self._log("CLARIFICATION", (
+            f"更新後 intent：skin={self.state.intent.skin_type.value}, "
+            f"concern={self.state.intent.concern}, "
+            f"category={self.state.intent.product_category.value}"
+        ))
+
+
+        self._fix_unclear_intent()
+        self._refresh_intent_scores()
+        intent = self.state.intent
+        if intent.routing_confidence < 0.5:
+            return self._ask_clarification("routing")
+        if intent.task_completeness < 1.0 and intent.intent_type in (IntentType.FIND_PRODUCT, IntentType.RECOMMENDATION):
+            return self._ask_clarification("concern")
+        self._log("STEP", "追問完成，分派")
+        return self._do_dispatch(self.state.intent)
+
+
+
+
+# ──────────────────────────────────────────
+# 測試
+# ──────────────────────────────────────────
+
+
+if __name__ == "__main__":
+    print("\n【測試 5】GetZep 記憶情境 — 油性 + 敏感肌雙重膚質，第二輪推薦精華液是否記得")
+    print("=" * 60)
+
+
+    zep_user_5 = "zep_test_oily_sensitive_001"   # 全新 user_id，避免沿用舊測試殘留的記憶
+
+
+    agent5 = RootAgentOrchestrator(user_id=zep_user_5)
+
+
+    # ── 第一輪：使用者說明自己「油性肌 + 敏感肌」，並詢問適合的成分類型 ──
+    print("\n【5a】第一輪：自述油性肌+敏感肌，詢問適合成分")
+    r5a = agent5.process("我是油性膚質，同時也是敏感肌，請問我適合使用什麼類型的成分？")
+    print(f"Stage: {r5a['stage']}")
+    print(f"Reply:\n{r5a['reply'][:400]}")
+    print(f"[intent] skin_type={r5a['intent'].get('skin_type')}, "
+          f"concern={r5a['intent'].get('concern')}, "
+          f"category={r5a['intent'].get('product_category')}")
+
+
+    print(f"\n[Zep] to_summary() = {agent5.memory.to_summary()}")
+    print(f"[Zep] get('skin_type') = {agent5.memory.get('skin_type')}")
+    print(f"[Zep] get('concerns') = {agent5.memory.get('concerns')}")
+
+
+    # skin_type 目前的 schema 是單一 enum，若使用者同時是「油性+敏感」，
+    # 檢查系統實際記住的是哪一個、還是有沒有機制同時保留兩者
+    skin_recorded = agent5.memory.get('skin_type')
+    if skin_recorded in ("oily", "sensitive"):
+        print(f"⚠️ 使用者自述同時是油性肌與敏感肌，但 Zep 只記住了單一膚質：{skin_recorded}"
+              "（skin_type 目前 schema 是單一 enum，可能遺失了另一個膚質標籤）")
+    elif skin_recorded:
+        print(f"[Zep] 記住的膚質為：{skin_recorded}")
+    else:
+        print("⚠️ Zep 沒有記住任何膚質，第一輪的自述可能沒有被 intent_parser 正確解析出 skin_type")
+
+
+    # ── 第二輪：同一使用者，改問精華液推薦，看是否同時反映油性+敏感肌 ──
+    print("\n【5b】第二輪（同一人）：推薦精華液 — 檢查是否同時考量油性與敏感肌")
+    r5b = agent5.process("推薦我精華液")
+    print(f"Stage: {r5b['stage']}")
+    print(f"Reply:\n{r5b['reply']}")
+    print(f"[intent] skin_type={r5b['intent'].get('skin_type')}, "
+          f"concern={r5b['intent'].get('concern')}, "
+          f"category={r5b['intent'].get('product_category')}")
+
+
+    reply_text = r5b['reply']
+    oily_hit = any(kw in reply_text for kw in ["油性", "控油", "出油", "毛孔"])
+    sensitive_hit = any(kw in reply_text for kw in ["敏感", "舒緩", "泛紅", "屏障", "溫和", "無刺激"])
+
+
+    print(f"\n推薦文字中是否呼應「油性」相關字眼：{oily_hit}")
+    print(f"推薦文字中是否呼應「敏感」相關字眼：{sensitive_hit}")
+
+
+    if oily_hit and sensitive_hit:
+        print("✅ 第二輪推薦同時呼應了油性與敏感兩個膚質特性")
+    elif oily_hit or sensitive_hit:
+        print("⚠️ 第二輪推薦只呼應了其中一個膚質特性，另一個可能在第一輪就沒被記住，"
+              "或是 product_agent 推薦時沒有把兩個標籤都納入考量")
+    else:
+        print("⚠️ 第二輪推薦完全沒有呼應到油性或敏感肌，代表膚質記憶可能沒有生效，"
+              "或是 _handle_recommendation / product_agent_run 沒有把 skin_type 落實到搜尋條件裡")

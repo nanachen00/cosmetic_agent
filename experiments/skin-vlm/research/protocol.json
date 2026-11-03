@@ -1,0 +1,46 @@
+{
+  "task": "acne04-box-derived-patch-presence-v1",
+  "frozen_dataset": "/var/lib/jenkins/tomod/experiments/skin-vlm/research/data/frozen-v1/dataset.json",
+  "configs": [
+    {
+      "name": "lora-r8-epoch1",
+      "rank": 8,
+      "alpha": 16,
+      "lr": 0.0001,
+      "epochs": 1
+    },
+    {
+      "name": "lora-r8-epoch2",
+      "rank": 8,
+      "alpha": 16,
+      "lr": 5e-05,
+      "epochs": 2
+    },
+    {
+      "name": "lora-r16-epoch2",
+      "rank": 16,
+      "alpha": 32,
+      "lr": 5e-05,
+      "epochs": 2
+    }
+  ],
+  "selection": "validation macro-F1, then validation precision, then fewer parameters; test scores never select a winner",
+  "test_policy": "Only baseline and the validation-selected final candidate are evaluated on the locked test set. No further tuning using test errors in this version.",
+  "promotion_rule": {
+    "minimum_test_macro_f1": 0.8,
+    "minimum_test_precision": 0.85,
+    "minimum_test_macro_f1_gain": 0.03,
+    "minimum_test_valid_json_rate": 0.98
+  },
+  "promotion_scope": "Research task only; no automatic deployment to the four-tag skin diary.",
+  "stop_rule": "Three predefined candidates, at most two epochs each; stop on resource failures or non-finite loss. A new cycle requires a new version and an untouched final holdout.",
+  "primary_metric": "macro-F1 with invalid responses counted as errors",
+  "secondary_metrics": [
+    "positive precision",
+    "positive recall",
+    "balanced accuracy",
+    "valid JSON rate",
+    "p50/p95 inference latency"
+  ],
+  "uncertainty": "95% parent-cluster bootstrap CI for paired test macro-F1 difference; small pilot, annotation-conditional and not clinical accuracy."
+}

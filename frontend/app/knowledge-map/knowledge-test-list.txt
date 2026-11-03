@@ -1,0 +1,10 @@
+/var/lib/jenkins/tomod/cosmetic-agent/tests/test_knowledge_query_interpreter.py
+/var/lib/jenkins/tomod/cosmetic-agent/tests/test_knowledge_response_config.py
+/var/lib/jenkins/tomod/cosmetic-agent/tests/test_knowledge_explorer_routes.py
+/var/lib/jenkins/tomod/cosmetic-agent/tests/test_knowledge_explorer_curated_repository.py
+/var/lib/jenkins/tomod/cosmetic-agent/tests/test_knowledge_seed_repository.py
+/var/lib/jenkins/tomod/cosmetic-agent/tests/test_knowledge_sub_agent_orchestration.py
+/var/lib/jenkins/tomod/cosmetic-agent/tests/test_knowledge_explorer.py
+/var/lib/jenkins/tomod/cosmetic-agent/tests/test_knowledge_ingredient_extractor.py
+/var/lib/jenkins/tomod/cosmetic-agent/tests/test_knowledge_explorer_verified_notice.py
+/var/lib/jenkins/tomod/cosmetic-agent/tests/test_knowledge_graph_curated_view.py

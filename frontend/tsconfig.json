@@ -1,0 +1,54 @@
+{
+  "compilerOptions": {
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "esnext"
+    ],
+    "allowJs": true,
+    "skipLibCheck": true,
+    "strict": false,
+    "noEmit": true,
+    "incremental": true,
+    "module": "esnext",
+    "esModuleInterop": true,
+    "moduleResolution": "bundler",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "jsx": "react-jsx",
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ],
+    "baseUrl": ".",
+    "paths": {
+      "@/*": [
+        "./*"
+      ]
+    },
+    "target": "ES2017"
+  },
+  "include": [
+    "next-env.d.ts",
+    ".next/types/**/*.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    ".next-dev/types/**/*.ts",
+    ".next/dev/types/**/*.ts",
+    ".next-dev/dev/types/**/*.ts",
+    ".next-dev-3001/types/**/*.ts",
+    ".next-dev-3001/dev/types/**/*.ts",
+    ".next-photo-20261031-052823/types/**/*.ts",
+    ".next-photo-20261031-052823/dev/types/**/*.ts",
+    ".next-photo-20261031-053134/types/**/*.ts",
+    ".next-photo-20261031-053134/dev/types/**/*.ts",
+    ".next-photo-20261031-053225/types/**/*.ts",
+    ".next-photo-20261031-053225/dev/types/**/*.ts",
+    ".next-skin-summary-20261031-062223/types/**/*.ts",
+    ".next-skin-summary-20261031-062223/dev/types/**/*.ts"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
+}

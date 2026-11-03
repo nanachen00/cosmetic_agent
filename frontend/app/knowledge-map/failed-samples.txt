@@ -1,0 +1,257 @@
+[
+  {
+    "case_id": "compare-04",
+    "category": "comparison",
+    "query": "水楊酸和A酸差別",
+    "expectation": "comparison",
+    "allowed_names": [
+      "水楊酸",
+      "A 酸"
+    ],
+    "require_rewrite": true,
+    "known_gap": false,
+    "required_groups": [
+      [
+        "水楊酸"
+      ],
+      [
+        "A 酸"
+      ]
+    ],
+    "status": 200,
+    "center": "水楊酸",
+    "strategy": "terra-query-understanding",
+    "interpreted_query": "水楊酸",
+    "query_mode": "compare",
+    "candidate_entities": [
+      {
+        "id": "ingredient_salicylic_acid_curated",
+        "name": "水楊酸",
+        "type": "Ingredient"
+      },
+      {
+        "id": "drug_active_isotretinoin",
+        "name": "口服 A 酸（Isotretinoin）",
+        "type": "DrugActiveIngredient"
+      }
+    ],
+    "unresolved_terms": [],
+    "error_code": null,
+    "latency_ms": 1145.8,
+    "failures": [
+      "comparison_required_entity_missing"
+    ],
+    "warnings": []
+  },
+  {
+    "case_id": "risk-05",
+    "category": "medical-risk",
+    "query": "擦保養品後呼吸困難",
+    "expectation": "safe_or_not_found",
+    "allowed_names": [],
+    "require_rewrite": null,
+    "known_gap": false,
+    "required_groups": [],
+    "status": 200,
+    "center": "過敏性接觸皮膚炎",
+    "strategy": "terra-query-understanding",
+    "interpreted_query": "過敏性接觸皮膚炎",
+    "query_mode": "single",
+    "candidate_entities": [
+      {
+        "id": "concern_allergic_contact_dermatitis",
+        "name": "過敏性接觸皮膚炎",
+        "type": "SkinConcern"
+      }
+    ],
+    "unresolved_terms": [
+      "呼吸困難"
+    ],
+    "error_code": null,
+    "latency_ms": 1060.1,
+    "failures": [
+      "urgent_medical_prompt_mapped_to_ordinary_graph"
+    ],
+    "warnings": []
+  },
+  {
+    "case_id": "human-062",
+    "category": "colloquial-salicylic-acid",
+    "query": "bha可以改善黑頭嗎",
+    "expectation": "match",
+    "allowed_names": [
+      "水楊酸"
+    ],
+    "require_rewrite": true,
+    "known_gap": false,
+    "required_groups": [],
+    "status": 200,
+    "center": "黑頭粉刺",
+    "strategy": "terra-query-understanding",
+    "interpreted_query": "黑頭粉刺",
+    "query_mode": "single",
+    "candidate_entities": [
+      {
+        "id": "concern_open_comedones",
+        "name": "黑頭粉刺",
+        "type": "SkinConcern"
+      }
+    ],
+    "unresolved_terms": [
+      "水楊酸 (BHA)"
+    ],
+    "error_code": null,
+    "latency_ms": 1307.4,
+    "failures": [
+      "expected_entity_missing"
+    ],
+    "warnings": []
+  },
+  {
+    "case_id": "human-069",
+    "category": "colloquial-dry-skin",
+    "query": "洗臉後整張臉繃繃的",
+    "expectation": "match",
+    "allowed_names": [
+      "乾燥脫皮",
+      "乾燥肌"
+    ],
+    "require_rewrite": true,
+    "known_gap": false,
+    "required_groups": [],
+    "status": 503,
+    "center": null,
+    "strategy": null,
+    "interpreted_query": null,
+    "query_mode": null,
+    "candidate_entities": null,
+    "unresolved_terms": null,
+    "error_code": "knowledge_query_backend_unavailable",
+    "latency_ms": 1345.9,
+    "failures": [
+      "expected_200_got_503"
+    ],
+    "warnings": []
+  },
+  {
+    "case_id": "human-074",
+    "category": "colloquial-dry-skin",
+    "query": "乾肌要怎麼保養",
+    "expectation": "match",
+    "allowed_names": [
+      "乾燥脫皮",
+      "乾燥肌"
+    ],
+    "require_rewrite": true,
+    "known_gap": false,
+    "required_groups": [],
+    "status": 200,
+    "center": "保濕",
+    "strategy": "terra-query-understanding-plus-bge-m3",
+    "interpreted_query": "保濕",
+    "query_mode": "single",
+    "candidate_entities": [
+      {
+        "id": "need_hydration",
+        "name": "保濕",
+        "type": "CareNeed"
+      }
+    ],
+    "unresolved_terms": [],
+    "error_code": null,
+    "latency_ms": 1217.1,
+    "failures": [
+      "expected_entity_missing"
+    ],
+    "warnings": []
+  },
+  {
+    "case_id": "human-089",
+    "category": "human-comparison",
+    "query": "A酸和retinol有什麼差別",
+    "expectation": "comparison",
+    "allowed_names": [
+      "A 酸",
+      "視黃醇"
+    ],
+    "require_rewrite": true,
+    "known_gap": false,
+    "required_groups": [
+      [
+        "A 酸"
+      ],
+      [
+        "視黃醇"
+      ]
+    ],
+    "status": 200,
+    "center": "口服 A 酸（Isotretinoin）",
+    "strategy": "terra-query-understanding",
+    "interpreted_query": "口服 A 酸（Isotretinoin）",
+    "query_mode": "compare",
+    "candidate_entities": [
+      {
+        "id": "drug_active_isotretinoin",
+        "name": "口服 A 酸（Isotretinoin）",
+        "type": "DrugActiveIngredient"
+      },
+      {
+        "id": "ingredient_retinol",
+        "name": "視黃醇",
+        "type": "Ingredient"
+      }
+    ],
+    "unresolved_terms": [],
+    "error_code": null,
+    "latency_ms": 1121.7,
+    "failures": [
+      "expected_entity_missing",
+      "comparison_required_entity_missing"
+    ],
+    "warnings": []
+  },
+  {
+    "case_id": "human-092",
+    "category": "human-comparison",
+    "query": "水楊酸與A酸哪裡不同",
+    "expectation": "comparison",
+    "allowed_names": [
+      "水楊酸",
+      "A 酸"
+    ],
+    "require_rewrite": true,
+    "known_gap": false,
+    "required_groups": [
+      [
+        "水楊酸"
+      ],
+      [
+        "A 酸"
+      ]
+    ],
+    "status": 200,
+    "center": "水楊酸",
+    "strategy": "terra-query-understanding",
+    "interpreted_query": "水楊酸",
+    "query_mode": "compare",
+    "candidate_entities": [
+      {
+        "id": "ingredient_salicylic_acid_curated",
+        "name": "水楊酸",
+        "type": "Ingredient"
+      },
+      {
+        "id": "drug_active_isotretinoin",
+        "name": "口服 A 酸（Isotretinoin）",
+        "type": "DrugActiveIngredient"
+      }
+    ],
+    "unresolved_terms": [],
+    "error_code": null,
+    "latency_ms": 935.6,
+    "failures": [
+      "comparison_required_entity_missing"
+    ],
+    "warnings": []
+  }
+]

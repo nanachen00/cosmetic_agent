@@ -1,0 +1,93 @@
+{
+ "source": "synthetic",
+ "consent_note": null,
+ "trace": "D:\\workspace\\cosmetic-agent\\experiments\\local-replica\\runtime\\tomod\\ops\\p-sys1\\shadow-sys1\\runs\\s3\\trace.jsonl",
+ "since": 0,
+ "n": 7,
+ "n_sys1_ok": 7,
+ "agreement": 0.0,
+ "agreement_ci": [
+  0.0,
+  0.35433884297520657
+ ],
+ "sys1_error_rate": 0.0,
+ "sys1_error_ci": [
+  0.0,
+  0.35433884297520657
+ ],
+ "confusion_llm_x_sys1": {
+  "safety": {
+   "safety": 0,
+   "skin_tracking": 0,
+   "product": 0,
+   "knowledge": 0,
+   "conversation": 0,
+   "clarify": 0
+  },
+  "skin_tracking": {
+   "safety": 0,
+   "skin_tracking": 0,
+   "product": 0,
+   "knowledge": 0,
+   "conversation": 0,
+   "clarify": 0
+  },
+  "product": {
+   "safety": 0,
+   "skin_tracking": 0,
+   "product": 0,
+   "knowledge": 0,
+   "conversation": 0,
+   "clarify": 0
+  },
+  "knowledge": {
+   "safety": 4,
+   "skin_tracking": 1,
+   "product": 0,
+   "knowledge": 0,
+   "conversation": 0,
+   "clarify": 2
+  },
+  "conversation": {
+   "safety": 0,
+   "skin_tracking": 0,
+   "product": 0,
+   "knowledge": 0,
+   "conversation": 0,
+   "clarify": 0
+  },
+  "clarify": {
+   "safety": 0,
+   "skin_tracking": 0,
+   "product": 0,
+   "knowledge": 0,
+   "conversation": 0,
+   "clarify": 0
+  }
+ },
+ "llm_safety_sys1_not": 0,
+ "sys1_safety_llm_not": 4,
+ "latency_ms": {
+  "sys1_http": {
+   "p50": 1.6,
+   "p95": 12.339999999999991,
+   "n": 7
+  },
+  "sys1_total_incl_parser": {
+   "p50": 2.61,
+   "p95": 15.210999999999997,
+   "n": 7
+  },
+  "llm_parse_intent": {
+   "p50": 1236.26,
+   "p95": 1684.8369999999998,
+   "n": 7
+  }
+ },
+ "models": [
+  "np-tiny-local"
+ ],
+ "frozen_cands": [
+  "np-tiny-local"
+ ]
+}

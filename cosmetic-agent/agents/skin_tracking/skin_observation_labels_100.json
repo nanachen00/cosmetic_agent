@@ -1,0 +1,1034 @@
+{
+  "source": "rebuilt-from-neo4j",
+  "labels": [
+    {
+      "slug": "acne_cyst_like",
+      "name_zh_tw": "囊腫型痘樣病灶",
+      "category": "acne_follicular",
+      "condition_flag": true,
+      "source_urls": [
+        "https://dermnetnz.org/topics/acne",
+        "https://www.aad.org/public/diseases/acne/really-acne/acne-rosacea"
+      ],
+      "face_regions": []
+    },
+    {
+      "slug": "acne_nodule_like",
+      "name_zh_tw": "深層痘結節樣腫塊",
+      "category": "acne_follicular",
+      "condition_flag": true,
+      "source_urls": [
+        "https://dermnetnz.org/topics/acne",
+        "https://www.aad.org/public/diseases/acne/really-acne/acne-rosacea"
+      ],
+      "face_regions": []
+    },
+    {
+      "slug": "allergic_contact_dermatitis_pattern",
+      "name_zh_tw": "過敏性接觸皮膚炎樣表現",
+      "category": "inflammatory_rash",
+      "condition_flag": true,
+      "source_urls": [
+        "https://dermnetnz.org/topics/dermatitis"
+      ],
+      "face_regions": []
+    },
+    {
+      "slug": "angular_cheilitis_pattern",
+      "name_zh_tw": "口角炎樣裂痕／發炎",
+      "category": "lip_perioral",
+      "condition_flag": true,
+      "source_urls": [
+        "https://dermnetnz.org/topics/angular-cheilitis"
+      ],
+      "face_regions": []
+    },
+    {
+      "slug": "atopic_dermatitis_pattern",
+      "name_zh_tw": "異位性皮膚炎樣表現",
+      "category": "inflammatory_rash",
+      "condition_flag": true,
+      "source_urls": [
+        "https://dermnetnz.org/topics/dermatitis",
+        "https://dermnetnz.org/topics/facial-rashes"
+      ],
+      "face_regions": []
+    },
+    {
+      "slug": "atrophic_acne_scars",
+      "name_zh_tw": "凹陷型痘疤",
+      "category": "acne_follicular",
+      "condition_flag": false,
+      "source_urls": [
+        "https://dermnetnz.org/topics/acne"
+      ],
+      "face_regions": []
+    },
+    {
+      "slug": "bilateral_eyelid_swelling",
+      "name_zh_tw": "雙側眼瞼腫脹",
+      "category": "eye_periocular",
+      "condition_flag": true,
+      "source_urls": [
+        "https://dermnetnz.org/topics/dark-circles-under-the-eyes"
+      ],
+      "face_regions": []
+    },
+    {
+      "slug": "blepharitis_pattern",
+      "name_zh_tw": "眼瞼炎樣瞼緣發炎",
+      "category": "eye_periocular",
+      "condition_flag": true,
+      "source_urls": [
+        "https://store.aao.org/media/resources/051184/051184-blepharitis-rf1.pdf"
+      ],
+      "face_regions": []
+    },
+    {
+      "slug": "boil_furuncle_pattern",
+      "name_zh_tw": "癤／疔瘡樣疼痛含膿腫塊",
+      "category": "infection_urgent",
+      "condition_flag": true,
+      "source_urls": [
+        "https://www.mayoclinic.org/diseases-conditions/boils-and-carbuncles/symptoms-causes/syc-20353770"
+      ],
+      "face_regions": []
+    },
+    {
+      "slug": "cellulitis_pattern",
+      "name_zh_tw": "蜂窩性組織炎樣擴散紅腫",
+      "category": "infection_urgent",
+      "condition_flag": true,
+      "source_urls": [
+        "https://dermnetnz.org/topics/cellulitis-mimics",
+        "https://dermnetnz.org/topics/skin-infections"
+      ],
+      "face_regions": []
+    },
+    {
+      "slug": "chalazion_pattern",
+      "name_zh_tw": "霰粒腫樣眼瞼硬塊",
+      "category": "eye_periocular",
+      "condition_flag": true,
+      "source_urls": [
+        "https://store.aao.org/media/resources/051214/051214-stye-chalazion-rf1.pdf"
+      ],
+      "face_regions": []
+    },
+    {
+      "slug": "changing_mole_warning",
+      "name_zh_tw": "變化中／不對稱色素痣警示",
+      "category": "lump_lesion",
+      "condition_flag": true,
+      "source_urls": [
+        "https://www.aad.org/public/diseases/skin-cancer/check-skin",
+        "https://www.aad.org/public/diseases/skin-cancer"
+      ],
+      "face_regions": []
+    },
+    {
+      "slug": "chapped_lips",
+      "name_zh_tw": "嘴唇乾裂",
+      "category": "lip_perioral",
+      "condition_flag": false,
+      "source_urls": [
+        "https://dermnetnz.org/topics/cheilitis"
+      ],
+      "face_regions": []
+    },
+    {
+      "slug": "cherry_angioma_pattern",
+      "name_zh_tw": "櫻桃血管瘤樣紅紫丘疹",
+      "category": "lump_lesion",
+      "condition_flag": true,
+      "source_urls": [
+        "https://dermnetnz.org/topics/cherry-angioma"
+      ],
+      "face_regions": []
+    },
+    {
+      "slug": "clogged_pore_appearance",
+      "name_zh_tw": "毛孔堵塞樣外觀",
+      "category": "surface_texture",
+      "condition_flag": false,
+      "source_urls": [
+        "https://dermnetnz.org/topics/acne"
+      ],
+      "face_regions": []
+    },
+    {
+      "slug": "closed_comedones",
+      "name_zh_tw": "閉鎖性粉刺／白頭",
+      "category": "acne_follicular",
+      "condition_flag": false,
+      "source_urls": [
+        "https://dermnetnz.org/topics/acne"
+      ],
+      "face_regions": []
+    },
+    {
+      "slug": "cold_sore_pattern",
+      "name_zh_tw": "唇疱疹樣群聚水疱",
+      "category": "lip_perioral",
+      "condition_flag": true,
+      "source_urls": [
+        "https://dermnetnz.org/topics/mouth-problems"
+      ],
+      "face_regions": []
+    },
+    {
+      "slug": "deep_wrinkles",
+      "name_zh_tw": "明顯皺紋",
+      "category": "surface_texture",
+      "condition_flag": false,
+      "source_urls": [
+        "https://dermnetnz.org/topics/facial-skin-problems"
+      ],
+      "face_regions": []
+    },
+    {
+      "slug": "dermatofibroma_like_nodule",
+      "name_zh_tw": "皮膚纖維瘤樣硬丘疹",
+      "category": "lump_lesion",
+      "condition_flag": true,
+      "source_urls": [
+        "https://dermnetnz.org/topics/benign-skin-lesions"
+      ],
+      "face_regions": []
+    },
+    {
+      "slug": "diffuse_facial_redness",
+      "name_zh_tw": "瀰漫性臉部泛紅",
+      "category": "pigment_vascular",
+      "condition_flag": false,
+      "source_urls": [
+        "https://dermnetnz.org/topics/facial-rashes"
+      ],
+      "face_regions": []
+    },
+    {
+      "slug": "drooping_upper_eyelid",
+      "name_zh_tw": "上眼瞼下垂外觀",
+      "category": "eye_periocular",
+      "condition_flag": true,
+      "source_urls": [
+        "https://my.clevelandclinic.org/health/body/eyelids"
+      ],
+      "face_regions": []
+    },
+    {
+      "slug": "enlarged_pore_appearance",
+      "name_zh_tw": "毛孔外觀明顯",
+      "category": "surface_texture",
+      "condition_flag": false,
+      "source_urls": [
+        "https://dermnetnz.org/topics/acne"
+      ],
+      "face_regions": []
+    },
+    {
+      "slug": "epidermoid_cyst_pattern",
+      "name_zh_tw": "表皮樣囊腫樣皮下凸起",
+      "category": "lump_lesion",
+      "condition_flag": true,
+      "source_urls": [
+        "https://www.mayoclinic.org/diseases-conditions/epidermoid-cysts/symptoms-causes/syc-20352701"
+      ],
+      "face_regions": []
+    },
+    {
+      "slug": "episodic_flushing",
+      "name_zh_tw": "間歇性潮紅",
+      "category": "pigment_vascular",
+      "condition_flag": false,
+      "source_urls": [
+        "https://www.aad.org/public/diseases/rosacea/what-is/overview"
+      ],
+      "face_regions": []
+    },
+    {
+      "slug": "excoriation_marks",
+      "name_zh_tw": "抓痕／搔抓痕跡",
+      "category": "surface_texture",
+      "condition_flag": false,
+      "source_urls": [
+        "https://dermnetnz.org/topics/dermatitis"
+      ],
+      "face_regions": []
+    },
+    {
+      "slug": "eyelash_crusting",
+      "name_zh_tw": "睫毛根部結痂／黏屑",
+      "category": "eye_periocular",
+      "condition_flag": false,
+      "source_urls": [
+        "https://store.aao.org/media/resources/051184/051184-blepharitis-rf1.pdf"
+      ],
+      "face_regions": []
+    },
+    {
+      "slug": "eyelid_asymmetry",
+      "name_zh_tw": "眼瞼外觀不對稱",
+      "category": "eye_periocular",
+      "condition_flag": false,
+      "source_urls": [
+        "https://my.clevelandclinic.org/health/body/eyelids"
+      ],
+      "face_regions": []
+    },
+    {
+      "slug": "eyelid_lump_unspecified",
+      "name_zh_tw": "未分類眼瞼腫塊",
+      "category": "eye_periocular",
+      "condition_flag": true,
+      "source_urls": [
+        "https://store.aao.org/media/resources/051214/051214-stye-chalazion-rf1.pdf"
+      ],
+      "face_regions": []
+    },
+    {
+      "slug": "eyelid_margin_scale_crust",
+      "name_zh_tw": "眼瞼邊緣皮屑／結痂",
+      "category": "eye_periocular",
+      "condition_flag": false,
+      "source_urls": [
+        "https://store.aao.org/media/resources/051184/051184-blepharitis-rf1.pdf"
+      ],
+      "face_regions": []
+    },
+    {
+      "slug": "eyelid_redness",
+      "name_zh_tw": "眼瞼泛紅",
+      "category": "eye_periocular",
+      "condition_flag": false,
+      "source_urls": [
+        "https://www.nhs.uk/conditions/stye/"
+      ],
+      "face_regions": []
+    },
+    {
+      "slug": "facial_angioedema",
+      "name_zh_tw": "血管性水腫樣臉部腫脹",
+      "category": "inflammatory_rash",
+      "condition_flag": true,
+      "source_urls": [
+        "https://dermnetnz.org/topics/facial-skin-problems"
+      ],
+      "face_regions": []
+    },
+    {
+      "slug": "facial_psoriasis_pattern",
+      "name_zh_tw": "臉部乾癬樣斑塊",
+      "category": "inflammatory_rash",
+      "condition_flag": true,
+      "source_urls": [
+        "https://dermnetnz.org/topics/facial-rashes"
+      ],
+      "face_regions": []
+    },
+    {
+      "slug": "facial_shingles_pattern",
+      "name_zh_tw": "臉部帶狀疱疹樣單側水疱",
+      "category": "infection_urgent",
+      "condition_flag": true,
+      "source_urls": [
+        "https://www.nhs.uk/conditions/shingles/",
+        "https://dermnetnz.org/topics/folliculitis"
+      ],
+      "face_regions": []
+    },
+    {
+      "slug": "fine_lines",
+      "name_zh_tw": "細紋",
+      "category": "surface_texture",
+      "condition_flag": false,
+      "source_urls": [
+        "https://dermnetnz.org/topics/dark-circles-under-the-eyes"
+      ],
+      "face_regions": []
+    },
+    {
+      "slug": "folliculitis_pattern",
+      "name_zh_tw": "毛囊炎樣丘疹／膿皰",
+      "category": "acne_follicular",
+      "condition_flag": true,
+      "source_urls": [
+        "https://dermnetnz.org/topics/folliculitis"
+      ],
+      "face_regions": []
+    },
+    {
+      "slug": "freckle_like_macules",
+      "name_zh_tw": "雀斑樣小斑點",
+      "category": "pigment_vascular",
+      "condition_flag": false,
+      "source_urls": [
+        "https://dermnetnz.org/topics/benign-skin-lesions"
+      ],
+      "face_regions": []
+    },
+    {
+      "slug": "hyperpigmented_macules",
+      "name_zh_tw": "深色斑點／色素沉澱",
+      "category": "pigment_vascular",
+      "condition_flag": false,
+      "source_urls": [
+        "https://dermnetnz.org/topics/pigmentation-disorders"
+      ],
+      "face_regions": []
+    },
+    {
+      "slug": "hypopigmented_patch",
+      "name_zh_tw": "淡色／低色素斑",
+      "category": "pigment_vascular",
+      "condition_flag": false,
+      "source_urls": [
+        "https://dermnetnz.org/topics/pigmentation-disorders"
+      ],
+      "face_regions": []
+    },
+    {
+      "slug": "impetigo_pattern",
+      "name_zh_tw": "膿痂疹樣蜂蜜色結痂",
+      "category": "infection_urgent",
+      "condition_flag": true,
+      "source_urls": [
+        "https://dermnetnz.org/topics/impetigo",
+        "https://www.nhs.uk/conditions/impetigo/"
+      ],
+      "face_regions": []
+    },
+    {
+      "slug": "inflammatory_papules",
+      "name_zh_tw": "發炎丘疹",
+      "category": "acne_follicular",
+      "condition_flag": false,
+      "source_urls": [
+        "https://dermnetnz.org/topics/acne",
+        "https://dermnetnz.org/topics/terminology"
+      ],
+      "face_regions": []
+    },
+    {
+      "slug": "ingrown_hair",
+      "name_zh_tw": "倒生毛樣凸起",
+      "category": "acne_follicular",
+      "condition_flag": false,
+      "source_urls": [
+        "https://dermnetnz.org/topics/pseudofolliculitis-barbae"
+      ],
+      "face_regions": []
+    },
+    {
+      "slug": "irritant_contact_dermatitis_pattern",
+      "name_zh_tw": "刺激性接觸皮膚炎樣表現",
+      "category": "inflammatory_rash",
+      "condition_flag": true,
+      "source_urls": [
+        "https://dermnetnz.org/topics/dermatitis"
+      ],
+      "face_regions": []
+    },
+    {
+      "slug": "lichenification",
+      "name_zh_tw": "苔癬化／皮膚紋理增厚",
+      "category": "inflammatory_rash",
+      "condition_flag": false,
+      "source_urls": [
+        "https://dermnetnz.org/topics/terminology",
+        "https://dermnetnz.org/topics/dermatitis"
+      ],
+      "face_regions": []
+    },
+    {
+      "slug": "lip_crusting",
+      "name_zh_tw": "唇部結痂",
+      "category": "lip_perioral",
+      "condition_flag": false,
+      "source_urls": [
+        "https://dermnetnz.org/topics/cheilitis"
+      ],
+      "face_regions": []
+    },
+    {
+      "slug": "lip_fissure",
+      "name_zh_tw": "唇部裂口",
+      "category": "lip_perioral",
+      "condition_flag": false,
+      "source_urls": [
+        "https://dermnetnz.org/topics/cheilitis"
+      ],
+      "face_regions": []
+    },
+    {
+      "slug": "lip_hyperpigmentation",
+      "name_zh_tw": "唇部色素沉澱／變深",
+      "category": "lip_perioral",
+      "condition_flag": false,
+      "source_urls": [
+        "https://dermnetnz.org/topics/pigmented-contact-cheilitis"
+      ],
+      "face_regions": []
+    },
+    {
+      "slug": "lip_hypopigmentation",
+      "name_zh_tw": "唇部淡色／脫色區",
+      "category": "lip_perioral",
+      "condition_flag": false,
+      "source_urls": [
+        "https://dermnetnz.org/topics/contact-reactions-to-lipsticks-and-other-lipcare-products"
+      ],
+      "face_regions": []
+    },
+    {
+      "slug": "lip_mucocele_pattern",
+      "name_zh_tw": "唇黏液囊腫樣透明凸起",
+      "category": "lip_perioral",
+      "condition_flag": true,
+      "source_urls": [
+        "https://dermnetnz.org/topics/mucocoele-of-the-lip"
+      ],
+      "face_regions": []
+    },
+    {
+      "slug": "lip_scaling_peeling",
+      "name_zh_tw": "嘴唇脫屑／脫皮",
+      "category": "lip_perioral",
+      "condition_flag": false,
+      "source_urls": [
+        "https://dermnetnz.org/topics/exfoliative-cheilitis"
+      ],
+      "face_regions": []
+    },
+    {
+      "slug": "lip_swelling",
+      "name_zh_tw": "嘴唇腫脹",
+      "category": "lip_perioral",
+      "condition_flag": true,
+      "source_urls": [
+        "https://dermnetnz.org/topics/contact-reactions-to-lipsticks-and-other-lipcare-products"
+      ],
+      "face_regions": []
+    },
+    {
+      "slug": "lip_ulcer",
+      "name_zh_tw": "唇部潰瘍／破皮不癒",
+      "category": "lip_perioral",
+      "condition_flag": true,
+      "source_urls": [
+        "https://dermnetnz.org/topics/actinic-cheilitis"
+      ],
+      "face_regions": []
+    },
+    {
+      "slug": "lipoma_like_lump",
+      "name_zh_tw": "脂肪瘤樣柔軟皮下腫塊",
+      "category": "lump_lesion",
+      "condition_flag": true,
+      "source_urls": [
+        "https://dermnetnz.org/topics/lipoma",
+        "https://dermnetnz.org/topics/benign-skin-lesions"
+      ],
+      "face_regions": []
+    },
+    {
+      "slug": "localized_pruritus",
+      "name_zh_tw": "局部搔癢",
+      "category": "sensation_symptom",
+      "condition_flag": false,
+      "source_urls": [
+        "https://dermnetnz.org/topics/pruritus"
+      ],
+      "face_regions": []
+    },
+    {
+      "slug": "localized_shine",
+      "name_zh_tw": "局部反光油亮",
+      "category": "surface_texture",
+      "condition_flag": false,
+      "source_urls": [
+        "https://dermnetnz.org/topics/seborrhoea"
+      ],
+      "face_regions": []
+    },
+    {
+      "slug": "melanocytic_nevus_pattern",
+      "name_zh_tw": "色素痣樣斑／丘疹",
+      "category": "lump_lesion",
+      "condition_flag": true,
+      "source_urls": [
+        "https://dermnetnz.org/topics/pigmented-skin-lesions",
+        "https://dermnetnz.org/topics/benign-skin-lesions"
+      ],
+      "face_regions": []
+    },
+    {
+      "slug": "melasma_pattern",
+      "name_zh_tw": "肝斑／黃褐斑樣色塊",
+      "category": "pigment_vascular",
+      "condition_flag": true,
+      "source_urls": [
+        "https://dermnetnz.org/topics/melasma"
+      ],
+      "face_regions": []
+    },
+    {
+      "slug": "milia_pattern",
+      "name_zh_tw": "粟粒腫樣白色小丘疹",
+      "category": "acne_follicular",
+      "condition_flag": true,
+      "source_urls": [
+        "https://dermnetnz.org/topics/milium"
+      ],
+      "face_regions": []
+    },
+    {
+      "slug": "nonhealing_bleeding_lesion_warning",
+      "name_zh_tw": "不癒合／反覆出血潰瘍性病灶警示",
+      "category": "infection_urgent",
+      "condition_flag": true,
+      "source_urls": [
+        "https://www.aad.org/public/diseases/skin-cancer",
+        "https://www.aad.org/public/diseases/skin-cancer/check-skin"
+      ],
+      "face_regions": []
+    },
+    {
+      "slug": "open_comedones",
+      "name_zh_tw": "開放性粉刺／黑頭",
+      "category": "acne_follicular",
+      "condition_flag": false,
+      "source_urls": [
+        "https://dermnetnz.org/topics/acne"
+      ],
+      "face_regions": []
+    },
+    {
+      "slug": "periocular_dermatitis_pattern",
+      "name_zh_tw": "眼周皮膚炎樣表現",
+      "category": "inflammatory_rash",
+      "condition_flag": true,
+      "source_urls": [
+        "https://dermnetnz.org/topics/periorificial-dermatitis"
+      ],
+      "face_regions": []
+    },
+    {
+      "slug": "perioral_papular_rash",
+      "name_zh_tw": "口周丘疹性皮疹",
+      "category": "lip_perioral",
+      "condition_flag": false,
+      "source_urls": [
+        "https://dermnetnz.org/topics/periorificial-dermatitis"
+      ],
+      "face_regions": []
+    },
+    {
+      "slug": "periorbital_bruising",
+      "name_zh_tw": "眼周瘀青樣變色",
+      "category": "pigment_vascular",
+      "condition_flag": true,
+      "source_urls": [
+        "https://my.clevelandclinic.org/health/diseases/black-eye"
+      ],
+      "face_regions": []
+    },
+    {
+      "slug": "periorbital_darkening",
+      "name_zh_tw": "黑眼圈／眼周暗沉",
+      "category": "pigment_vascular",
+      "condition_flag": false,
+      "source_urls": [
+        "https://dermnetnz.org/topics/dark-circles-under-the-eyes",
+        "https://www.mayoclinic.org/symptoms/dark-circles-under-eyes/basics/causes/sym-20050624"
+      ],
+      "face_regions": []
+    },
+    {
+      "slug": "periorificial_dermatitis_pattern",
+      "name_zh_tw": "口周／開口周圍皮膚炎樣表現",
+      "category": "inflammatory_rash",
+      "condition_flag": true,
+      "source_urls": [
+        "https://dermnetnz.org/topics/periorificial-dermatitis"
+      ],
+      "face_regions": []
+    },
+    {
+      "slug": "photosensitive_rash_pattern",
+      "name_zh_tw": "光敏感性疹樣表現",
+      "category": "inflammatory_rash",
+      "condition_flag": true,
+      "source_urls": [
+        "https://dermnetnz.org/topics/facial-skin-problems"
+      ],
+      "face_regions": []
+    },
+    {
+      "slug": "pityriasis_alba_pattern",
+      "name_zh_tw": "白色糠疹樣淡色斑",
+      "category": "inflammatory_rash",
+      "condition_flag": true,
+      "source_urls": [
+        "https://dermnetnz.org/topics/pigmentation-disorders"
+      ],
+      "face_regions": []
+    },
+    {
+      "slug": "post_acne_erythema",
+      "name_zh_tw": "痘後紅印",
+      "category": "acne_follicular",
+      "condition_flag": false,
+      "source_urls": [
+        "https://dermnetnz.org/topics/acne"
+      ],
+      "face_regions": []
+    },
+    {
+      "slug": "post_acne_hyperpigmentation",
+      "name_zh_tw": "痘後色素沉澱",
+      "category": "acne_follicular",
+      "condition_flag": false,
+      "source_urls": [
+        "https://dermnetnz.org/topics/acne",
+        "https://dermnetnz.org/topics/postinflammatory-hyperpigmentation"
+      ],
+      "face_regions": []
+    },
+    {
+      "slug": "postinflammatory_hyperpigmentation_pattern",
+      "name_zh_tw": "發炎後色素沉澱樣斑",
+      "category": "pigment_vascular",
+      "condition_flag": true,
+      "source_urls": [
+        "https://dermnetnz.org/topics/postinflammatory-hyperpigmentation"
+      ],
+      "face_regions": []
+    },
+    {
+      "slug": "pseudofolliculitis_barbae_pattern",
+      "name_zh_tw": "假性鬍鬚毛囊炎樣刮鬍疹",
+      "category": "acne_follicular",
+      "condition_flag": true,
+      "source_urls": [
+        "https://dermnetnz.org/topics/pseudofolliculitis-barbae"
+      ],
+      "face_regions": []
+    },
+    {
+      "slug": "pustules",
+      "name_zh_tw": "膿皰",
+      "category": "acne_follicular",
+      "condition_flag": false,
+      "source_urls": [
+        "https://dermnetnz.org/topics/acne",
+        "https://dermnetnz.org/topics/terminology"
+      ],
+      "face_regions": []
+    },
+    {
+      "slug": "pyogenic_granuloma_pattern",
+      "name_zh_tw": "化膿性肉芽腫樣易出血凸起",
+      "category": "lump_lesion",
+      "condition_flag": true,
+      "source_urls": [
+        "https://dermnetnz.org/topics/benign-skin-lesions"
+      ],
+      "face_regions": []
+    },
+    {
+      "slug": "raised_acne_scars",
+      "name_zh_tw": "隆起／蟹足腫樣痘疤",
+      "category": "acne_follicular",
+      "condition_flag": true,
+      "source_urls": [
+        "https://dermnetnz.org/topics/acne"
+      ],
+      "face_regions": []
+    },
+    {
+      "slug": "rosacea_pattern",
+      "name_zh_tw": "酒糟／玫瑰斑樣表現",
+      "category": "inflammatory_rash",
+      "condition_flag": true,
+      "source_urls": [
+        "https://www.aad.org/public/diseases/rosacea/what-is/overview",
+        "https://www.aad.org/public/diseases/acne/really-acne/acne-rosacea"
+      ],
+      "face_regions": []
+    },
+    {
+      "slug": "rough_texture",
+      "name_zh_tw": "粗糙膚觸",
+      "category": "surface_texture",
+      "condition_flag": false,
+      "source_urls": [
+        "https://dermnetnz.org/topics/dermatitis"
+      ],
+      "face_regions": []
+    },
+    {
+      "slug": "sebaceous_filament_appearance",
+      "name_zh_tw": "皮脂絲外觀明顯",
+      "category": "acne_follicular",
+      "condition_flag": false,
+      "source_urls": [
+        "https://dermnetnz.org/topics/acne"
+      ],
+      "face_regions": []
+    },
+    {
+      "slug": "sebaceous_hyperplasia_pattern",
+      "name_zh_tw": "皮脂腺增生樣黃色小丘疹",
+      "category": "lump_lesion",
+      "condition_flag": true,
+      "source_urls": [
+        "https://dermnetnz.org/topics/sebaceous-hyperplasia"
+      ],
+      "face_regions": []
+    },
+    {
+      "slug": "seborrheic_dermatitis_pattern",
+      "name_zh_tw": "脂漏性皮膚炎樣表現",
+      "category": "inflammatory_rash",
+      "condition_flag": true,
+      "source_urls": [
+        "https://dermnetnz.org/topics/seborrhoeic-dermatitis"
+      ],
+      "face_regions": []
+    },
+    {
+      "slug": "seborrheic_keratosis_pattern",
+      "name_zh_tw": "脂漏性角化症樣貼附斑塊",
+      "category": "lump_lesion",
+      "condition_flag": true,
+      "source_urls": [
+        "https://dermnetnz.org/topics/seborrhoeic-keratosis"
+      ],
+      "face_regions": []
+    },
+    {
+      "slug": "skin_abscess_pattern",
+      "name_zh_tw": "皮膚膿瘍樣波動性腫塊",
+      "category": "infection_urgent",
+      "condition_flag": true,
+      "source_urls": [
+        "https://www.mayoclinic.org/diseases-conditions/boils-and-carbuncles/symptoms-causes/syc-20353770",
+        "https://dermnetnz.org/topics/terminology"
+      ],
+      "face_regions": []
+    },
+    {
+      "slug": "skin_dryness",
+      "name_zh_tw": "皮膚乾燥",
+      "category": "surface_texture",
+      "condition_flag": false,
+      "source_urls": [
+        "https://dermnetnz.org/topics/dermatitis"
+      ],
+      "face_regions": []
+    },
+    {
+      "slug": "skin_fissure",
+      "name_zh_tw": "皮膚裂紋",
+      "category": "surface_texture",
+      "condition_flag": false,
+      "source_urls": [
+        "https://dermnetnz.org/topics/dermatitis"
+      ],
+      "face_regions": []
+    },
+    {
+      "slug": "skin_flaking",
+      "name_zh_tw": "脫屑／起皮",
+      "category": "surface_texture",
+      "condition_flag": false,
+      "source_urls": [
+        "https://dermnetnz.org/topics/dermatitis"
+      ],
+      "face_regions": []
+    },
+    {
+      "slug": "skin_laxity",
+      "name_zh_tw": "皮膚鬆弛",
+      "category": "surface_texture",
+      "condition_flag": false,
+      "source_urls": [
+        "https://dermnetnz.org/topics/dark-circles-under-the-eyes"
+      ],
+      "face_regions": []
+    },
+    {
+      "slug": "skin_oiliness",
+      "name_zh_tw": "出油／油光",
+      "category": "surface_texture",
+      "condition_flag": false,
+      "source_urls": [
+        "https://dermnetnz.org/topics/seborrhoea"
+      ],
+      "face_regions": []
+    },
+    {
+      "slug": "skin_scaling",
+      "name_zh_tw": "鱗屑",
+      "category": "surface_texture",
+      "condition_flag": false,
+      "source_urls": [
+        "https://dermnetnz.org/topics/terminology"
+      ],
+      "face_regions": []
+    },
+    {
+      "slug": "skin_tag_pattern",
+      "name_zh_tw": "皮贅樣帶蒂凸起",
+      "category": "lump_lesion",
+      "condition_flag": true,
+      "source_urls": [
+        "https://dermnetnz.org/topics/benign-skin-lesions"
+      ],
+      "face_regions": []
+    },
+    {
+      "slug": "solar_lentigo_pattern",
+      "name_zh_tw": "曬斑／日光性黑子樣斑",
+      "category": "pigment_vascular",
+      "condition_flag": true,
+      "source_urls": [
+        "https://dermnetnz.org/topics/solar-lentigo"
+      ],
+      "face_regions": []
+    },
+    {
+      "slug": "stye_pattern",
+      "name_zh_tw": "麥粒腫樣疼痛眼瞼腫塊",
+      "category": "eye_periocular",
+      "condition_flag": true,
+      "source_urls": [
+        "https://www.nhs.uk/conditions/stye/",
+        "https://store.aao.org/media/resources/051214/051214-stye-chalazion-rf1.pdf"
+      ],
+      "face_regions": []
+    },
+    {
+      "slug": "tear_trough_hollow",
+      "name_zh_tw": "淚溝／眼下凹陷陰影",
+      "category": "pigment_vascular",
+      "condition_flag": false,
+      "source_urls": [
+        "https://eyewiki.aao.org/Tear_Trough_Deformity"
+      ],
+      "face_regions": []
+    },
+    {
+      "slug": "under_eye_crepey_texture",
+      "name_zh_tw": "眼下薄皺／紙紋感",
+      "category": "surface_texture",
+      "condition_flag": false,
+      "source_urls": [
+        "https://dermnetnz.org/topics/dark-circles-under-the-eyes"
+      ],
+      "face_regions": []
+    },
+    {
+      "slug": "under_eye_puffiness",
+      "name_zh_tw": "眼下浮腫／眼袋",
+      "category": "pigment_vascular",
+      "condition_flag": false,
+      "source_urls": [
+        "https://dermnetnz.org/topics/dark-circles-under-the-eyes",
+        "https://www.mayoclinic.org/diseases-conditions/bags-under-eyes/diagnosis-treatment/drc-20369931"
+      ],
+      "face_regions": []
+    },
+    {
+      "slug": "uneven_skin_tone",
+      "name_zh_tw": "膚色不均",
+      "category": "pigment_vascular",
+      "condition_flag": false,
+      "source_urls": [
+        "https://dermnetnz.org/topics/pigmentation-disorders"
+      ],
+      "face_regions": []
+    },
+    {
+      "slug": "uneven_texture",
+      "name_zh_tw": "膚質凹凸不平",
+      "category": "surface_texture",
+      "condition_flag": false,
+      "source_urls": [
+        "https://dermnetnz.org/topics/acne"
+      ],
+      "face_regions": []
+    },
+    {
+      "slug": "unilateral_eyelid_swelling",
+      "name_zh_tw": "單側眼瞼腫脹",
+      "category": "eye_periocular",
+      "condition_flag": true,
+      "source_urls": [
+        "https://www.nhs.uk/conditions/stye/"
+      ],
+      "face_regions": []
+    },
+    {
+      "slug": "urticarial_wheals",
+      "name_zh_tw": "蕁麻疹樣風團",
+      "category": "inflammatory_rash",
+      "condition_flag": true,
+      "source_urls": [
+        "https://dermnetnz.org/topics/terminology"
+      ],
+      "face_regions": []
+    },
+    {
+      "slug": "visible_telangiectasia",
+      "name_zh_tw": "可見微血管／血絲",
+      "category": "pigment_vascular",
+      "condition_flag": false,
+      "source_urls": [
+        "https://www.aad.org/public/diseases/rosacea/what-is/red-face"
+      ],
+      "face_regions": []
+    },
+    {
+      "slug": "vitiligo_like_depigmentation",
+      "name_zh_tw": "白斑症樣脫色斑",
+      "category": "pigment_vascular",
+      "condition_flag": true,
+      "source_urls": [
+        "https://dermnetnz.org/topics/vitiligo"
+      ],
+      "face_regions": []
+    },
+    {
+      "slug": "weeping_dermatitis_appearance",
+      "name_zh_tw": "滲液／濕潤性皮疹外觀",
+      "category": "inflammatory_rash",
+      "condition_flag": true,
+      "source_urls": [
+        "https://dermnetnz.org/topics/dermatitis"
+      ],
+      "face_regions": []
+    },
+    {
+      "slug": "well_demarcated_scaly_plaque",
+      "name_zh_tw": "界線清楚的脫屑斑塊",
+      "category": "inflammatory_rash",
+      "condition_flag": true,
+      "source_urls": [
+        "https://dermnetnz.org/topics/facial-rashes"
+      ],
+      "face_regions": []
+    },
+    {
+      "slug": "xanthelasma_pattern",
+      "name_zh_tw": "眼瞼黃斑瘤樣黃色斑塊",
+      "category": "eye_periocular",
+      "condition_flag": true,
+      "source_urls": [
+        "https://dermnetnz.org/topics/xanthoma"
+      ],
+      "face_regions": []
+    }
+  ]
+}

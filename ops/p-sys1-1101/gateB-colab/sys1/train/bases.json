@@ -1,0 +1,7 @@
+{"_doc": "微調候選 → Hugging Face 基座。registry_id 必須在 sys1/registry.json，且 policy 簽核後才能 collect。所有候選用同一份資料、同一組頭、同一個 budget.json。trust_remote_code=true 會執行模型庫的程式碼（EuroBERT 需要），請先讀過該 repo 的 modeling 檔。",
+ "bases": {
+  "mmbert-ft":   {"hf": "jhu-clsp/mmBERT-base",            "trust_remote_code": false},
+  "mdeberta-ft": {"hf": "microsoft/mdeberta-v3-base",      "trust_remote_code": false, "note": "tokenizer 需要 sentencepiece"},
+  "xlmr-ft":     {"hf": "FacebookAI/xlm-roberta-base",     "trust_remote_code": false},
+  "eurobert-ft": {"hf": "EuroBERT/EuroBERT-210m",          "trust_remote_code": true,  "note": "registry 中為研究新增候選；是否納入比較由負責人決定"}
+ }}

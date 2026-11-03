@@ -1,0 +1,9 @@
+{
+ "bundle": "p-sys1-bundle-20261028-r4",
+ "built": "2026-10-28T17:14:30+0800",
+ "unzip_to": "/var/lib/jenkins/tomod",
+ "files": 135,
+ "bytes": 1383645,
+ "frozen_check": "FROZEN ✓",
+ "source": "D:/workspace/cosmetic-agent/experiments/p-sys1"
+}

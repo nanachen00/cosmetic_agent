@@ -1,0 +1,6 @@
+{
+ "_doc": "目前 production 的程式根目錄（shadowpatch 與 overlay 都會拒絕在這些路徑之內/之上動作）。內建值來自 vendored production orchestrator（/var/lib/jenkins/tomod/cosmetic-agent 等）；請在 VM 上用 ./find_prod_roots.sh 讀出現行 :8010 的實際工作目錄，確認後填入並寫 confirmed_by/confirmed_on。",
+ "prod_roots": [],
+ "confirmed_by": null,
+ "confirmed_on": null
+}

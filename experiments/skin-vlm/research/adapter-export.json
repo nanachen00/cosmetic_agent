@@ -1,0 +1,8 @@
+{
+  "path": "/var/lib/jenkins/tomod/experiments/skin-vlm/research/BLINK_Passed_Research_Adapter.zip",
+  "filename": "BLINK_Passed_Research_Adapter.zip",
+  "bytes": 47499889,
+  "sha256": "314d490bdc378bc6090c34c987a3c225f93ad3cdb577dea7bbce3a7e578c42d8",
+  "selected": "lora-r16-epoch2",
+  "research_only": true
+}

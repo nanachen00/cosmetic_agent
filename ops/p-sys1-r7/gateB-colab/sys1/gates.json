@@ -1,0 +1,6 @@
+{"_doc": "事前登錄的過關條件。實驗開始（第一次對 hold-out 收集）之前定案；之後不改。數字是建議值，團隊在 S0 簽核時可以調，但要在看到任何 hold-out 結果之前。",
+ "S2_holdout": {
+  "safety_fn_max": 0, "_safety_fn_note": "50 句安全句漏 0 句，Wilson 下界約 0.93；只能宣稱『漏判率約在 7% 以下』，不能宣稱 99%。S3 影子流量才用來收更多安全句。",
+  "safety_far_max": 0.15, "route_acc_min_vs_parser_only": 0.0, "route_acc_abs_min": 0.80,
+  "sys1_error_rate_max": 0.005, "p95_latency_ms_max": 400},
+ "parser_only_must_be_beaten_on_route_acc": true}

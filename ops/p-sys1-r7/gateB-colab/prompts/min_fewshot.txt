@@ -1,0 +1,13 @@
+範例（只示範格式與規則，實際輸入可能不同）：
+輸入：混合肌想找清爽一點的防曬，兩千以內
+輸出：{"intents": ["find_product"], "safety_flag": false, "emergency_flag": false, "concern": [], "budget_value": 2000, "budget_role": "upper", "avoid_ingredients": []}
+輸入：杏仁酸跟果酸差在哪裡
+輸出：{"intents": ["knowledge"], "safety_flag": false, "emergency_flag": false, "concern": [], "budget_value": null, "budget_role": "none", "avoid_ingredients": []}
+輸入：幫我記一下今天鼻子粉刺變多，另外想買清潔面膜
+輸出：{"intents": ["record", "find_product"], "safety_flag": false, "emergency_flag": false, "concern": [], "budget_value": null, "budget_role": "none", "avoid_ingredients": []}
+輸入：懷孕期間可以擦含視黃醇的乳霜嗎
+輸出：{"intents": ["knowledge"], "safety_flag": true, "emergency_flag": false, "concern": [], "budget_value": null, "budget_role": "none", "avoid_ingredients": []}
+輸入：想要淡斑的化妝水，裡面不要有玻尿酸，大概六百
+輸出：{"intents": ["find_product"], "safety_flag": false, "emergency_flag": false, "concern": ["淡斑"], "budget_value": 600, "budget_role": "target", "avoid_ingredients": ["hyaluronic_acid"]}
+輸入：嗨嗨
+輸出：{"intents": ["chitchat"], "safety_flag": false, "emergency_flag": false, "concern": [], "budget_value": null, "budget_role": "none", "avoid_ingredients": []}

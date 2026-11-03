@@ -1,0 +1,28 @@
+{
+ "verdict": "ok",
+ "problems": [],
+ "shadow_root": "D:\\workspace\\cosmetic-agent\\experiments\\local-replica\\runtime\\tomod\\ops\\p-sys1\\shadow-sys1\\shadow\\cosmetic-agent",
+ "prod_trees": [
+  "d:\\var\\lib\\jenkins\\tomod\\backend",
+  "d:\\var\\lib\\jenkins\\tomod\\core",
+  "d:\\var\\lib\\jenkins\\tomod\\cosmetic-agent",
+  "d:\\var\\lib\\jenkins\\tomod\\cosmetic-agent-stable",
+  "d:\\workspace\\cosmetic-agent\\experiments\\local-replica\\runtime\\tomod\\cosmetic-agent"
+ ],
+ "orchestrator": {
+  "file": "D:\\workspace/cosmetic-agent/experiments/local-replica/runtime/tomod/ops/p-sys1/shadow-sys1/shadow/cosmetic-agent\\agents\\root\\orchestrator.py",
+  "sha256": "75335bfee54f3b5a13d49051b011817d74d49b8ef4111058e719d08e64debf7e",
+  "loaded_before_probe": true,
+  "overlay_active": true,
+  "overlay_file": "D:\\workspace/cosmetic-agent/experiments/local-replica/runtime/tomod/ops/p-sys1/shadow-sys1/shadow/cosmetic-agent\\agents\\root\\sys1_dispatch.py",
+  "overlay_enabled": true
+ },
+ "prod_modules": [],
+ "foreign_app": [],
+ "prod_sys_path": [],
+ "opened": [],
+ "env_added": [],
+ "modules": 2695,
+ "pid": 19156,
+ "python": "D:\\devtools\\venvs\\blink-backend-local\\Scripts\\python.exe"
+}

@@ -1,0 +1,10 @@
+{
+  "release": "kg-knowledge-20261031T0630Z",
+  "phase": "activated",
+  "before_page_sha256": "c2a7fda155c2d81ead5d41c7d26ad7881fc51d681de85591291f46f4046f489d",
+  "after_page_sha256": "0d90518b3c269c77618c67c8e03c3b26e4828854d557b74bc2f3cd2f1c994a80",
+  "old_build_id": "NtaekDdHnTtYW0QuvxtSx",
+  "new_build_id": "w2KrpSiKuTeI73f8nK-F3",
+  "pid": 852254,
+  "start_ticks": "102797139"
+}

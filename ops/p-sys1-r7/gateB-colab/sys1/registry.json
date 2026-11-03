@@ -1,0 +1,380 @@
+{
+ "_doc": "P+Sys1 候選登錄表。基座來源(provenance)規則見 policy.py。status: reference=只當對照(Kev，基座是 Qwen，不得成為替換候選)；allowed=已查證可入選；unverified=基座/訓練資料來源還沒查證，在 provenance_verified=true 之前 policy 一律拒絕收集(fail-closed)；blocked=違反規則。",
+ "candidates": [
+  {
+   "id": "kev-0.8b",
+   "display": "Kev-0.8B (LoRA+pointer on Qwen3.5-0.8B-Base)",
+   "role": "reference",
+   "lineage": [
+    "Qwen3.5-0.8B-Base"
+   ],
+   "base_origin": "CN",
+   "license": "團隊自有微調",
+   "provenance_verified": true,
+   "owner_decision": {"status": "reference", "by": "Saika（使用者）", "on": "2026-10-28", "reason": "只當對照（Qwen 基座）；不得 promote"},
+   "serve": "kev.serve（jaredpalmer/kev@1f04cfa2）。舊 runtime 已遺失；2026-11-03 起可在 VM 用 ./run_vm.sh kev-venv／kev-gateb 重跑（Python 3.12＋ROCm torch，127.0.0.1:8230），Colab 結果仍保留為對照",
+   "model_field": "kev-latest",
+   "kev_label": "0.8b",
+   "evidence": [],
+   "proposed_provenance": {
+    "status": "n/a",
+    "reason": "reference：基座 Qwen3.5，依規則只當對照，不查證",
+    "by": "agent (研究，不是簽核)"
+   }
+  },
+  {
+   "id": "laya-mmbert",
+   "display": "Laya multilingual (mmBERT-base 322M, zero-shot)",
+   "role": "candidate",
+   "lineage": [
+    "mmBERT-base",
+    "ModernBERT"
+   ],
+   "base_origin": "US",
+   "license": "Apache-2.0 (Laya) / MIT (mmBERT)",
+   "provenance_verified": true,
+   "verified_by": "Saika（使用者）：owner override，授權越過 teacher／標註來源檢查；來源本身仍未查證",
+   "verified_on": "2026-11-03",
+   "owner_decision": {"status": "override_test", "by": "Saika（使用者）", "on": "2026-11-03", "reason": "使用者授權越過模型細節檢查、直接測試 Laya。teacher／標註來源仍未公開，S0 第 2 條的疑慮沒有解除；所有結果須標示『來源未查證（owner override）』，要 promote 前另行決定"},
+   "owner_decision_history": [{"status": "excluded", "by": "Saika（使用者）", "on": "2026-10-28", "reason": "§5-2：Laya 頭的 teacher／標註來源未公開，無法排除中國模型產生；T3 已取消"}],
+   "verify": [
+    "讀 convaiinnovations/laya model card：確認 multilingual 檢查點的基座與訓練資料來源",
+    "確認沒有以 Qwen/DeepSeek 等模型蒸餾或產生標註資料"
+   ],
+   "serve": "laya-serve（laya[serve]==0.4.21，/opt/venv-laya；./run_vm.sh laya-contract／laya-s2 經 sys1/laya_entry.py 開在 127.0.0.1:8231）",
+   "model_field": "multilingual",
+   "kev_label": "laya-mmbert",
+   "evidence": [
+    {
+     "url": "https://huggingface.co/convaiinnovations/laya",
+     "summary": "model card：Convai Innovations，Apache-2.0；multilingual 檢查點『uses mmBERT-base, 22 layers, 256k vocab, 322M total』，client model=\"multilingual\"，預設 max_len 1024（可到 8192）",
+     "checked_on": "2026-10-26"
+    },
+    {
+     "url": "https://huggingface.co/convaiinnovations/laya/raw/main/README.md",
+     "summary": "README 全文無 Qwen/GPT/Llama/DeepSeek/distill/synthetic/training data 字樣；只提到未具名的『teacher』（'teacher self-agreement ceiling'、'teacher's full probability distributions'），未說明 teacher 是誰、multilingual 用什麼資料訓練",
+     "checked_on": "2026-10-26"
+    },
+    {
+     "url": "https://www.i-scoop.eu/laya-system-1-decision-model/",
+     "summary": "第三方介紹：同樣未說明 teacher 或訓練資料來源",
+     "checked_on": "2026-10-26"
+    },
+    {
+     "url": "https://huggingface.co/jhu-clsp/mmBERT-base",
+     "summary": "基座 mmBERT-base：JHU CLSP，MIT（見 mmbert-ft 條目）",
+     "checked_on": "2026-10-26"
+    }
+   ],
+   "proposed_provenance": {
+    "status": "unclear",
+    "reason": "基座（mmBERT-base, JHU）合格；但 Laya 頭的訓練資料與 teacher 未公開，無法排除由中國模型產生的標註／機率分布。屬 handoff §8.2 問題：需負責人決定規則是否涵蓋標註來源，並建議向 Convai Innovations 書面詢問 teacher 身分。",
+    "by": "agent (研究，不是簽核)"
+   },
+   "research_notes": [
+    "中文：model card 未點名中文；只說 100+ 語言、51 語中 45 語可用",
+    "ctx：multilingual 預設 1024 token"
+   ]
+  },
+  {
+   "id": "laya-typed",
+   "display": "Laya typed-decisions (ModernBERT-large 421M，英文為主)",
+   "role": "candidate",
+   "lineage": [
+    "ModernBERT-large"
+   ],
+   "base_origin": "US",
+   "license": "Apache-2.0",
+   "provenance_verified": true,
+   "verified_by": "Saika（使用者）：owner override，授權越過 teacher／標註來源檢查；來源本身仍未查證",
+   "verified_on": "2026-11-03",
+   "owner_decision": {"status": "override_test", "by": "Saika（使用者）", "on": "2026-11-03", "reason": "使用者授權越過模型細節檢查、直接測試 Laya。teacher／標註來源仍未公開，S0 第 2 條的疑慮沒有解除；所有結果須標示『來源未查證（owner override）』，要 promote 前另行決定"},
+   "owner_decision_history": [{"status": "excluded", "by": "Saika（使用者）", "on": "2026-10-28", "reason": "§5-2：同 laya-mmbert"}],
+   "verify": [
+    "同上；另確認 typed-decisions 檢查點是否為多語（中文未驗證，預期很差）"
+   ],
+   "serve": "laya-serve（laya[serve]==0.4.21，/opt/venv-laya；./run_vm.sh laya-contract／laya-s2 經 sys1/laya_entry.py 開在 127.0.0.1:8231）",
+   "model_field": "typed-decisions",
+   "kev_label": "laya-typed",
+   "evidence": [
+    {
+     "url": "https://huggingface.co/convaiinnovations/laya",
+     "summary": "typed-decisions 檢查點：ModernBERT-large 421M，ctx 1024，『fine-tuned on that benchmark's own training split』（2,000 decisions / 4 workflows）；根檢查點為英文，card 說『Use laya-multilingual for anything outside English』",
+     "checked_on": "2026-10-26"
+    },
+    {
+     "url": "https://huggingface.co/answerdotai/ModernBERT-large",
+     "summary": "基座：Answer.AI + LightOn，Apache-2.0，『pre-trained on 2 trillion tokens of English and code data』",
+     "checked_on": "2026-10-26"
+    }
+   ],
+   "proposed_provenance": {
+    "status": "unclear",
+    "reason": "基座合格（美/法）；teacher 與 typed-decisions benchmark 資料來源同 laya-mmbert 未公開。另：英文檢查點，中文預期很差，即使放行也只適合當下限對照。",
+    "by": "agent (研究，不是簽核)"
+   },
+   "research_notes": [
+    "ctx：typed-decisions 為 1024（不是 handoff 寫的 512；512 是根英文檢查點）"
+   ]
+  },
+  {
+   "id": "mmbert-ft",
+   "display": "mmBERT-base + 自訓 typed 頭（微調）",
+   "role": "candidate",
+   "lineage": [
+    "mmBERT-base",
+    "ModernBERT"
+   ],
+   "base_origin": "US",
+   "license": "MIT",
+   "provenance_verified": true,
+   "verified_by": "Saika（使用者）",
+   "verified_on": "2026-10-28",
+   "signoff_note": "依 docs/plans/P_SYS1_REPLACEMENT_PLAN.md §5 建議定案；使用者於 2026-10-28 Claude Code 對話核准，Claude 代為記錄",
+   "owner_decision": {"status": "signed", "by": "Saika（使用者）", "on": "2026-10-28", "reason": "§5-1 簽核：來源乾淨（JHU、MIT；無 LLM 合成資料）"},
+   "verify": [
+    "確認 JHU CLSP 官方 model card 的訓練語料含繁中（影響 tokenization/表現，不影響來源規則）"
+   ],
+   "serve": "custom (需要自寫訓練+服務，見 handoff §9)",
+   "model_field": "mmbert-ft",
+   "kev_label": "mmbert-ft",
+   "evidence": [
+    {
+     "url": "https://huggingface.co/jhu-clsp/mmBERT-base",
+     "summary": "JHU CLSP，MIT；ModernBERT 架構，307M（110M non-embedding），Gemma 2 tokenizer；語料 DCLM/FineWeb2/FineWeb2-HQ/MegaWika/StarCoder/ProLong/ArXiv/PeS2o/StackExchange；card 未提 LLM 合成資料",
+     "checked_on": "2026-10-26"
+    },
+    {
+     "url": "https://arxiv.org/html/2509.06888",
+     "summary": "論文 Table 9 列 'cmn'：pretrain 103.7B（5.21%）、mid-training 27.9B；未分繁簡（無 zho_Hant 單列）；未提 LLM 合成訓練資料；FineWeb2-HQ 為 model-based selection，論文未點名用哪個模型",
+     "checked_on": "2026-10-26"
+    }
+   ],
+   "proposed_provenance": {
+    "status": "verified",
+    "reason": "基座為 JHU 自訓、語料為公開網頁/程式/學術資料，無中國模型；中文以 'cmn' 單一類別包含（繁中比例未知，需在 VM 上量 tokenizer 對繁中的切分）。",
+    "by": "agent (研究，不是簽核)"
+   },
+   "research_notes": [
+    "tokenizer 來自 Gemma 2（只是詞表，不是權重；不影響來源規則，但記錄）"
+   ]
+  },
+  {
+   "id": "mdeberta-ft",
+   "display": "mDeBERTa-v3-base + 自訓 typed 頭",
+   "role": "candidate",
+   "lineage": [
+    "mDeBERTa-v3-base"
+   ],
+   "base_origin": "US",
+   "license": "MIT",
+   "provenance_verified": true,
+   "verified_by": "Saika（使用者）",
+   "verified_on": "2026-10-28",
+   "signoff_note": "依 docs/plans/P_SYS1_REPLACEMENT_PLAN.md §5 建議定案；使用者於 2026-10-28 Claude Code 對話核准，Claude 代為記錄",
+   "owner_decision": {"status": "signed", "by": "Saika（使用者）", "on": "2026-10-28", "reason": "§5-1 簽核：來源乾淨（Microsoft、MIT、CC100）"},
+   "verify": [
+    "Microsoft 官方 model card"
+   ],
+   "serve": "custom",
+   "model_field": "mdeberta-ft",
+   "kev_label": "mdeberta-ft",
+   "evidence": [
+    {
+     "url": "https://huggingface.co/microsoft/mdeberta-v3-base",
+     "summary": "Microsoft，MIT；『trained using the 2.5T CC100 data as XLM-R』；86M backbone + 190M embedding（250K vocab）",
+     "checked_on": "2026-10-26"
+    }
+   ],
+   "proposed_provenance": {
+    "status": "verified",
+    "reason": "Microsoft 自訓，CC100 網頁語料，無 LLM 合成資料跡象。中文：CC100 含 zh-Hans 與 zh-Hant（見 xlmr-ft 證據）。",
+    "by": "agent (研究，不是簽核)"
+   }
+  },
+  {
+   "id": "xlmr-ft",
+   "display": "XLM-RoBERTa-base/large + 自訓 typed 頭",
+   "role": "candidate",
+   "lineage": [
+    "XLM-RoBERTa"
+   ],
+   "base_origin": "US",
+   "license": "MIT",
+   "provenance_verified": true,
+   "verified_by": "Saika（使用者）",
+   "verified_on": "2026-10-28",
+   "signoff_note": "依 docs/plans/P_SYS1_REPLACEMENT_PLAN.md §5 建議定案；使用者於 2026-10-28 Claude Code 對話核准，Claude 代為記錄",
+   "owner_decision": {"status": "signed", "by": "Saika（使用者）", "on": "2026-10-28", "reason": "§5-1 簽核：來源乾淨（Meta、MIT、CommonCrawl）"},
+   "verify": [
+    "Meta 官方 model card"
+   ],
+   "serve": "custom",
+   "model_field": "xlmr-ft",
+   "kev_label": "xlmr-ft",
+   "evidence": [
+    {
+     "url": "https://huggingface.co/FacebookAI/xlm-roberta-base",
+     "summary": "FacebookAI 命名空間，MIT；『pre-trained on 2.5TB of filtered CommonCrawl data containing 100 languages』（metadata 標 94，兩數不一致）；card 註明非原團隊撰寫",
+     "checked_on": "2026-10-26"
+    },
+    {
+     "url": "https://arxiv.org/abs/1911.02116",
+     "summary": "Conneau et al. 2019：100 種語言的 masked LM",
+     "checked_on": "2026-10-26"
+    },
+    {
+     "url": "https://huggingface.co/datasets/statmt/cc100/blob/0635e5c8c08aba2709297c95a438907bb006ba14/README.md",
+     "summary": "CC-100 重建版（Edinburgh，CC-Net）：language_bcp47 含 zh-Hans 與 zh-Hant，聲明為 XLM-R 訓練資料的重建",
+     "checked_on": "2026-10-26"
+    }
+   ],
+   "proposed_provenance": {
+    "status": "verified",
+    "reason": "Meta 自訓，CommonCrawl，無中國模型。繁中有獨立類別（依 CC-100 重建版 metadata；未直接查到 XLM-R 論文附表原文）。",
+    "by": "agent (研究，不是簽核)"
+   }
+  },
+  {
+   "id": "bgem3-ft",
+   "display": "BGE-M3 編碼器 + 自訓 typed 頭",
+   "role": "grey",
+   "lineage": [
+    "XLM-RoBERTa",
+    "BAAI 微調"
+   ],
+   "base_origin": "CN-finetune-on-non-CN-base",
+   "license": "MIT",
+   "provenance_verified": false,
+   "owner_decision": {"status": "excluded", "by": "Saika（使用者）", "on": "2026-10-28", "reason": "§5-1 未簽核：grey（BAAI 繼續預訓練，MLDR 由未具名 LLM 產生）"},
+   "verify": [
+    "需要團隊決策：基座是 Meta 的 XLM-R，但權重是 BAAI(中國機構)微調後的。你的規則是『基座不能是中國模型』，字面上通過、精神上有爭議。預設：不收集，除非書面同意。"
+   ],
+   "serve": "custom",
+   "model_field": "bgem3-ft",
+   "kev_label": "bgem3-ft",
+   "evidence": [
+    {
+     "url": "https://huggingface.co/BAAI/bge-m3",
+     "summary": "BAAI（北京智源），MIT；bge-m3-retromae『extend the max_length of xlm-roberta to 8192 and further pretrained via retromae』→ unsupervised 對比學習 → unified fine-tuning；MLDR 為『a document retrieval dataset we constructed via LLM』（未點名哪個 LLM）",
+     "checked_on": "2026-10-26"
+    }
+   ],
+   "proposed_provenance": {
+    "status": "blocked",
+    "reason": "依 registry 原設計為 grey：基座 XLM-R 合格，但權重是中國機構繼續預訓練＋微調，且部分資料由未具名 LLM 產生。不建議放行；只有負責人書面同意（§8.1）才收集。",
+    "by": "agent (研究，不是簽核)"
+   }
+  },
+  {
+   "id": "gemma3-1b-kev",
+   "display": "Kev 式（LoRA+pointer）套在 Gemma 3 1B",
+   "role": "candidate",
+   "lineage": [
+    "Gemma-3-1B"
+   ],
+   "base_origin": "US",
+   "license": "Gemma terms",
+   "provenance_verified": false,
+   "owner_decision": {"status": "excluded", "by": "Saika（使用者）", "on": "2026-10-28", "reason": "§5-11：不列入評比（Gemma Terms 授權待法務；1B 多語能力弱）"},
+   "verify": [
+    "確認 Gemma license 允許商用部署與微調後散佈；Google 官方 model card"
+   ],
+   "serve": "custom (Kev 訓練碼在你們手上，需要換基座，見 handoff §9)",
+   "model_field": "gemma3-1b-kev",
+   "kev_label": "gemma3-1b-kev",
+   "evidence": [
+    {
+     "url": "https://huggingface.co/google/gemma-3-1b-pt",
+     "summary": "Google DeepMind，Gemma license；1B 用 2T tokens、ctx 32K；家族宣稱 140+ 語言，但 1B 的 MGSM 僅 2.04（4B 為 34.7），多語能力有限",
+     "checked_on": "2026-10-26"
+    },
+    {
+     "url": "https://ai.google.dev/gemma/terms",
+     "summary": "Gemma Terms：§2.2 可 use/modify/distribute；§1.1(e) Model Derivatives 含 modifications；§3.1 散佈衍生模型需附使用限制、本協議、修改聲明、Notice 檔；§3.2 Prohibited Use Policy 併入，且 Google『reserves the right to restrict (remotely or otherwise) usage』；條款未直接寫 commercial use 字樣",
+     "checked_on": "2026-10-26"
+    }
+   ],
+   "proposed_provenance": {
+    "status": "unclear",
+    "reason": "基座來源合格（美）。授權不是 OSI 開源：可修改與以 hosted service 方式散佈，但附帶使用限制傳遞與 Google 限制權。商用與微調後散佈需法務判斷（handoff §8.7）。",
+    "by": "agent (研究，不是簽核)"
+   }
+  },
+  {
+   "id": "smollm2-kev",
+   "display": "Kev 式套在 SmolLM2 (HuggingFace)",
+   "role": "candidate",
+   "lineage": [
+    "SmolLM2"
+   ],
+   "base_origin": "US/EU",
+   "license": "Apache-2.0",
+   "provenance_verified": false,
+   "owner_decision": {"status": "excluded", "by": "Saika（使用者）", "on": "2026-10-28", "reason": "§5-1 未簽核：只有 base 合格，且 Kev 型 LoRA 訓練碼未提供；Instruct 版因 §5-2 不合格"},
+   "verify": [
+    "確認 SmolLM2 訓練語料沒有 Qwen 合成資料；中文能力極弱，預期只作上限對照"
+   ],
+   "serve": "custom",
+   "model_field": "smollm2-kev",
+   "kev_label": "smollm2-kev",
+   "evidence": [
+    {
+     "url": "https://huggingface.co/HuggingFaceTB/SmolLM2-1.7B",
+     "summary": "HuggingFace，Apache-2.0；『primarily understand and generate content in English』；base 用 FineWeb-Edu、DCLM、The Stack 及自建數學/程式資料",
+     "checked_on": "2026-10-26"
+    },
+    {
+     "url": "https://arxiv.org/html/2502.02737",
+     "summary": "論文：base 預訓練各階段無 SmolTalk/指令資料；Cosmopedia v2 佔 stage4 4%；分類器標註用 Llama3-70B / Llama-3.1-70B；**SmolTalk 的 Smol-Constraint、Smol-Summarization、Smol-Rewrite 由 Qwen2.5-72B-Instruct 生成**，只用於 post-training（Instruct 版）",
+     "checked_on": "2026-10-26"
+    },
+    {
+     "url": "https://huggingface.co/datasets/HuggingFaceTB/smollm-corpus",
+     "summary": "Cosmopedia v2『generated by Mixtral-8x7B-Instruct-v0.1』（Mistral，法國）",
+     "checked_on": "2026-10-26"
+    }
+   ],
+   "proposed_provenance": {
+    "status": "verified",
+    "reason": "只限 **base** 檢查點（SmolLM2-*-base/非 Instruct）：預訓練無中國模型產生資料。**SmolLM2-Instruct 不合格**——SFT 資料部分由 Qwen2.5-72B 生成（若負責人在 §8.2 決定標註來源也算違規）。建議 lineage 明確寫 SmolLM2-1.7B（base）。中文能力極弱。",
+    "by": "agent (研究，不是簽核)"
+   }
+  },
+  {
+   "id": "eurobert-ft",
+   "display": "EuroBERT-210m/610m + 自訓 typed 頭（研究新增，未入選）",
+   "role": "candidate",
+   "lineage": [
+    "EuroBERT"
+   ],
+   "base_origin": "EU",
+   "license": "Apache-2.0",
+   "provenance_verified": false,
+   "owner_decision": {"status": "pending_review", "by": "Saika（使用者）", "on": "2026-10-28", "reason": "§5-1：需 trust_remote_code，Claude 讀過 modeling 程式碼後再提簽核"},
+   "verify": [
+    "確認 EuroBERT 品質分類器（EuroLLM classifier）架構；確認 CulturaX 中文切分繁簡比例"
+   ],
+   "serve": "custom",
+   "model_field": "eurobert-ft",
+   "kev_label": "eurobert-ft",
+   "evidence": [
+    {
+     "url": "https://huggingface.co/EuroBERT/EuroBERT-210m",
+     "summary": "Apache-2.0；210m/610m/2.1B 三種；15 種語言＋數學與程式",
+     "checked_on": "2026-10-26"
+    },
+    {
+     "url": "https://arxiv.org/html/2503.05500",
+     "summary": "論文：作者單位 Diabolocom、Artefact、CentraleSupélec/Paris-Saclay、IST/Lisboa、Unbabel、CNRS、CINES、Illuin、Equall、CMU 等；語言『English, French, German, Spanish, Chinese, Italian, Russian, Polish, Portuguese, Japanese, Vietnamese, Dutch, Arabic, Turkish, and Hindi』；資料 FineWeb、CulturaX、EuroLLM 平行語料、The Stack v2、Proof-Pile-2；未提 LLM 合成資料；品質過濾用 EuroLLM classifier",
+     "checked_on": "2026-10-26"
+    }
+   ],
+   "proposed_provenance": {
+    "status": "verified",
+    "reason": "歐洲機構為主，含中文，未見中國模型。比 mmBERT 小（210m）且有中文，可作為額外微調候選；是否納入比較由負責人決定（§5 規則 4：所有候選同預算）。",
+    "by": "agent (研究，不是簽核)"
+   }
+  }
+ ]
+}

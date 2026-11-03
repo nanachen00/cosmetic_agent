@@ -1,0 +1,59 @@
+[
+  {
+    "aliases": [
+      "A酸"
+    ],
+    "kg_id": "alias_query_a_acid",
+    "type": "AliasTerm",
+    "display_name": "A 酸",
+    "source_ids": [
+      "tfda_acne_medicines_2026"
+    ],
+    "ambiguity": "topical-tretinoin-or-oral-isotretinoin",
+    "entity_type": "AliasTerm",
+    "name": "A 酸",
+    "id": "alias_query_a_acid",
+    "review_status": "verified",
+    "publication_status": "published",
+    "name_en": "A-acid colloquial term",
+    "description": ""
+  },
+  {
+    "id": "adapalene-has-function-unclogging",
+    "source": "drug_active_adapalene_curated",
+    "target": "function_unclog_pores",
+    "relation": "HAS_FUNCTION",
+    "relation_label": "主要作用",
+    "label_zh": "主要作用",
+    "direction": "source_to_target",
+    "evidence_status": "verified",
+    "evidence_reference": "AAD topical retinoid guidance",
+    "source_ids": [
+      "aad-acne-treatment"
+    ],
+    "source_locator": "AAD: topical retinoids clear pores and treat whiteheads",
+    "reviewed_at": "2026-10-31",
+    "properties": {
+      "kg_edge_id": "adapalene-has-function-unclogging",
+      "evidence_titles": [
+        "American Academy of Dermatology — Acne: Diagnosis and treatment"
+      ],
+      "reviewed_at": "2026-10-31",
+      "knowledge_patch_id": "kg-curated-closed-comedones-v1",
+      "source_locator": "AAD: topical retinoids clear pores and treat whiteheads",
+      "evidence_urls": [
+        "https://www.aad.org/public/diseases/acne/derm-treat/treat"
+      ],
+      "source": "drug_active_adapalene_curated",
+      "label": "主要作用",
+      "target": "function_unclog_pores",
+      "relation": "HAS_FUNCTION",
+      "source_ids": [
+        "aad-acne-treatment"
+      ],
+      "evidence_status": "verified",
+      "evidence_reference": "AAD topical retinoid guidance",
+      "id": "adapalene-has-function-unclogging"
+    }
+  }
+]

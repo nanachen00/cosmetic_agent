@@ -1,0 +1,156 @@
+{
+  "updated_utc": "2026-10-31T07:03:10Z",
+  "cycles": [
+    {
+      "title": "第一輪：框選衍生局部",
+      "task": "acne04-box-derived-patch-presence-v1",
+      "selection": "lora-r16-epoch2",
+      "conclusion": "通過此局部研究任務的預設門檻，仍須另行驗證真實照片與四類膚況。",
+      "test": {
+        "baseline": {
+          "n": 96,
+          "tp": 43,
+          "fp": 9,
+          "tn": 39,
+          "fn": 5,
+          "invalid": 0,
+          "positive_precision": 0.8269230769230769,
+          "positive_recall": 0.8958333333333334,
+          "positive_f1": 0.86,
+          "negative_f1": 0.8478260869565217,
+          "macro_f1": 0.8539130434782609,
+          "balanced_accuracy": 0.8541666666666667,
+          "accuracy": 0.8541666666666666,
+          "valid_json_rate": 1.0,
+          "latency_p50_seconds": 0.5649500000000001,
+          "latency_p95_seconds": 0.6444
+        },
+        "selected": {
+          "n": 96,
+          "tp": 44,
+          "fp": 6,
+          "tn": 42,
+          "fn": 4,
+          "invalid": 0,
+          "positive_precision": 0.88,
+          "positive_recall": 0.9166666666666666,
+          "positive_f1": 0.8979591836734694,
+          "negative_f1": 0.8936170212765957,
+          "macro_f1": 0.8957881024750325,
+          "balanced_accuracy": 0.8958333333333333,
+          "accuracy": 0.8958333333333334,
+          "valid_json_rate": 1.0,
+          "latency_p50_seconds": 0.6193500000000001,
+          "latency_p95_seconds": 0.6995
+        },
+        "macro_f1_difference": 0.041875058996771575,
+        "paired_difference_ci95": {
+          "method": "paired parent-cluster bootstrap",
+          "resamples": 1000,
+          "lower_95": 0.010390655609977206,
+          "upper_95": 0.08364137514395198
+        },
+        "research_gate_passed": true,
+        "statistically_clear_positive_difference": true,
+        "automatic_deployment": false
+      }
+    },
+    {
+      "title": "第二輪：顏色配對陰性＋MLP",
+      "task": "acne04-color-matched-patch-presence-v2",
+      "selection": "lora-r8-attention-mlp-hardneg",
+      "conclusion": "分數提高，但 95% 差異區間包含零，尚無足夠證據判定穩定提升。",
+      "test": {
+        "baseline": {
+          "n": 96,
+          "tp": 42,
+          "fp": 12,
+          "tn": 36,
+          "fn": 6,
+          "invalid": 0,
+          "positive_precision": 0.7777777777777778,
+          "positive_recall": 0.875,
+          "positive_f1": 0.8235294117647058,
+          "negative_f1": 0.8,
+          "macro_f1": 0.8117647058823529,
+          "balanced_accuracy": 0.8125,
+          "accuracy": 0.8125,
+          "valid_json_rate": 1.0,
+          "latency_p50_seconds": 0.5865,
+          "latency_p95_seconds": 0.6343
+        },
+        "selected": {
+          "n": 96,
+          "tp": 37,
+          "fp": 5,
+          "tn": 43,
+          "fn": 11,
+          "invalid": 0,
+          "positive_precision": 0.8809523809523809,
+          "positive_recall": 0.7708333333333334,
+          "positive_f1": 0.8222222222222222,
+          "negative_f1": 0.8431372549019608,
+          "macro_f1": 0.8326797385620914,
+          "balanced_accuracy": 0.8333333333333334,
+          "accuracy": 0.8333333333333334,
+          "valid_json_rate": 1.0,
+          "latency_p50_seconds": 0.8928,
+          "latency_p95_seconds": 0.9948
+        },
+        "macro_f1_difference": 0.020915032679738488,
+        "paired_difference_ci95": {
+          "method": "paired parent-cluster bootstrap",
+          "resamples": 1000,
+          "lower_95": -0.04094904599253779,
+          "upper_95": 0.0758142314219471
+        },
+        "research_gate_passed": false,
+        "statistically_clear_positive_difference": false,
+        "automatic_deployment": false
+      }
+    }
+  ],
+  "production_model_changed": false,
+  "dataset_restriction": "academic/research only",
+  "ui_verification": {
+    "same_feature_three_regions_old_cards": 3,
+    "new_groups": 1,
+    "retained_evidence_items": 3,
+    "test_status": "six grouping contracts passed; Next.js build and TypeScript passed; public sample round trip verified"
+  },
+  "training_data_quality_audit": {
+    "cycle1_train_negative_reviewed": 16,
+    "obvious_background_or_clothing": 3,
+    "reviewer": "assistant visual screening; not a dermatologist or new ground-truth annotation",
+    "response": "cycle2 matches negative crop mean RGB and proximity to positive; excludes previous test parents",
+    "cycle2_train_negative_reviewed": 16,
+    "cycle2_obvious_background_or_clothing": 1
+  },
+  "full_report_compatibility": {
+    "status": "complete",
+    "stats": [
+      {
+        "version": "original",
+        "model_calls": 4,
+        "valid_full_report": 4,
+        "non_skin_refused": true,
+        "low_contrast_heuristic_refused": true
+      },
+      {
+        "version": "cycle1",
+        "model_calls": 4,
+        "valid_full_report": 4,
+        "non_skin_refused": true,
+        "low_contrast_heuristic_refused": true
+      },
+      {
+        "version": "cycle2",
+        "model_calls": 4,
+        "valid_full_report": 4,
+        "non_skin_refused": true,
+        "low_contrast_heuristic_refused": true
+      }
+    ],
+    "note": "Compatibility and refusal smoke only; not four-tag accuracy or clinical validation. Models selected before this probe; no checkpoint tuning uses probe results."
+  }
+}

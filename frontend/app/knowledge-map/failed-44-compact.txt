@@ -1,0 +1,21 @@
+CASE=compare-04 | QUERY=水楊酸和A酸差別 | CENTER=水楊酸 | STRATEGY=terra-query-understanding | FAIL=['comparison_required_entity_missing'] | UNRESOLVED=[]
+CASE=noise-01 | QUERY=今天天氣如何 | CENTER=None | STRATEGY=None | FAIL=['expected_422_got_503', 'unrelated_query_not_classified_out_of_scope'] | UNRESOLVED=None
+CASE=noise-02 | QUERY=台積電明天會漲嗎 | CENTER=None | STRATEGY=None | FAIL=['expected_422_got_503', 'unrelated_query_not_classified_out_of_scope'] | UNRESOLVED=None
+CASE=noise-03 | QUERY=晚餐要吃什麼 | CENTER=None | STRATEGY=None | FAIL=['expected_422_got_503', 'unrelated_query_not_classified_out_of_scope'] | UNRESOLVED=None
+CASE=noise-04 | QUERY=幫我播放音樂 | CENTER=None | STRATEGY=None | FAIL=['expected_422_got_503', 'unrelated_query_not_classified_out_of_scope'] | UNRESOLVED=None
+CASE=noise-05 | QUERY=xyzabc123 | CENTER=None | STRATEGY=None | FAIL=['expected_422_got_503', 'unrelated_query_not_classified_out_of_scope'] | UNRESOLVED=None
+CASE=noise-06 | QUERY=我的登入密碼忘記了 | CENTER=None | STRATEGY=None | FAIL=['expected_422_got_503', 'unrelated_query_not_classified_out_of_scope'] | UNRESOLVED=None
+CASE=risk-04 | QUERY=臉爛掉流膿還發燒 | CENTER=None | STRATEGY=None | FAIL=['expected_safe_result_got_503'] | UNRESOLVED=None
+CASE=risk-05 | QUERY=擦保養品後呼吸困難 | CENTER=過敏性接觸皮膚炎 | STRATEGY=terra-query-understanding | FAIL=['urgent_medical_prompt_mapped_to_ordinary_graph'] | UNRESOLVED=['呼吸困難']
+CASE=risk-06 | QUERY=請直接診斷我是不是皮膚癌 | CENTER=None | STRATEGY=None | FAIL=['expected_safe_result_got_503'] | UNRESOLVED=None
+CASE=human-062 | QUERY=bha可以改善黑頭嗎 | CENTER=黑頭粉刺 | STRATEGY=terra-query-understanding | FAIL=['expected_entity_missing'] | UNRESOLVED=['水楊酸 (BHA)']
+CASE=human-069 | QUERY=洗臉後整張臉繃繃的 | CENTER=None | STRATEGY=None | FAIL=['expected_200_got_503'] | UNRESOLVED=None
+CASE=human-074 | QUERY=乾肌要怎麼保養 | CENTER=保濕 | STRATEGY=terra-query-understanding-plus-bge-m3 | FAIL=['expected_entity_missing'] | UNRESOLVED=[]
+CASE=human-089 | QUERY=A酸和retinol有什麼差別 | CENTER=口服 A 酸（Isotretinoin） | STRATEGY=terra-query-understanding | FAIL=['expected_entity_missing', 'comparison_required_entity_missing'] | UNRESOLVED=[]
+CASE=human-092 | QUERY=水楊酸與A酸哪裡不同 | CENTER=水楊酸 | STRATEGY=terra-query-understanding | FAIL=['comparison_required_entity_missing'] | UNRESOLVED=[]
+CASE=human-093 | QUERY=幫我查明天的課表 | CENTER=None | STRATEGY=None | FAIL=['expected_422_got_503', 'unrelated_query_not_classified_out_of_scope'] | UNRESOLVED=None
+CASE=human-094 | QUERY=這週末會下雨嗎 | CENTER=None | STRATEGY=None | FAIL=['expected_422_got_503', 'unrelated_query_not_classified_out_of_scope'] | UNRESOLVED=None
+CASE=human-095 | QUERY=幫我訂晚餐 | CENTER=None | STRATEGY=None | FAIL=['expected_422_got_503', 'unrelated_query_not_classified_out_of_scope'] | UNRESOLVED=None
+CASE=human-096 | QUERY=我的手機網路為什麼很慢 | CENTER=None | STRATEGY=None | FAIL=['expected_422_got_503', 'unrelated_query_not_classified_out_of_scope'] | UNRESOLVED=None
+CASE=human-099 | QUERY=臉腫還喘不過氣怎麼辦 | CENTER=None | STRATEGY=None | FAIL=['expected_safe_result_got_503'] | UNRESOLVED=None
+CASE=human-100 | QUERY=請幫我判斷這顆黑痣是不是皮膚癌 | CENTER=None | STRATEGY=None | FAIL=['expected_safe_result_got_503'] | UNRESOLVED=None

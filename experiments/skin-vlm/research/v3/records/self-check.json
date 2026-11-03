@@ -1,0 +1,167 @@
+{
+  "status": "contract_pipeline_passed",
+  "five_tracks": {
+    "1_detection": {
+      "status": "passed",
+      "metrics": {
+        "iou_threshold": 0.5,
+        "ap": 0.5,
+        "precision": 0.5,
+        "recall": 0.5,
+        "count_mae": 0.0,
+        "ground_truth_boxes": 2,
+        "predicted_boxes": 2,
+        "matched_boxes": 1
+      }
+    },
+    "2_colour": {
+      "status": "passed",
+      "metrics": {
+        "clean_lab": [
+          51.1397,
+          24.3169,
+          19.3996
+        ],
+        "synthetic_delta_e00": {
+          "clean": 0.0,
+          "exposure_ev_minus_1": 23.05690388759521,
+          "exposure_ev_plus_1": 29.76638873138198,
+          "white_balance_warm": 5.91279092176097,
+          "white_balance_cool": 7.226266448896642,
+          "blur_radius_2": 0.0,
+          "directional_shadow": 11.333167297429798,
+          "warm_plus_shadow": 9.702933595503136
+        },
+        "status": "synthetic_robustness_probe_only"
+      }
+    },
+    "3_multiview": {
+      "status": "passed",
+      "metrics": {
+        "complete_views": true,
+        "findings": [
+          {
+            "tag": "redness",
+            "region": "left_cheek",
+            "present_views": [
+              "front",
+              "left"
+            ],
+            "view_count": 2,
+            "consistency": 0.6667,
+            "status": "repeated"
+          }
+        ],
+        "repeated_fraction": 1.0,
+        "limitation": "Cross-view repetition is not proof of surface height; calibrated stereo or photometric data is required."
+      }
+    },
+    "4_personal_baseline": {
+      "status": "passed",
+      "metrics": {
+        "status": "relative_change_only",
+        "eligible_sessions": 3,
+        "deltas": {
+          "lesion_count": {
+            "current": 4.0,
+            "baseline_median": 2.0,
+            "delta": 2.0,
+            "baseline_mad": 0.0,
+            "robust_z": null
+          },
+          "redness_a_star": {
+            "current": 14.0,
+            "baseline_median": 13.0,
+            "delta": 1.0,
+            "baseline_mad": 0.5,
+            "robust_z": 1.3489815189531904
+          }
+        },
+        "limitation": "Relative diary comparison only; no disease diagnosis or treatment claim."
+      }
+    },
+    "5_qwen_integration": {
+      "status": "passed",
+      "packet_sha256": "97405934fc2d52fc256beae49e952c230da6319f74659d0a5659cc74456fb29a"
+    }
+  },
+  "claim_limit": "Synthetic contract run only. It does not establish real-image accuracy, colour calibration, height estimation, or clinical validity.",
+  "packet": {
+    "schema": "blink.skin_evidence.v1",
+    "task": "daily_skin_diary_explanation",
+    "detector": {
+      "iou_threshold": 0.5,
+      "ap": 0.5,
+      "precision": 0.5,
+      "recall": 0.5,
+      "count_mae": 0.0,
+      "ground_truth_boxes": 2,
+      "predicted_boxes": 2,
+      "matched_boxes": 1
+    },
+    "colour": {
+      "clean_lab": [
+        51.1397,
+        24.3169,
+        19.3996
+      ],
+      "synthetic_delta_e00": {
+        "clean": 0.0,
+        "exposure_ev_minus_1": 23.05690388759521,
+        "exposure_ev_plus_1": 29.76638873138198,
+        "white_balance_warm": 5.91279092176097,
+        "white_balance_cool": 7.226266448896642,
+        "blur_radius_2": 0.0,
+        "directional_shadow": 11.333167297429798,
+        "warm_plus_shadow": 9.702933595503136
+      },
+      "status": "synthetic_robustness_probe_only"
+    },
+    "multiview": {
+      "complete_views": true,
+      "findings": [
+        {
+          "tag": "redness",
+          "region": "left_cheek",
+          "present_views": [
+            "front",
+            "left"
+          ],
+          "view_count": 2,
+          "consistency": 0.6667,
+          "status": "repeated"
+        }
+      ],
+      "repeated_fraction": 1.0,
+      "limitation": "Cross-view repetition is not proof of surface height; calibrated stereo or photometric data is required."
+    },
+    "personal_baseline": {
+      "status": "relative_change_only",
+      "eligible_sessions": 3,
+      "deltas": {
+        "lesion_count": {
+          "current": 4.0,
+          "baseline_median": 2.0,
+          "delta": 2.0,
+          "baseline_mad": 0.0,
+          "robust_z": null
+        },
+        "redness_a_star": {
+          "current": 14.0,
+          "baseline_median": 13.0,
+          "delta": 1.0,
+          "baseline_mad": 0.5,
+          "robust_z": 1.3489815189531904
+        }
+      },
+      "limitation": "Relative diary comparison only; no disease diagnosis or treatment claim."
+    },
+    "output_rules": [
+      "describe only visible appearance",
+      "separate image evidence from symptoms",
+      "do not diagnose disease",
+      "do not infer treatment efficacy",
+      "state missing or inconsistent evidence"
+    ]
+  }
+}

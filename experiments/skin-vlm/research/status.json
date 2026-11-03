@@ -1,0 +1,8 @@
+{
+  "phase": "complete",
+  "updated_utc": "2026-10-31T06:40:19Z",
+  "selected": "lora-r16-epoch2",
+  "test_macro_f1": 0.8957881024750325,
+  "difference": 0.041875058996771575,
+  "research_gate_passed": true
+}

@@ -1,0 +1,17 @@
+{
+  "python": "3.10.18 | packaged by conda-forge | (main, Jun  4 2025, 14:45:41) [GCC 13.3.0]",
+  "platform": "Linux-6.2.0-39-generic-x86_64-with-glibc2.35",
+  "packages": {
+    "torch": "2.6.0+gitdbfe118",
+    "transformers": "4.57.6",
+    "peft": "0.17.1",
+    "accelerate": "1.11.0",
+    "pyarrow": "19.0.1",
+    "Pillow": "11.0.0",
+    "safetensors": "0.8.0"
+  },
+  "base_model": "Qwen/Qwen3-VL-4B-Instruct",
+  "base_model_revision": "ebb281ec70b05090aa6165b016eac8ec08e71b17",
+  "hardware": "AMD Instinct MI300X; shared with existing services",
+  "user_uploaded_photos_used_for_training": false
+}

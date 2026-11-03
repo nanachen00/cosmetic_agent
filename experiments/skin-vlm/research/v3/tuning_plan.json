@@ -1,0 +1,63 @@
+{
+  "plan_version": "v3-predeclared-2026-11-01",
+  "observed_failure": "The v2 candidate reduced false positives but increased false negatives; precision rose while recall fell below the intended floor.",
+  "locked_test_policy": "The v1/v2 test IDs may be audited but never added to training, used as hard examples, or used for candidate selection.",
+  "new_data_split": "Create a new provenance-checked pool grouped by subject_id + captured_date + device_id. Freeze train/validation/new-test before training.",
+  "candidate_grid": [
+    {
+      "name": "lora-r8-lr5e-5-positive-1.15",
+      "rank": 8,
+      "alpha": 16,
+      "learning_rate": 0.00005,
+      "epochs_max": 2,
+      "positive_example_weight": 1.15,
+      "targets": "language attention + MLP",
+      "reason": "Reduce conservative drift while retaining the bounded adapter size."
+    },
+    {
+      "name": "lora-r8-lr1e-4-train-hard-positive",
+      "rank": 8,
+      "alpha": 16,
+      "learning_rate": 0.0001,
+      "epochs_max": 1,
+      "positive_example_weight": 1.0,
+      "hard_positive_sampling": "2x, mined from training-only cross-validation predictions",
+      "targets": "language attention + MLP",
+      "reason": "Target missed subtle lesions without reading locked-test errors."
+    },
+    {
+      "name": "lora-r16-lr5e-5-positive-1.15",
+      "rank": 16,
+      "alpha": 32,
+      "learning_rate": 0.00005,
+      "epochs_max": 1,
+      "positive_example_weight": 1.15,
+      "targets": "language attention + MLP",
+      "reason": "Capacity check only; reject unless it clears every validation floor."
+    }
+  ],
+  "preferred_visual_upgrade": {
+    "name": "dedicated small-lesion detector",
+    "why": "The current LoRA freezes the visual encoder and only changes language layers, so it cannot be the primary route for colour or surface-detail learning.",
+    "training_labels": "ACNE04 boxes for detection; AcneSCU only after original access/license verification and true mask/category validation.",
+    "metrics": ["AP50", "precision", "recall", "count MAE"],
+    "selection_split": "validation only"
+  },
+  "validation_floors": {
+    "valid_json_rate": 0.98,
+    "precision": 0.85,
+    "recall": 0.85,
+    "macro_f1": 0.85
+  },
+  "strata_to_report": ["dataset", "device_id", "skin_tone_bin", "lighting", "blur_bin", "lesion_type", "region"],
+  "low_score_actions": {
+    "blur": "reject or recapture first; do not train the model to hallucinate detail",
+    "lighting_or_white_balance": "calibrate colour and augment training-only images with predeclared transforms",
+    "small_or_occluded_lesions": "detector tiling / higher resolution / training-only hard positives",
+    "device_gap": "collect matched captures across devices and report per-device results",
+    "skin_tone_gap": "balance consented data and report subgroup confidence intervals",
+    "count_error": "improve detector/instance segmentation rather than language-only LoRA",
+    "cross_angle_inconsistency": "capture guidance and geometric alignment before height claims"
+  }
+}
+

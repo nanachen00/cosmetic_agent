@@ -1,0 +1,36 @@
+{
+ "cand": "mmbert-ft",
+ "thresholds": {
+  "base": {
+   "safety": 0.45,
+   "intent": {
+    "find_product": 0.55,
+    "price_comparison": 0.05,
+    "knowledge": 0.5,
+    "record": 0.05,
+    "chitchat": 0.3,
+    "unclear": 0.65
+   },
+   "avoid": 0.5,
+   "cal_n": 93,
+   "cal_safety_pos": 16
+  },
+  "safety": 0.45,
+  "emergency": 0.25,
+  "cal_emergency_pos": 2,
+  "emergency_cal_fpr": 0.0,
+  "intent": {
+   "find_product": 0.55,
+   "price_comparison": 0.05,
+   "knowledge": 0.5,
+   "record": 0.05,
+   "chitchat": 0.3,
+   "unclear": 0.65
+  },
+  "unclear": "derived"
+ },
+ "cal_run": "/var/lib/jenkins/tomod/ops/p-sys1/runs/mmbert-ft-s13/gd",
+ "n_cal": 95,
+ "noul_true_high": true,
+ "sha256": "9bfb3b8d54a583a8880b4938ed14a30d462c551ed2058693343742abb4d87bb2"
+}

@@ -1,0 +1,152 @@
+{
+  "runtime": {
+    "python": "3.10.18 | packaged by conda-forge | (main, Jun  4 2025, 14:45:41) [GCC 13.3.0]",
+    "executable": "/opt/conda/envs/py_3.10/bin/python",
+    "disk_free_gib": 2303.7,
+    "torch": "2.6.0+gitdbfe118",
+    "transformers": "4.57.6",
+    "accelerate": null,
+    "peft": null,
+    "trl": null,
+    "Pillow": "11.0.0",
+    "torchvision": "0.21.0+4040d51",
+    "fastapi": "0.115.14",
+    "huggingface-hub": "0.36.2",
+    "hip": "6.4.43484-123eb5128",
+    "gpu_available": true,
+    "gpus": [
+      {
+        "name": "AMD Instinct MI300X",
+        "free_total_gib": [
+          121.91,
+          191.98
+        ]
+      }
+    ],
+    "cached_models": []
+  },
+  "inference": {
+    "model": "Qwen/Qwen3-VL-4B-Instruct",
+    "model_revision": "ebb281ec70b05090aa6165b016eac8ec08e71b17",
+    "load_seconds": 25.56,
+    "clinical_validation": false,
+    "results": [
+      {
+        "image": "low_contrast_control.png",
+        "result": {
+          "status": "needs_retake",
+          "source": "experimental_vlm",
+          "requires_user_confirmation": true,
+          "eligible_for_auto_save": false,
+          "severity": null,
+          "observation": {
+            "image_scope": "uncertain",
+            "observations": [],
+            "limitations": [
+              "照片品質不足，請重新拍攝。"
+            ],
+            "follow_up_question": "可以提供清楚且沒有濾鏡的照片嗎？"
+          },
+          "quality": {
+            "width": 512,
+            "height": 512,
+            "brightness": 128.0,
+            "reasons": [
+              "low_contrast"
+            ],
+            "note": "Heuristic checks only; face/blur/lighting assessment not validated."
+          }
+        }
+      },
+      {
+        "image": "non_skin_control.png",
+        "result": {
+          "status": "needs_retake",
+          "source": "experimental_vlm",
+          "requires_user_confirmation": true,
+          "eligible_for_auto_save": false,
+          "severity": null,
+          "observation": {
+            "image_scope": "non_skin",
+            "observations": [],
+            "limitations": [
+              "此照片無法用於觀察膚況。"
+            ],
+            "follow_up_question": ""
+          },
+          "quality": {
+            "width": 512,
+            "height": 512,
+            "brightness": 208.91,
+            "reasons": [],
+            "note": "Heuristic checks only; face/blur/lighting assessment not validated."
+          },
+          "raw_output": "{\n  \"image_scope\": \"non_skin\",\n  \"observations\": [],\n  \"limitations\": [\n    \"此照片無法用於觀察膚況。\"\n  ],\n  \"follow_up_question\": \"\"\n}",
+          "inference_seconds": 5.908,
+          "image_sha256": "5ddbb7976379f19ef76f481cc44b986b4e588e451db2a458adf75e057a191edd"
+        }
+      },
+      {
+        "image": "public_acne_ccby4.jpg",
+        "result": {
+          "status": "needs_confirmation",
+          "source": "experimental_vlm",
+          "requires_user_confirmation": true,
+          "eligible_for_auto_save": false,
+          "severity": null,
+          "observation": {
+            "image_scope": "skin_closeup",
+            "observations": [
+              {
+                "tag": "acne_like_bumps",
+                "region": "cheek",
+                "evidence": "臉頰區域可見多個紅色、隆起的丘疹，部分有白色頭部，呈密集分布"
+              },
+              {
+                "tag": "redness",
+                "region": "cheek",
+                "evidence": "臉頰整體呈現泛紅狀態，尤其在痘痘集中區更為明顯"
+              }
+            ],
+            "limitations": [
+              "照片光線偏暗且影像品質較低，可能影響細節辨識"
+            ],
+            "follow_up_question": "請提供更清晰的皮膚照片以便進一步觀察。"
+          },
+          "quality": {
+            "width": 870,
+            "height": 547,
+            "brightness": 132.34,
+            "reasons": [],
+            "note": "Heuristic checks only; face/blur/lighting assessment not validated."
+          },
+          "raw_output": "{\n  \"image_scope\": \"skin_closeup\",\n  \"observations\": [\n    {\n      \"tag\": \"acne_like_bumps\",\n      \"region\": \"cheek\",\n      \"evidence\": \"臉頰區域可見多個紅色、隆起的丘疹，部分有白色頭部，呈密集分布\"\n    },\n    {\n      \"tag\": \"redness\",\n      \"region\": \"cheek\",\n      \"evidence\": \"臉頰整體呈現泛紅狀態，尤其在痘痘集中區更為明顯\"\n    }\n  ],\n  \"limitations\": [\n    \"照片光線偏暗且影像品質較低，可能影響細節辨識\"\n  ],\n  \"follow_up_question\": \"請提供更清晰的皮膚照片以便進一步觀察。\"\n}",
+          "inference_seconds": 5.119,
+          "image_sha256": "b938b0940de6722e34a9c7d13dfe2186d1b733900b692a6df9cb41a814096510"
+        }
+      }
+    ]
+  },
+  "training": {
+    "engineering_smoke_only": true,
+    "clinical_validation": false,
+    "steps": 1,
+    "accumulation": 1,
+    "rank": 8,
+    "learning_rate": 0.0001,
+    "seed": 42,
+    "train_images": 1,
+    "validation_images": 0,
+    "trainable_parameters": 5898240,
+    "metrics": [
+      {
+        "step": 1,
+        "train_loss": 0.9168091416358948,
+        "grad_norm": 2.8861632347106934
+      }
+    ],
+    "train_manifest_sha256": "492a98abc3a3a68e6c4aaef13437dc7d9764ebe8f58deb169f7c8451f758e418",
+    "base_model": "/var/lib/jenkins/tomod/experiments/skin-vlm/model",
+    "warning": "Successful training/lower loss is not skin-recognition accuracy."
+  }
+}

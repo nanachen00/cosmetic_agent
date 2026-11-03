@@ -1,0 +1,8 @@
+{
+  "phase": "complete",
+  "updated_utc": "2026-10-31T06:51:26Z",
+  "selected": "lora-r8-attention-mlp-hardneg",
+  "test_macro_f1": 0.8326797385620914,
+  "difference": 0.020915032679738488,
+  "research_gate_passed": false
+}

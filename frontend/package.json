@@ -1,0 +1,27 @@
+{
+  "name": "blink-ai-girl-retro-v2",
+  "version": "2.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "typecheck": "tsc --noEmit",
+    "test:contracts": "node tests/source-contracts.mjs"
+  },
+  "dependencies": {
+    "@sentry/nextjs": "^10.75.0",
+    "@vercel/speed-insights": "^2.0.0",
+    "date-fns": "^4.4.0",
+    "next": "^16.3.5",
+    "react": "18.3.1",
+    "react-day-picker": "^10.0.1",
+    "react-dom": "18.3.1"
+  },
+  "devDependencies": {
+    "@types/node": "20.17.30",
+    "@types/react": "18.3.20",
+    "@types/react-dom": "18.3.6",
+    "typescript": "5.8.3"
+  }
+}

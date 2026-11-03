@@ -1,0 +1,546 @@
+[
+  {
+    "short_label": "溫和清潔",
+    "aliases": [
+      "溫和清潔",
+      "不致粉刺保養"
+    ],
+    "evidence_titles": [
+      "NHS — Acne"
+    ],
+    "reviewed_at": "2026-10-31",
+    "knowledge_patch_id": "kg-curated-closed-comedones-v1",
+    "description": "可選擇溫和清潔並使用標示不致粉刺的保養與彩妝產品，避免過度摩擦。",
+    "normalized_name": "溫和清潔與不致粉刺保養",
+    "kg_id": "care_gentle_noncomedogenic_routine",
+    "evidence_urls": [
+      "https://www.nhs.uk/conditions/acne/"
+    ],
+    "type": "CareNeed",
+    "display_name": "溫和清潔與不致粉刺保養",
+    "source_ids": [
+      "nhs-acne-2026"
+    ],
+    "entity_type": "CareNeed",
+    "name": "溫和清潔與不致粉刺保養",
+    "id": "care_gentle_noncomedogenic_routine",
+    "review_status": "verified"
+  },
+  {
+    "short_label": "閉鎖性粉刺",
+    "aliases": [
+      "內包粉刺",
+      "白頭粉刺",
+      "閉口粉刺",
+      "閉鎖性面皰",
+      "closed comedones",
+      "whiteheads"
+    ],
+    "evidence_titles": [
+      "American Academy of Dermatology — How to treat different types of acne",
+      "NHS — Acne"
+    ],
+    "reviewed_at": "2026-10-31",
+    "knowledge_patch_id": "kg-curated-closed-comedones-v1",
+    "description": "毛孔被皮脂與老廢角質堵塞且開口封閉時，可能形成膚色或白色的小凸起，屬於粉刺型痤瘡。",
+    "normalized_name": "閉鎖性粉刺",
+    "kg_id": "concern_closed_comedones",
+    "evidence_urls": [
+      "https://www.aad.org/public/diseases/acne/diy/types-breakouts/",
+      "https://www.nhs.uk/conditions/acne/"
+    ],
+    "type": "SkinConcern",
+    "display_name": "閉鎖性粉刺",
+    "source_ids": [
+      "aad-acne-types-2023",
+      "nhs-acne-2026"
+    ],
+    "entity_type": "SkinConcern",
+    "name": "閉鎖性粉刺",
+    "id": "concern_closed_comedones",
+    "review_status": "verified"
+  },
+  {
+    "short_label": "阿達帕林",
+    "aliases": [
+      "Adapalene",
+      "阿達帕林",
+      "外用維A酸"
+    ],
+    "evidence_titles": [
+      "American Academy of Dermatology — Acne: Diagnosis and treatment"
+    ],
+    "reviewed_at": "2026-10-31",
+    "knowledge_patch_id": "kg-curated-closed-comedones-v1",
+    "description": "阿達帕林是外用維 A 酸類藥物，可用於白頭粉刺等痤瘡；孕期或備孕及用藥方式應先諮詢醫師或藥師。",
+    "normalized_name": "阿達帕林（adapalene）",
+    "kg_id": "drug_active_adapalene_curated",
+    "evidence_urls": [
+      "https://www.aad.org/public/diseases/acne/derm-treat/treat"
+    ],
+    "type": "DrugActiveIngredient",
+    "display_name": "阿達帕林（Adapalene）",
+    "source_ids": [
+      "aad-acne-treatment"
+    ],
+    "entity_type": "DrugActiveIngredient",
+    "name": "阿達帕林（Adapalene）",
+    "id": "drug_active_adapalene_curated",
+    "review_status": "verified"
+  },
+  {
+    "aliases": [
+      "〝生達〞皮爽能粉劑",
+      "MICO-S POWDER \"STANDARD\"",
+      "衛署藥製字第042648號"
+    ],
+    "normalized_name": "drug_product_fc0aafe88fb3",
+    "kg_id": "drug_product_fc0aafe88fb3",
+    "type": "DrugProduct",
+    "display_name": "〝生達〞皮爽能粉劑",
+    "license_number": "衛署藥製字第042648號",
+    "dosage_form": "外用粉劑",
+    "manufacturer": "生達化學製藥股份有限公司",
+    "source_ids": [
+      "tfda_drug_licenses_36"
+    ],
+    "active_ingredient_text": "MICONAZOLE NITRATE;;SALICYLIC ACID",
+    "snapshot_status": "non_cancelled_at_2026_10_02",
+    "entity_type": "DrugProduct",
+    "approved_indication_text": "治療皮膚表淺性黴菌感染，如：足癬（香港腳）、股癬、汗斑及去角質。",
+    "name": "〝生達〞皮爽能粉劑",
+    "manufacturer_country": "TW",
+    "drug_category": "醫師藥師藥劑生指示藥品",
+    "cancellation_status": "",
+    "id": "drug_product_fc0aafe88fb3",
+    "review_status": "needs-review",
+    "license_holder": "生達化學製藥股份有限公司",
+    "description": ""
+  },
+  {
+    "source_ids": [
+      "ontology_v1"
+    ],
+    "aliases": [
+      "保濕補水",
+      "Hydration",
+      "hydration"
+    ],
+    "entity_type": "Function",
+    "name": "保濕補水",
+    "normalized_name": "hydration",
+    "kg_id": "function_hydration",
+    "id": "function_hydration",
+    "review_status": "needs-review",
+    "type": "Function",
+    "display_name": "保濕補水",
+    "description": ""
+  },
+  {
+    "short_label": "疏通毛孔",
+    "aliases": [
+      "暢通毛孔",
+      "改善毛孔堵塞"
+    ],
+    "evidence_titles": [
+      "American Academy of Dermatology — Acne: Diagnosis and treatment"
+    ],
+    "reviewed_at": "2026-10-31",
+    "knowledge_patch_id": "kg-curated-closed-comedones-v1",
+    "description": "粉刺照護的常見作用方向之一，是協助疏通被堵塞的毛孔。",
+    "normalized_name": "疏通堵塞毛孔",
+    "kg_id": "function_unclog_pores",
+    "evidence_urls": [
+      "https://www.aad.org/public/diseases/acne/derm-treat/treat"
+    ],
+    "type": "Function",
+    "display_name": "疏通堵塞毛孔",
+    "source_ids": [
+      "aad-acne-treatment"
+    ],
+    "entity_type": "Function",
+    "name": "疏通堵塞毛孔",
+    "id": "function_unclog_pores",
+    "review_status": "verified"
+  },
+  {
+    "short_label": "水楊酸",
+    "aliases": [
+      "BHA",
+      "salicylic acid"
+    ],
+    "evidence_titles": [
+      "American Academy of Dermatology — Acne: Diagnosis and treatment"
+    ],
+    "reviewed_at": "2026-10-31",
+    "knowledge_patch_id": "kg-curated-closed-comedones-v1",
+    "description": "水楊酸可幫助疏通堵塞毛孔與去除表面老廢角質；使用濃度與方式應依產品標示或專業建議。",
+    "normalized_name": "水楊酸",
+    "kg_id": "ingredient_salicylic_acid_curated",
+    "evidence_urls": [
+      "https://www.aad.org/public/diseases/acne/derm-treat/treat"
+    ],
+    "type": "Ingredient",
+    "display_name": "水楊酸",
+    "source_ids": [
+      "aad-acne-treatment"
+    ],
+    "entity_type": "Ingredient",
+    "name": "水楊酸",
+    "id": "ingredient_salicylic_acid_curated",
+    "review_status": "verified"
+  },
+  {
+    "source_ids": [
+      "care_pathway_ontology_v1"
+    ],
+    "aliases": [
+      "保濕",
+      "補水",
+      "乾燥保養",
+      "缺水保養",
+      "想保濕",
+      "保濕需求"
+    ],
+    "entity_type": "CareNeed",
+    "name": "保濕",
+    "normalized_name": "hydration",
+    "kg_id": "need_hydration",
+    "id": "need_hydration",
+    "review_status": "needs-review",
+    "type": "CareNeed",
+    "display_name": "保濕",
+    "description": ""
+  },
+  {
+    "source_ids": [
+      "care_pathway_ontology_v1"
+    ],
+    "aliases": [
+      "舒緩",
+      "敏感舒緩",
+      "敏弱照護",
+      "刺痛照護"
+    ],
+    "entity_type": "CareNeed",
+    "name": "舒緩照護",
+    "normalized_name": "soothing",
+    "kg_id": "need_soothing",
+    "id": "need_soothing",
+    "review_status": "needs-review",
+    "type": "CareNeed",
+    "display_name": "舒緩照護",
+    "description": ""
+  },
+  {
+    "short_label": "白色小凸起",
+    "aliases": [
+      "白色小凸起",
+      "膚色小顆粒"
+    ],
+    "evidence_titles": [
+      "American Academy of Dermatology — How to treat different types of acne",
+      "NHS — Acne"
+    ],
+    "reviewed_at": "2026-10-31",
+    "knowledge_patch_id": "kg-curated-closed-comedones-v1",
+    "description": "白頭粉刺常呈現膚色或白色的小凸起。",
+    "normalized_name": "膚色或白色小凸起",
+    "kg_id": "symptom_skin_colored_white_bumps",
+    "evidence_urls": [
+      "https://www.aad.org/public/diseases/acne/diy/types-breakouts/",
+      "https://www.nhs.uk/conditions/acne/"
+    ],
+    "type": "Symptom",
+    "display_name": "膚色或白色小凸起",
+    "source_ids": [
+      "aad-acne-types-2023",
+      "nhs-acne-2026"
+    ],
+    "entity_type": "Symptom",
+    "name": "膚色或白色小凸起",
+    "id": "symptom_skin_colored_white_bumps",
+    "review_status": "verified"
+  },
+  {
+    "short_label": "毛孔堵塞",
+    "aliases": [
+      "毛孔堵塞",
+      "角質與皮脂堆積"
+    ],
+    "evidence_titles": [
+      "American Academy of Dermatology — How to treat different types of acne",
+      "NHS — Acne"
+    ],
+    "reviewed_at": "2026-10-31",
+    "knowledge_patch_id": "kg-curated-closed-comedones-v1",
+    "description": "過多皮脂與老廢角質堆積可堵塞毛囊並形成粉刺。",
+    "normalized_name": "毛囊被皮脂與老廢角質堵塞",
+    "kg_id": "trigger_clogged_hair_follicle",
+    "evidence_urls": [
+      "https://www.aad.org/public/diseases/acne/diy/types-breakouts/",
+      "https://www.nhs.uk/conditions/acne/"
+    ],
+    "type": "Trigger",
+    "display_name": "毛囊被皮脂與老廢角質堵塞",
+    "source_ids": [
+      "aad-acne-types-2023",
+      "nhs-acne-2026"
+    ],
+    "entity_type": "Trigger",
+    "name": "毛囊被皮脂與老廢角質堵塞",
+    "id": "trigger_clogged_hair_follicle",
+    "review_status": "verified"
+  },
+  {
+    "short_label": "避免擠壓",
+    "aliases": [
+      "不要擠粉刺",
+      "避免摳抓"
+    ],
+    "evidence_titles": [
+      "American Academy of Dermatology — How to treat different types of acne",
+      "NHS — Acne"
+    ],
+    "reviewed_at": "2026-10-31",
+    "knowledge_patch_id": "kg-curated-closed-comedones-v1",
+    "description": "摳抓、擠壓或用力磨砂可能使痘痘惡化並增加留疤風險。",
+    "normalized_name": "避免摳抓或擠壓",
+    "kg_id": "warning_do_not_pick_comedones",
+    "evidence_urls": [
+      "https://www.aad.org/public/diseases/acne/diy/types-breakouts/",
+      "https://www.nhs.uk/conditions/acne/"
+    ],
+    "type": "SafetyWarning",
+    "display_name": "避免摳抓或擠壓",
+    "source_ids": [
+      "aad-acne-types-2023",
+      "nhs-acne-2026"
+    ],
+    "entity_type": "SafetyWarning",
+    "name": "避免摳抓或擠壓",
+    "id": "warning_do_not_pick_comedones",
+    "review_status": "verified"
+  },
+  {
+    "id": "concern_acne_vulgaris",
+    "kg_id": "concern_acne_vulgaris",
+    "type": "SkinConcern",
+    "entity_type": "SkinConcern",
+    "name": "痘痘（尋常性痤瘡）",
+    "display_name": "痘痘（尋常性痤瘡）",
+    "short_label": "痘痘（尋常性痤瘡）",
+    "normalized_name": "acne_vulgaris",
+    "aliases": [
+      "痘痘",
+      "青春痘",
+      "痤瘡"
+    ],
+    "description": "毛孔被皮脂與老廢角質堵住後，可能出現粉刺、紅色丘疹、膿疱或深層疼痛的結節；需要依實際類型判斷。",
+    "source_ids": [
+      "aad-acne_vulgaris-2026"
+    ],
+    "evidence_titles": [
+      "American Academy of Dermatology — Acne: Overview"
+    ],
+    "evidence_urls": [
+      "https://www.aad.org/public/diseases/acne/really-acne/overview"
+    ],
+    "review_status": "verified",
+    "publication_status": "published",
+    "status": "active",
+    "reviewed_at": "2026-11-01"
+  },
+  {
+    "id": "concern_open_comedones",
+    "kg_id": "concern_open_comedones",
+    "type": "SkinConcern",
+    "entity_type": "SkinConcern",
+    "name": "黑頭粉刺",
+    "display_name": "黑頭粉刺",
+    "short_label": "黑頭粉刺",
+    "normalized_name": "open_comedones",
+    "aliases": [
+      "開放性粉刺",
+      "黑頭"
+    ],
+    "description": "毛孔開口未閉合、內部堵塞物露在空氣中而呈深色；黑色不代表髒污。",
+    "source_ids": [
+      "aad-open_comedones-2026"
+    ],
+    "evidence_titles": [
+      "American Academy of Dermatology — How to treat different types of acne"
+    ],
+    "evidence_urls": [
+      "https://www.aad.org/public/diseases/acne/diy/types-breakouts/"
+    ],
+    "review_status": "verified",
+    "publication_status": "published",
+    "status": "active",
+    "reviewed_at": "2026-11-01"
+  },
+  {
+    "id": "concern_irritant_contact_dermatitis",
+    "kg_id": "concern_irritant_contact_dermatitis",
+    "type": "SkinConcern",
+    "entity_type": "SkinConcern",
+    "name": "刺激性接觸皮膚炎",
+    "display_name": "刺激性接觸皮膚炎",
+    "short_label": "刺激性接觸皮膚炎",
+    "normalized_name": "irritant_contact_dermatitis",
+    "aliases": [
+      "保養品刺激泛紅",
+      "刺激泛紅"
+    ],
+    "description": "清潔用品、保養品或反覆接觸刺激物使皮膚受損時，可能泛紅、乾裂、刺痛或灼熱；這和過敏反應不同。",
+    "source_ids": [
+      "aad-irritant_contact_dermatitis-2026"
+    ],
+    "evidence_titles": [
+      "American Academy of Dermatology — Contact dermatitis: Causes"
+    ],
+    "evidence_urls": [
+      "https://www.aad.org/public/diseases/eczema/types/contact-dermatitis/causes"
+    ],
+    "review_status": "verified",
+    "publication_status": "published",
+    "status": "active",
+    "reviewed_at": "2026-11-01"
+  },
+  {
+    "id": "concern_recurrent_facial_redness",
+    "kg_id": "concern_recurrent_facial_redness",
+    "type": "SkinConcern",
+    "entity_type": "SkinConcern",
+    "name": "反覆臉部泛紅",
+    "display_name": "反覆臉部泛紅",
+    "short_label": "反覆臉部泛紅",
+    "normalized_name": "recurrent_facial_redness",
+    "aliases": [
+      "泛紅敏感",
+      "臉頰容易紅"
+    ],
+    "description": "臉部反覆發紅只是表現，可能與刺激、接觸性皮膚炎或酒糟等有關；不能只憑泛紅判定病因。",
+    "source_ids": [
+      "aad-recurrent_facial_redness-2026"
+    ],
+    "evidence_titles": [
+      "American Academy of Dermatology — Is rosacea causing your red, irritated face?"
+    ],
+    "evidence_urls": [
+      "https://www.aad.org/public/diseases/rosacea/what-is/red-face"
+    ],
+    "review_status": "verified",
+    "publication_status": "published",
+    "status": "active",
+    "reviewed_at": "2026-11-01"
+  },
+  {
+    "id": "concern_atopic_dermatitis",
+    "kg_id": "concern_atopic_dermatitis",
+    "type": "SkinConcern",
+    "entity_type": "SkinConcern",
+    "name": "異位性皮膚炎",
+    "display_name": "異位性皮膚炎",
+    "short_label": "異位性皮膚炎",
+    "normalized_name": "atopic_dermatitis",
+    "aliases": [
+      "異位性濕疹",
+      "濕疹"
+    ],
+    "description": "常見的慢性濕疹類型，皮膚可能乾燥、發炎且發癢；不同年齡與膚色的外觀可能不同，需由醫師判斷。",
+    "source_ids": [
+      "aad-atopic_dermatitis-2026"
+    ],
+    "evidence_titles": [
+      "American Academy of Dermatology — Atopic dermatitis: Overview"
+    ],
+    "evidence_urls": [
+      "https://www.aad.org/public/diseases/eczema/types/atopic-dermatitis"
+    ],
+    "review_status": "verified",
+    "publication_status": "published",
+    "status": "active",
+    "reviewed_at": "2026-11-01"
+  },
+  {
+    "id": "concern_perioral_dermatitis",
+    "kg_id": "concern_perioral_dermatitis",
+    "type": "SkinConcern",
+    "entity_type": "SkinConcern",
+    "name": "口周皮膚炎",
+    "display_name": "口周皮膚炎",
+    "short_label": "口周皮膚炎",
+    "normalized_name": "perioral_dermatitis",
+    "aliases": [
+      "嘴巴周圍小疹子",
+      "口周紅疹"
+    ],
+    "description": "嘴巴周圍可能出現像痘痘的小疹子，伴隨乾燥、脫屑、發癢或灼熱；也可能在鼻翼或眼周出現，建議醫師辨別。",
+    "source_ids": [
+      "aad-perioral_dermatitis-2026"
+    ],
+    "evidence_titles": [
+      "American Academy of Dermatology — Red rash around your mouth could be perioral dermatitis"
+    ],
+    "evidence_urls": [
+      "https://www.aad.org/public/diseases/a-z/perioral-dermatitis"
+    ],
+    "review_status": "verified",
+    "publication_status": "published",
+    "status": "active",
+    "reviewed_at": "2026-11-01"
+  },
+  {
+    "id": "function_exfoliate_dead_skin",
+    "kg_id": "function_exfoliate_dead_skin",
+    "type": "Function",
+    "entity_type": "Function",
+    "name": "去除老廢角質",
+    "display_name": "去除老廢角質",
+    "short_label": "去除老廢角質",
+    "normalized_name": "去除老廢角質",
+    "aliases": [
+      "角質代謝"
+    ],
+    "description": "水楊酸可協助去除表面老廢角質；效果與刺激性取決於產品配方及使用方式。",
+    "source_ids": [
+      "aad-acne-treatment"
+    ],
+    "evidence_urls": [
+      "https://www.aad.org/public/diseases/acne/derm-treat/treat"
+    ],
+    "evidence_titles": [
+      "American Academy of Dermatology – Acne: Diagnosis and treatment"
+    ],
+    "review_status": "verified",
+    "reviewed_at": "2026-11-01",
+    "knowledge_patch_id": "kg-salicylic-expanded-2026-11-01"
+  },
+  {
+    "id": "warning_salicylic_dryness_irritation",
+    "kg_id": "warning_salicylic_dryness_irritation",
+    "type": "SafetyWarning",
+    "entity_type": "SafetyWarning",
+    "name": "可能乾燥或刺激",
+    "display_name": "可能乾燥或刺激",
+    "short_label": "可能乾燥或刺激",
+    "normalized_name": "可能乾燥或刺激",
+    "aliases": [
+      "乾燥刺激"
+    ],
+    "description": "開始使用水楊酸時，皮膚可能乾燥或受刺激；若不適，可減少使用頻率並依標示或詢問醫師、藥師。",
+    "source_ids": [
+      "medlineplus-salicylic"
+    ],
+    "evidence_urls": [
+      "https://medlineplus.gov/druginfo/meds/a607072.html"
+    ],
+    "evidence_titles": [
+      "MedlinePlus – Salicylic Acid Topical"
+    ],
+    "review_status": "verified",
+    "reviewed_at": "2026-11-01",
+    "knowledge_patch_id": "kg-salicylic-expanded-2026-11-01"
+  }
+]

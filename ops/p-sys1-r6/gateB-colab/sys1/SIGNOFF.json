@@ -1,0 +1,43 @@
+{
+ "_doc": "S0 負責人決策（P_SYS1_REPLACEMENT_PLAN.md §5）。frozen_files 是定案時的 SHA-256；run_vm.sh train/s2 會用 sys1/signoff.py verify 核對，不符即拒絕。要修改必須重新簽核並記錄在 REPORT。",
+ "signed_by": "Saika（使用者）",
+ "signed_on": "2026-10-28",
+ "recorded_by": "Claude（cosmetic-agent 專案負責人）",
+ "note": "依 docs/plans/P_SYS1_REPLACEMENT_PLAN.md §5 建議定案；使用者於 2026-10-28 Claude Code 對話核准，Claude 代為記錄",
+ "decisions": {
+  "1_candidate_provenance": {
+   "signed": [
+    "mmbert-ft",
+    "mdeberta-ft",
+    "xlmr-ft"
+   ],
+   "pending_review": [
+    "eurobert-ft"
+   ],
+   "excluded": [
+    "laya-mmbert",
+    "laya-typed",
+    "smollm2-kev",
+    "bgem3-ft",
+    "gemma3-1b-kev"
+   ],
+   "reference": [
+    "kev-0.8b"
+   ]
+  },
+  "2_labels_generated_by_chinese_models": "violation（基座合格但標註由中國模型產生，視為不合格）",
+  "3_budget_and_gates": "照現值定案；之後不得修改（見 frozen_files）",
+  "4_router_gold_v2": "待決定（S5 之前）",
+  "5_sys1_error_fallback": "safety_or_clarify：不退回 LLM（control/sys1_dispatch.json error_fallback）",
+  "6_conversation_route": "維持澄清（conversation_reply=false），S5 之後再評估",
+  "7_replace_layer1": "不換（保留 classify_dialogue_route 與 119 急症回覆）",
+  "8_avoid_ingredients_schema": "待決定（S5 之後另開變更）",
+  "9_prod_roots": "待 VM 上 find_prod_roots.sh 確認（S3 之前）",
+  "10_canary_steps": "每一級分別同意（S5）",
+  "11_gemma_license": "不列入評比"
+ },
+ "frozen_files": {
+  "gates.json": "ae054a68b177187c086a23ef8888bb1b4d4352db47ffea8d77cedc3a852a9293",
+  "train/budget.json": "512eea5606ec251109177c861756eabca8a9d64c773d740799e1f2d3027ca014"
+ }
+}

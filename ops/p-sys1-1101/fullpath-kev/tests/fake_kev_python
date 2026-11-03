@@ -1,0 +1,8 @@
+#!/usr/bin/env python3
+# Stands in for $ROOT/.runtime/kev-py312/bin/python in the selftest: `python -m kev.serve --run X --host H --port P` -> mock Kev (rule-based, NOT a model)
+import sys, runpy, os
+a = sys.argv[1:]
+assert a[:2] == ["-m", "kev.serve"], a
+port = a[a.index("--port") + 1]
+sys.argv = [os.path.join(os.environ["FP_BUNDLE"], "tests", "mock_kev.py"), "--port", port]
+runpy.run_path(sys.argv[0], run_name="__main__")

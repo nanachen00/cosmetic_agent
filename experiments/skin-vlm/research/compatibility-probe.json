@@ -1,0 +1,600 @@
+{
+  "status": "complete",
+  "note": "Compatibility and refusal smoke only; not four-tag accuracy or clinical validation. Models selected before this probe; no checkpoint tuning uses probe results.",
+  "stats": [
+    {
+      "version": "original",
+      "model_calls": 4,
+      "valid_full_report": 4,
+      "non_skin_refused": true,
+      "low_contrast_heuristic_refused": true
+    },
+    {
+      "version": "cycle1",
+      "model_calls": 4,
+      "valid_full_report": 4,
+      "non_skin_refused": true,
+      "low_contrast_heuristic_refused": true
+    },
+    {
+      "version": "cycle2",
+      "model_calls": 4,
+      "valid_full_report": 4,
+      "non_skin_refused": true,
+      "low_contrast_heuristic_refused": true
+    }
+  ],
+  "results": [
+    {
+      "version": "original",
+      "case": "ccby_public_example",
+      "expected_input_role": "skin",
+      "wall_seconds": 10.13099524390418,
+      "report": {
+        "status": "needs_confirmation",
+        "source": "experimental_vlm",
+        "requires_user_confirmation": true,
+        "eligible_for_auto_save": false,
+        "severity": null,
+        "observation": {
+          "image_scope": "skin_closeup",
+          "observations": [
+            {
+              "tag": "acne_like_bumps",
+              "region": "cheek",
+              "evidence": "臉頰區域可見多個紅色、隆起的丘疹，部分有白色頭部，呈密集分布"
+            },
+            {
+              "tag": "redness",
+              "region": "cheek",
+              "evidence": "臉頰整體呈現泛紅狀態，尤其在痘痘集中區更為明顯"
+            }
+          ],
+          "limitations": [
+            "照片光線偏暗且影像品質較低，可能影響細節辨識"
+          ],
+          "follow_up_question": "請提供更清晰的皮膚照片以便進一步觀察。"
+        },
+        "quality": {
+          "width": 870,
+          "height": 547,
+          "brightness": 132.34,
+          "reasons": [],
+          "note": "Heuristic checks only; face/blur/lighting assessment not validated."
+        },
+        "raw_output": "{\n  \"image_scope\": \"skin_closeup\",\n  \"observations\": [\n    {\n      \"tag\": \"acne_like_bumps\",\n      \"region\": \"cheek\",\n      \"evidence\": \"臉頰區域可見多個紅色、隆起的丘疹，部分有白色頭部，呈密集分布\"\n    },\n    {\n      \"tag\": \"redness\",\n      \"region\": \"cheek\",\n      \"evidence\": \"臉頰整體呈現泛紅狀態，尤其在痘痘集中區更為明顯\"\n    }\n  ],\n  \"limitations\": [\n    \"照片光線偏暗且影像品質較低，可能影響細節辨識\"\n  ],\n  \"follow_up_question\": \"請提供更清晰的皮膚照片以便進一步觀察。\"\n}",
+        "inference_seconds": 9.273,
+        "image_sha256": "b938b0940de6722e34a9c7d13dfe2186d1b733900b692a6df9cb41a814096510"
+      }
+    },
+    {
+      "version": "original",
+      "case": "non_skin_control",
+      "expected_input_role": "non_skin",
+      "wall_seconds": 1.6578354559605941,
+      "report": {
+        "status": "needs_retake",
+        "source": "experimental_vlm",
+        "requires_user_confirmation": true,
+        "eligible_for_auto_save": false,
+        "severity": null,
+        "observation": {
+          "image_scope": "non_skin",
+          "observations": [],
+          "limitations": [
+            "此照片無法用於觀察膚況。"
+          ],
+          "follow_up_question": ""
+        },
+        "quality": {
+          "width": 512,
+          "height": 512,
+          "brightness": 208.91,
+          "reasons": [],
+          "note": "Heuristic checks only; face/blur/lighting assessment not validated."
+        },
+        "raw_output": "{\n  \"image_scope\": \"non_skin\",\n  \"observations\": [],\n  \"limitations\": [\n    \"此照片無法用於觀察膚況。\"\n  ],\n  \"follow_up_question\": \"\"\n}",
+        "inference_seconds": 1.342,
+        "image_sha256": "5ddbb7976379f19ef76f481cc44b986b4e588e451db2a458adf75e057a191edd"
+      }
+    },
+    {
+      "version": "original",
+      "case": "low_contrast_control",
+      "expected_input_role": "low_contrast",
+      "wall_seconds": 0.0027486439794301987,
+      "report": {
+        "status": "needs_retake",
+        "source": "experimental_vlm",
+        "requires_user_confirmation": true,
+        "eligible_for_auto_save": false,
+        "severity": null,
+        "observation": {
+          "image_scope": "uncertain",
+          "observations": [],
+          "limitations": [
+            "照片品質不足，請重新拍攝。"
+          ],
+          "follow_up_question": "可以提供清楚且沒有濾鏡的照片嗎？"
+        },
+        "quality": {
+          "width": 512,
+          "height": 512,
+          "brightness": 128.0,
+          "reasons": [
+            "low_contrast"
+          ],
+          "note": "Heuristic checks only; face/blur/lighting assessment not validated."
+        }
+      }
+    },
+    {
+      "version": "original",
+      "case": "author_heldout_face_0",
+      "expected_input_role": "skin",
+      "wall_seconds": 13.7756362069631,
+      "report": {
+        "status": "needs_confirmation",
+        "source": "experimental_vlm",
+        "requires_user_confirmation": true,
+        "eligible_for_auto_save": false,
+        "severity": null,
+        "observation": {
+          "image_scope": "face",
+          "observations": [
+            {
+              "tag": "acne_like_bumps",
+              "region": "chin",
+              "evidence": "下巴區域可見數個紅色、略微隆起的丘疹，部分有輕微結痂跡象"
+            },
+            {
+              "tag": "acne_like_bumps",
+              "region": "cheek",
+              "evidence": "右臉頰可見數個紅色小丘疹，部分呈點狀聚集"
+            }
+          ],
+          "limitations": [
+            "照片光線較亮，可能造成皮膚表面反光，影響細節判讀。",
+            "影像品質一般，無法清晰辨識所有皮膚紋理與病灶邊界。"
+          ],
+          "follow_up_question": "請提供更清晰、無強光反射的皮膚近照以便進一步觀察。"
+        },
+        "quality": {
+          "width": 3112,
+          "height": 3456,
+          "brightness": 103.35,
+          "reasons": [],
+          "note": "Heuristic checks only; face/blur/lighting assessment not validated."
+        },
+        "raw_output": "{\n  \"image_scope\": \"face\",\n  \"observations\": [\n    {\n      \"tag\": \"acne_like_bumps\",\n      \"region\": \"chin\",\n      \"evidence\": \"下巴區域可見數個紅色、略微隆起的丘疹，部分有輕微結痂跡象\"\n    },\n    {\n      \"tag\": \"acne_like_bumps\",\n      \"region\": \"cheek\",\n      \"evidence\": \"右臉頰可見數個紅色小丘疹，部分呈點狀聚集\"\n    }\n  ],\n  \"limitations\": [\n    \"照片光線較亮，可能造成皮膚表面反光，影響細節判讀。\",\n    \"影像品質一般，無法清晰辨識所有皮膚紋理與病灶邊界。\"\n  ],\n  \"follow_up_question\": \"請提供更清晰、無強光反射的皮膚近照以便進一步觀察。\"\n}",
+        "inference_seconds": 13.39,
+        "image_sha256": "bc0d6df68f6735cd0b1c4dcc8b1dcfba6bbcfc6d5670beb4a7ea5c8848764ef1"
+      }
+    },
+    {
+      "version": "original",
+      "case": "author_heldout_face_1",
+      "expected_input_role": "skin",
+      "wall_seconds": 6.650591540033929,
+      "report": {
+        "status": "needs_confirmation",
+        "source": "experimental_vlm",
+        "requires_user_confirmation": true,
+        "eligible_for_auto_save": false,
+        "severity": null,
+        "observation": {
+          "image_scope": "skin_closeup",
+          "observations": [
+            {
+              "tag": "acne_like_bumps",
+              "region": "cheek",
+              "evidence": "臉頰區域可見多個紅色小丘疹及部分微腫的痘印"
+            },
+            {
+              "tag": "redness",
+              "region": "cheek",
+              "evidence": "臉頰呈現輕度泛紅，尤其在痘痘集中區域"
+            }
+          ],
+          "limitations": [
+            "照片光線較暗，可能影響對皮膚細節的準確判讀。",
+            "影像品質有限，無法辨識皮膚表面更微小的結構或變化。"
+          ],
+          "follow_up_question": "這張照片是白天拍攝還是晚上？有沒有使用任何護膚產品或化妝品？"
+        },
+        "quality": {
+          "width": 3112,
+          "height": 3456,
+          "brightness": 89.67,
+          "reasons": [],
+          "note": "Heuristic checks only; face/blur/lighting assessment not validated."
+        },
+        "raw_output": "{\n  \"image_scope\": \"skin_closeup\",\n  \"observations\": [\n    {\n      \"tag\": \"acne_like_bumps\",\n      \"region\": \"cheek\",\n      \"evidence\": \"臉頰區域可見多個紅色小丘疹及部分微腫的痘印\"\n    },\n    {\n      \"tag\": \"redness\",\n      \"region\": \"cheek\",\n      \"evidence\": \"臉頰呈現輕度泛紅，尤其在痘痘集中區域\"\n    }\n  ],\n  \"limitations\": [\n    \"照片光線較暗，可能影響對皮膚細節的準確判讀。\",\n    \"影像品質有限，無法辨識皮膚表面更微小的結構或變化。\"\n  ],\n  \"follow_up_question\": \"這張照片是白天拍攝還是晚上？有沒有使用任何護膚產品或化妝品？\"\n}",
+        "inference_seconds": 6.162,
+        "image_sha256": "040ae6c9a3489df30923605485a96b2425748874963918ea8cf9e9cd69ee6fa4"
+      }
+    },
+    {
+      "version": "cycle1",
+      "case": "ccby_public_example",
+      "expected_input_role": "skin",
+      "wall_seconds": 8.74264070193749,
+      "report": {
+        "status": "needs_confirmation",
+        "source": "experimental_vlm",
+        "requires_user_confirmation": true,
+        "eligible_for_auto_save": false,
+        "severity": null,
+        "observation": {
+          "image_scope": "skin_closeup",
+          "observations": [
+            {
+              "tag": "acne_like_bumps",
+              "region": "cheek",
+              "evidence": "臉頰區域可見多處紅色凸起，部分有頂部白頭或微發炎外觀"
+            },
+            {
+              "tag": "redness",
+              "region": "cheek",
+              "evidence": "臉頰呈現整體泛紅狀態，尤其在痘痘集中區"
+            },
+            {
+              "tag": "acne_like_bumps",
+              "region": "chin",
+              "evidence": "下巴區域亦可見數個類似痘痘的凸起，顏色偏紅"
+            }
+          ],
+          "limitations": [
+            "照片光線較暗，影像略模糊，可能影響細節辨識；未見明顯脫屑或色素沉著跡象"
+          ],
+          "follow_up_question": "請提供更清晰的正面或側面皮膚照片以便進一步觀察"
+        },
+        "quality": {
+          "width": 870,
+          "height": 547,
+          "brightness": 132.34,
+          "reasons": [],
+          "note": "Heuristic checks only; face/blur/lighting assessment not validated."
+        },
+        "raw_output": "{\"image_scope\":\"skin_closeup\",\"observations\":[{\"tag\":\"acne_like_bumps\",\"region\":\"cheek\",\"evidence\":\"臉頰區域可見多處紅色凸起，部分有頂部白頭或微發炎外觀\"},{\"tag\":\"redness\",\"region\":\"cheek\",\"evidence\":\"臉頰呈現整體泛紅狀態，尤其在痘痘集中區\"},{\"tag\":\"acne_like_bumps\",\"region\":\"chin\",\"evidence\":\"下巴區域亦可見數個類似痘痘的凸起，顏色偏紅\"}],\"limitations\":[\"照片光線較暗，影像略模糊，可能影響細節辨識；未見明顯脫屑或色素沉著跡象\"],\"follow_up_question\":\"請提供更清晰的正面或側面皮膚照片以便進一步觀察\"}",
+        "inference_seconds": 8.313,
+        "image_sha256": "b938b0940de6722e34a9c7d13dfe2186d1b733900b692a6df9cb41a814096510"
+      }
+    },
+    {
+      "version": "cycle1",
+      "case": "non_skin_control",
+      "expected_input_role": "non_skin",
+      "wall_seconds": 2.1985338599188253,
+      "report": {
+        "status": "needs_retake",
+        "source": "experimental_vlm",
+        "requires_user_confirmation": true,
+        "eligible_for_auto_save": false,
+        "severity": null,
+        "observation": {
+          "image_scope": "non_skin",
+          "observations": [],
+          "limitations": [
+            "此照片無法用於觀察膚況。"
+          ],
+          "follow_up_question": "可以提供清楚的皮膚照片嗎？"
+        },
+        "quality": {
+          "width": 512,
+          "height": 512,
+          "brightness": 208.91,
+          "reasons": [],
+          "note": "Heuristic checks only; face/blur/lighting assessment not validated."
+        },
+        "raw_output": "{\"image_scope\":\"non_skin\",\"observations\":[],\"limitations\":[\"此照片無法用於觀察膚況。\"],\"follow_up_question\":\"可以提供清楚的皮膚照片嗎？\"}",
+        "inference_seconds": 2.012,
+        "image_sha256": "5ddbb7976379f19ef76f481cc44b986b4e588e451db2a458adf75e057a191edd"
+      }
+    },
+    {
+      "version": "cycle1",
+      "case": "low_contrast_control",
+      "expected_input_role": "low_contrast",
+      "wall_seconds": 0.003675232990644872,
+      "report": {
+        "status": "needs_retake",
+        "source": "experimental_vlm",
+        "requires_user_confirmation": true,
+        "eligible_for_auto_save": false,
+        "severity": null,
+        "observation": {
+          "image_scope": "uncertain",
+          "observations": [],
+          "limitations": [
+            "照片品質不足，請重新拍攝。"
+          ],
+          "follow_up_question": "可以提供清楚且沒有濾鏡的照片嗎？"
+        },
+        "quality": {
+          "width": 512,
+          "height": 512,
+          "brightness": 128.0,
+          "reasons": [
+            "low_contrast"
+          ],
+          "note": "Heuristic checks only; face/blur/lighting assessment not validated."
+        }
+      }
+    },
+    {
+      "version": "cycle1",
+      "case": "author_heldout_face_0",
+      "expected_input_role": "skin",
+      "wall_seconds": 7.775088120950386,
+      "report": {
+        "status": "needs_confirmation",
+        "source": "experimental_vlm",
+        "requires_user_confirmation": true,
+        "eligible_for_auto_save": false,
+        "severity": null,
+        "observation": {
+          "image_scope": "face",
+          "observations": [
+            {
+              "tag": "acne_like_bumps",
+              "region": "chin",
+              "evidence": "下巴區域有多顆紅色、略微隆起的丘疹，部分有輕微結痂跡象"
+            },
+            {
+              "tag": "acne_like_bumps",
+              "region": "cheek",
+              "evidence": "右臉頰靠近下巴處可見數顆紅色小丘疹，部分呈點狀聚集"
+            }
+          ],
+          "limitations": [
+            "照片光線偏暗且有反光，可能影響細節辨識；影像品質一般，局部區域模糊。"
+          ],
+          "follow_up_question": "請提供更清晰、正面或側面的皮膚照片，以便觀察更多細節。"
+        },
+        "quality": {
+          "width": 3112,
+          "height": 3456,
+          "brightness": 103.35,
+          "reasons": [],
+          "note": "Heuristic checks only; face/blur/lighting assessment not validated."
+        },
+        "raw_output": "{\"image_scope\":\"face\",\"observations\":[{\"tag\":\"acne_like_bumps\",\"region\":\"chin\",\"evidence\":\"下巴區域有多顆紅色、略微隆起的丘疹，部分有輕微結痂跡象\"},{\"tag\":\"acne_like_bumps\",\"region\":\"cheek\",\"evidence\":\"右臉頰靠近下巴處可見數顆紅色小丘疹，部分呈點狀聚集\"}],\"limitations\":[\"照片光線偏暗且有反光，可能影響細節辨識；影像品質一般，局部區域模糊。\"],\"follow_up_question\":\"請提供更清晰、正面或側面的皮膚照片，以便觀察更多細節。\"}",
+        "inference_seconds": 7.276,
+        "image_sha256": "bc0d6df68f6735cd0b1c4dcc8b1dcfba6bbcfc6d5670beb4a7ea5c8848764ef1"
+      }
+    },
+    {
+      "version": "cycle1",
+      "case": "author_heldout_face_1",
+      "expected_input_role": "skin",
+      "wall_seconds": 6.218783085932955,
+      "report": {
+        "status": "needs_confirmation",
+        "source": "experimental_vlm",
+        "requires_user_confirmation": true,
+        "eligible_for_auto_save": false,
+        "severity": null,
+        "observation": {
+          "image_scope": "face",
+          "observations": [
+            {
+              "tag": "acne_like_bumps",
+              "region": "cheek",
+              "evidence": "左側臉頰有數個紅色小丘疹，部分呈凸起狀"
+            },
+            {
+              "tag": "redness",
+              "region": "cheek",
+              "evidence": "左側臉頰有明顯泛紅區域，範圍較廣"
+            }
+          ],
+          "limitations": [
+            "照片光線偏暗，影像品質一般，可能影響細節判讀"
+          ],
+          "follow_up_question": "請提供更清晰的皮膚照片以便進一步觀察"
+        },
+        "quality": {
+          "width": 3112,
+          "height": 3456,
+          "brightness": 89.67,
+          "reasons": [],
+          "note": "Heuristic checks only; face/blur/lighting assessment not validated."
+        },
+        "raw_output": "{\"image_scope\":\"face\",\"observations\":[{\"tag\":\"acne_like_bumps\",\"region\":\"cheek\",\"evidence\":\"左側臉頰有數個紅色小丘疹，部分呈凸起狀\"},{\"tag\":\"redness\",\"region\":\"cheek\",\"evidence\":\"左側臉頰有明顯泛紅區域，範圍較廣\"}],\"limitations\":[\"照片光線偏暗，影像品質一般，可能影響細節判讀\"],\"follow_up_question\":\"請提供更清晰的皮膚照片以便進一步觀察\"}",
+        "inference_seconds": 5.598,
+        "image_sha256": "040ae6c9a3489df30923605485a96b2425748874963918ea8cf9e9cd69ee6fa4"
+      }
+    },
+    {
+      "version": "cycle2",
+      "case": "ccby_public_example",
+      "expected_input_role": "skin",
+      "wall_seconds": 11.527169636101462,
+      "report": {
+        "status": "needs_confirmation",
+        "source": "experimental_vlm",
+        "requires_user_confirmation": true,
+        "eligible_for_auto_save": false,
+        "severity": null,
+        "observation": {
+          "image_scope": "face",
+          "observations": [
+            {
+              "tag": "acne_like_bumps",
+              "region": "cheek",
+              "evidence": "臉頰區域可見多處紅色凸起，部分呈圓形，表面有輕微油脂感"
+            },
+            {
+              "tag": "redness",
+              "region": "cheek",
+              "evidence": "臉頰整體呈現泛紅狀態，尤其在痘痘集中區更為明顯"
+            }
+          ],
+          "limitations": [
+            "照片光線偏暗，影像品質不佳，可能影響細節辨識。",
+            "未見到完整對稱部位，難以評估雙側差異。"
+          ],
+          "follow_up_question": "請提供清晰的正面或側面皮膚照片，以便更準確觀察症狀分布。"
+        },
+        "quality": {
+          "width": 870,
+          "height": 547,
+          "brightness": 132.34,
+          "reasons": [],
+          "note": "Heuristic checks only; face/blur/lighting assessment not validated."
+        },
+        "raw_output": "{\n  \"image_scope\":\"face\",\n  \"observations\":[\n    {\n      \"tag\":\"acne_like_bumps\",\n      \"region\":\"cheek\",\n      \"evidence\":\"臉頰區域可見多處紅色凸起，部分呈圓形，表面有輕微油脂感\"\n    },\n    {\n      \"tag\":\"redness\",\n      \"region\":\"cheek\",\n      \"evidence\":\"臉頰整體呈現泛紅狀態，尤其在痘痘集中區更為明顯\"\n    }\n  ],\n  \"limitations\":[\n    \"照片光線偏暗，影像品質不佳，可能影響細節辨識。\",\n    \"未見到完整對稱部位，難以評估雙側差異。\"\n  ],\n  \"follow_up_question\":\"請提供清晰的正面或側面皮膚照片，以便更準確觀察症狀分布。\"\n}",
+        "inference_seconds": 11.125,
+        "image_sha256": "b938b0940de6722e34a9c7d13dfe2186d1b733900b692a6df9cb41a814096510"
+      }
+    },
+    {
+      "version": "cycle2",
+      "case": "non_skin_control",
+      "expected_input_role": "non_skin",
+      "wall_seconds": 3.0852858129655942,
+      "report": {
+        "status": "needs_retake",
+        "source": "experimental_vlm",
+        "requires_user_confirmation": true,
+        "eligible_for_auto_save": false,
+        "severity": null,
+        "observation": {
+          "image_scope": "non_skin",
+          "observations": [],
+          "limitations": [
+            "此照片無法用於觀察膚況。"
+          ],
+          "follow_up_question": "可以提供清楚的皮膚照片嗎？"
+        },
+        "quality": {
+          "width": 512,
+          "height": 512,
+          "brightness": 208.91,
+          "reasons": [],
+          "note": "Heuristic checks only; face/blur/lighting assessment not validated."
+        },
+        "raw_output": "{\n  \"image_scope\":\"non_skin\",\n  \"observations\":[],\n  \"limitations\":[\"此照片無法用於觀察膚況。\"],\n  \"follow_up_question\":\"可以提供清楚的皮膚照片嗎？\"\n}",
+        "inference_seconds": 2.91,
+        "image_sha256": "5ddbb7976379f19ef76f481cc44b986b4e588e451db2a458adf75e057a191edd"
+      }
+    },
+    {
+      "version": "cycle2",
+      "case": "low_contrast_control",
+      "expected_input_role": "low_contrast",
+      "wall_seconds": 0.002976133953779936,
+      "report": {
+        "status": "needs_retake",
+        "source": "experimental_vlm",
+        "requires_user_confirmation": true,
+        "eligible_for_auto_save": false,
+        "severity": null,
+        "observation": {
+          "image_scope": "uncertain",
+          "observations": [],
+          "limitations": [
+            "照片品質不足，請重新拍攝。"
+          ],
+          "follow_up_question": "可以提供清楚且沒有濾鏡的照片嗎？"
+        },
+        "quality": {
+          "width": 512,
+          "height": 512,
+          "brightness": 128.0,
+          "reasons": [
+            "low_contrast"
+          ],
+          "note": "Heuristic checks only; face/blur/lighting assessment not validated."
+        }
+      }
+    },
+    {
+      "version": "cycle2",
+      "case": "author_heldout_face_0",
+      "expected_input_role": "skin",
+      "wall_seconds": 12.234148298040964,
+      "report": {
+        "status": "needs_confirmation",
+        "source": "experimental_vlm",
+        "requires_user_confirmation": true,
+        "eligible_for_auto_save": false,
+        "severity": null,
+        "observation": {
+          "image_scope": "face",
+          "observations": [
+            {
+              "tag": "acne_like_bumps",
+              "region": "chin",
+              "evidence": "下巴區域可見數個紅色、略微隆起的丘疹，部分有輕微結痂跡象"
+            },
+            {
+              "tag": "acne_like_bumps",
+              "region": "cheek",
+              "evidence": "右臉頰可見數個紅色小丘疹，部分呈點狀聚集"
+            }
+          ],
+          "limitations": [
+            "照片光線偏暗且有反光，可能影響對皮膚細節的準確判讀。",
+            "影像品質不佳，無法清晰辨識所有皮膚特徵。"
+          ],
+          "follow_up_question": "請提供更清晰、正面或側面的皮膚照片以便進一步觀察。"
+        },
+        "quality": {
+          "width": 3112,
+          "height": 3456,
+          "brightness": 103.35,
+          "reasons": [],
+          "note": "Heuristic checks only; face/blur/lighting assessment not validated."
+        },
+        "raw_output": "{\n  \"image_scope\":\"face\",\n  \"observations\":[\n    {\n      \"tag\":\"acne_like_bumps\",\n      \"region\":\"chin\",\n      \"evidence\":\"下巴區域可見數個紅色、略微隆起的丘疹，部分有輕微結痂跡象\"\n    },\n    {\n      \"tag\":\"acne_like_bumps\",\n      \"region\":\"cheek\",\n      \"evidence\":\"右臉頰可見數個紅色小丘疹，部分呈點狀聚集\"\n    }\n  ],\n  \"limitations\":[\n    \"照片光線偏暗且有反光，可能影響對皮膚細節的準確判讀。\",\n    \"影像品質不佳，無法清晰辨識所有皮膚特徵。\"\n  ],\n  \"follow_up_question\":\"請提供更清晰、正面或側面的皮膚照片以便進一步觀察。\"\n}",
+        "inference_seconds": 11.742,
+        "image_sha256": "bc0d6df68f6735cd0b1c4dcc8b1dcfba6bbcfc6d5670beb4a7ea5c8848764ef1"
+      }
+    },
+    {
+      "version": "cycle2",
+      "case": "author_heldout_face_1",
+      "expected_input_role": "skin",
+      "wall_seconds": 10.27566848800052,
+      "report": {
+        "status": "needs_confirmation",
+        "source": "experimental_vlm",
+        "requires_user_confirmation": true,
+        "eligible_for_auto_save": false,
+        "severity": null,
+        "observation": {
+          "image_scope": "face",
+          "observations": [
+            {
+              "tag": "acne_like_bumps",
+              "region": "cheek",
+              "evidence": "左側臉頰有數個紅色小丘疹，部分呈圓形隆起"
+            },
+            {
+              "tag": "redness",
+              "region": "cheek",
+              "evidence": "左側臉頰整體呈現輕度泛紅"
+            }
+          ],
+          "limitations": [
+            "照片光線偏暗，可能影響皮膚細節辨識。",
+            "影像品質有限，無法判讀皮膚表面微觀結構。"
+          ],
+          "follow_up_question": "請提供更清晰的皮膚照片，以便更準確觀察。"
+        },
+        "quality": {
+          "width": 3112,
+          "height": 3456,
+          "brightness": 89.67,
+          "reasons": [],
+          "note": "Heuristic checks only; face/blur/lighting assessment not validated."
+        },
+        "raw_output": "{\n  \"image_scope\":\"face\",\n  \"observations\":[\n    {\n      \"tag\":\"acne_like_bumps\",\n      \"region\":\"cheek\",\n      \"evidence\":\"左側臉頰有數個紅色小丘疹，部分呈圓形隆起\"\n    },\n    {\n      \"tag\":\"redness\",\n      \"region\":\"cheek\",\n      \"evidence\":\"左側臉頰整體呈現輕度泛紅\"\n    }\n  ],\n  \"limitations\":[\n    \"照片光線偏暗，可能影響皮膚細節辨識。\",\n    \"影像品質有限，無法判讀皮膚表面微觀結構。\"\n  ],\n  \"follow_up_question\":\"請提供更清晰的皮膚照片，以便更準確觀察。\"\n}",
+        "inference_seconds": 9.819,
+        "image_sha256": "040ae6c9a3489df30923605485a96b2425748874963918ea8cf9e9cd69ee6fa4"
+      }
+    }
+  ]
+}

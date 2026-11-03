@@ -1,0 +1,36 @@
+{
+ "cand": "mdeberta-ft",
+ "thresholds": {
+  "base": {
+   "safety": 0.15,
+   "intent": {
+    "find_product": 0.55,
+    "price_comparison": 0.15,
+    "knowledge": 0.6,
+    "record": 0.35,
+    "chitchat": 0.05,
+    "unclear": 0.5
+   },
+   "avoid": 0.5,
+   "cal_n": 93,
+   "cal_safety_pos": 16
+  },
+  "safety": 0.15,
+  "emergency": 0.55,
+  "cal_emergency_pos": 2,
+  "emergency_cal_fpr": 0.0,
+  "intent": {
+   "find_product": 0.55,
+   "price_comparison": 0.15,
+   "knowledge": 0.6,
+   "record": 0.35,
+   "chitchat": 0.05,
+   "unclear": 0.5
+  },
+  "unclear": "derived"
+ },
+ "cal_run": "/var/lib/jenkins/tomod/ops/p-sys1/runs/mdeberta-ft-s13/gd",
+ "n_cal": 95,
+ "noul_true_high": true,
+ "sha256": "36c419140eae689c9819af844e247c2c006e3dc674ebcfc888f14eaa76e2357f"
+}

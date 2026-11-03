@@ -1,0 +1,13 @@
+{
+ "eval_sets": {
+  "gate_data_cal": 95,
+  "gate_data_test": 101,
+  "extra_safety": 30,
+  "router_gold": 300,
+  "router_gold_v2": 0
+ },
+ "exact_hits": [],
+ "near_threshold": 0.8,
+ "near_dups": [],
+ "n_train_rows": 1196
+}

@@ -1,0 +1,17 @@
+{
+ "id": "kev-harness-hook-v1",
+ "target": "frozen_snapshot.py",
+ "overlay_marker": false,
+ "allow_roots": [
+  "/var/lib/jenkins/tomod/ops/blink-root-intent-system-one-benchmark/gate2/harness"
+ ],
+ "doc": "Tooling patch (NOT production code): after frozen_snapshot.working_copy builds a disposable cell copy, apply kev-dispatch-v1 to that copy when KEV_OVERLAY_SPEC is set. Harness is re-sealed by run_gate2.sh (seal_manifest.py).",
+ "hunks": [
+  {
+   "id": "HK1_post_working_copy",
+   "old": "    entry_contract = compatibility(dest)\n    atomic_json(report, {'snapshot_id':read_json(capsule/'snapshot.json')['snapshot_id'],\n                        'changes':changes,",
+   "new": "    if os.environ.get('KEV_OVERLAY_SPEC'):  # SHADOW-KEV-HOOK: only ever receives this disposable cell copy\n        import subprocess as _sp, sys as _sys\n        _env = dict(os.environ, SHADOWPATCH_ALLOW_PARENT=str(dest.resolve().parent))\n        _sp.run([_sys.executable, os.environ['KEV_OVERLAY_SHADOWPATCH'], 'apply', '--spec', os.environ['KEV_OVERLAY_SPEC'],\n                 '--shadow-root', str(dest.resolve())], check=True, env=_env)\n    entry_contract = compatibility(dest)\n    atomic_json(report, {'snapshot_id':read_json(capsule/'snapshot.json')['snapshot_id'],\n                        'changes':changes,"
+  }
+ ],
+ "add_files": []
+}

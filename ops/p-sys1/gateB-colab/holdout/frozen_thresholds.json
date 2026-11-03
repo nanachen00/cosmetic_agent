@@ -1,0 +1,96 @@
+{
+ "_doc": "P+K thresholds FROZEN for the router_gold hold-out. Tuned ONLY on gate_data cal split (seed 7, n_per 24) in run gateB-t4-001 (v2 Kev answers, 2026-10-19). Never re-tuned on router_gold.",
+ "source_run": "gateB-t4-001",
+ "by_kev": {
+  "0.8b": {
+   "v1": {
+    "safety": 0.2,
+    "intent": {
+     "find_product": 0.7,
+     "price_comparison": 0.85,
+     "knowledge": 0.35,
+     "record": 0.7,
+     "chitchat": 0.8,
+     "unclear": 0.45
+    },
+    "avoid": 0.5,
+    "cal_n": 95,
+    "cal_safety_pos": 18
+   },
+   "v2": {
+    "base": {
+     "safety": 0.7,
+     "intent": {
+      "find_product": 0.7,
+      "price_comparison": 0.85,
+      "knowledge": 0.35,
+      "record": 0.65,
+      "chitchat": 0.8,
+      "unclear": 0.45
+     },
+     "avoid": 0.5,
+     "cal_n": 93,
+     "cal_safety_pos": 16
+    },
+    "safety": 0.7,
+    "emergency": 0.6,
+    "cal_emergency_pos": 2,
+    "emergency_cal_fpr": 0.0,
+    "intent": {
+     "find_product": 0.7,
+     "price_comparison": 0.85,
+     "knowledge": 0.35,
+     "record": 0.65,
+     "chitchat": 0.8,
+     "unclear": 0.45
+    },
+    "unclear": "derived"
+   }
+  },
+  "4b": {
+   "v1": {
+    "safety": 0.6,
+    "intent": {
+     "find_product": 0.7,
+     "price_comparison": 0.7,
+     "knowledge": 0.45,
+     "record": 0.75,
+     "chitchat": 0.55,
+     "unclear": 0.35
+    },
+    "avoid": 0.5,
+    "cal_n": 95,
+    "cal_safety_pos": 18
+   },
+   "v2": {
+    "base": {
+     "safety": 0.6,
+     "intent": {
+      "find_product": 0.7,
+      "price_comparison": 0.7,
+      "knowledge": 0.45,
+      "record": 0.55,
+      "chitchat": 0.55,
+      "unclear": 0.35
+     },
+     "avoid": 0.5,
+     "cal_n": 93,
+     "cal_safety_pos": 16
+    },
+    "safety": 0.6,
+    "emergency": 0.6,
+    "cal_emergency_pos": 2,
+    "emergency_cal_fpr": 0.0,
+    "intent": {
+     "find_product": 0.7,
+     "price_comparison": 0.7,
+     "knowledge": 0.45,
+     "record": 0.55,
+     "chitchat": 0.55,
+     "unclear": 0.35
+    },
+    "unclear": "derived"
+   }
+  }
+ }
+}

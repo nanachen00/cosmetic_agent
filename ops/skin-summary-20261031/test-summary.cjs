@@ -1,0 +1,18 @@
+const fs = require('node:fs');
+const path = require('node:path');
+const Module = require('node:module');
+const assert = require('node:assert/strict');
+const ts = Module.createRequire(path.join(process.cwd(), 'package.json'))('typescript');
+const source = process.argv[2] || path.join(process.cwd(), 'app/skin-photo/reportSummary.ts');
+const compiled = ts.transpileModule(fs.readFileSync(source, 'utf8'), {compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText;
+const mod = new Module(source); mod.filename=source; mod.paths=module.paths; mod._compile(compiled, source);
+const {groupFindings, uniqueStatements} = mod.exports;
+const input = ['forehead','cheek','chin'].map(region=>({tag:'acne_like_bumps',region,evidence:'可見紅色突起。'}));
+const groups = groupFindings(input);
+assert.equal(groups.length,1); assert.equal(groups[0].regions.length,3); assert.equal(groups[0].findings.length,3);
+assert.equal(groupFindings([...input,input[0],{...input[0],evidence:'可見 紅色突起'}])[0].findings.length,3);
+assert.equal(groupFindings([...input,{tag:'redness',region:'cheek',evidence:'泛紅'}]).length,2);
+assert.equal(groupFindings([{...input[0],evidence:'可見白色頂部'},{...input[0],evidence:'另有紅色突起'}])[0].findings.length,2);
+assert.deepEqual(uniqueStatements(['光線影響判讀。','光線影響判讀','細節不足','']),['光線影響判讀。','細節不足']);
+assert.deepEqual(groupFindings([]),[]);
+console.log('SUMMARY_CONTRACTS_PASSED: grouping, region preservation, duplicate removal, distinct evidence, limitations, empty state');

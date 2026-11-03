@@ -1,0 +1,43 @@
+{
+ "real": {
+  "backend": "cosmetic-agent (uvicorn api.api_server:app :8010)",
+  "taide_gateway": "ops/runtime/taide_vllm_gateway.py :8000/:8003",
+  "taide_router": "taide_router_8001.py :8001",
+  "postgresql": "PostgreSQL 14.24 (EDB Windows binaries) :5432 — VM: Ubuntu apt PostgreSQL 14",
+  "redis": "Redis 6.2.24 (redis-windows MSYS2 build) :6389 — VM: Ubuntu apt Redis 6",
+  "p_sys1": "ops/p-sys1 from experiments/p-sys1 (bundle + run_local_psys1.sh sync-dev); only paths and LOCAL flags differ"
+ },
+ "simulated": {
+  "taide_12b": "Llama-3.2-3B-Instruct Q4_K_M on llama.cpp b10819 CUDA :8200, served as taide-12b — VM: TAIDE Gemma-3 12B bf16 on vLLM 0.8.5 ROCm",
+  "openai_terra": "sim/openai_sim.py :8090 (OPENAI_BASE_URL) -> same llama; Terra is never called — VM: OpenAI gpt-5.6-terra",
+  "zep_cloud": "sim/zep_sim.py :8091 (ZEP_API_URL), in-memory, no memory extraction — VM: Zep Cloud",
+  "embedding_bge_m3": "sim/embedding_sim.py :8002, SHA-256 vectors — VM: BGE-M3 sentence-transformers",
+  "sys1_encoder": "np-tiny-local: numpy wiring-only head on CPU, serve_sys1.py :8232, listed only in runtime/local-registry.json — VM: owner-approved candidates (mmbert-ft, mdeberta-ft, xlmr-ft) trained on MI300X"
+ },
+ "skipped": {
+  "neo4j_aura": "NEO4J_* empty: product/knowledge graph retrieval unavailable — VM: Neo4j Aura (10,735 nodes)",
+  "tavily_firecrawl": "keys empty",
+  "smtp": "empty: no mail",
+  "oauth_google_line": "empty",
+  "better_stack_otel": "disabled",
+  "cloudflare_nginx": "not part of the local replica",
+  "skin_observation_catalog": "needs Neo4j; not rebuilt"
+ },
+ "not_exercised": {
+  "zep_writes": "guest sessions skip remote long-term memory by design (agents/root/orchestrator.py, '訪客工作階段略過遠端長期記憶'); smoke and S3 are guest-only, so user.add / thread.create / add_messages never ran — member-path smoke is a later round",
+  "product_turns": "need Neo4j (skipped): smoke 商品/追問 and 3 of 16 S3 turns fail",
+  "knowledge_agent": "knowledge_sub_agent and the A2A wrapper fail to import without NEO4J_USER/PASSWORD; the orchestrator falls back to the '知識庫暫時維護中' stub, so local knowledge answers are response_composer rewrites of it",
+  "vm_bootstrap": "Linux/VM-only steps never ran locally (Windows shims instead): run_vm.sh venv on /opt/conda/envs/py_3.10 (ROCm torch 2.6.0), base-model downloads from Hugging Face, GPU training, shadow_stack `su postgres`, find_prod_roots.sh — the first real run of each is on the VM",
+  "sys1_accuracy": "np-tiny-local is wiring only: S3 agreement/safety numbers are not candidate results"
+ },
+ "platform": {
+  "os": "Windows 11 (no WSL)",
+  "backend_python": "3.11 (uv) — VM: 3.11 conda",
+  "gpu": "RTX 4060 Ti 16 GB (CUDA) — VM: MI300X (ROCm 6.4)",
+  "sys1_python": "local: 3.12 venv, numpy, CPU — VM: /opt/venv-sys1 on /opt/conda/envs/py_3.10 (Python 3.10, --system-site-packages, image torch 2.6.0 ROCm)"
+ },
+ "generated": "2026-10-28T16:24:03+0800",
+ "refreshed": "2026-10-29T14:39:58+0800",
+ "bundle": "p-sys1-bundle-20261028-r2.zip",
+ "llm_model_file": "Llama-3.2-3B-Instruct-Q4_K_M.gguf"
+}

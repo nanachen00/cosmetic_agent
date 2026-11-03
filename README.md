@@ -1,6 +1,10 @@
-# BLINK AI — recovery patches
+# BLINK AI — platform source backup
 
-This repository currently stores the sanitized recovery patches used to restore and harden the BLINK AI knowledge-map service.
+This repository stores the sanitized BLINK AI platform source used by the mobile/web frontend, backend agents, authentication, persistence, knowledge map, tests and deployment tooling.
+
+- Platform operations: [`PLATFORM_README.md`](PLATFORM_README.md)
+- Recovery architecture: [`RESTORE_README.md`](RESTORE_README.md)
+- Backup scope and exclusions: [`BACKUP_MANIFEST.md`](BACKUP_MANIFEST.md)
 
 ## Verified on 2026-11-03
 
@@ -21,4 +25,4 @@ Secrets and runtime data are intentionally excluded. Do not commit:
 - model weights, uploads, user conversations or profiles
 - build artifacts, logs, caches and dependency directories
 
-The files in `recovery/` are idempotent migration scripts and can be reviewed before applying to a restored server copy.
+The files in `recovery/` are idempotent migration scripts and can be reviewed before applying to a restored server copy. Runtime secrets, user data, databases, model weights and generated build/training artifacts are intentionally not stored in this public repository.

@@ -1,0 +1,27 @@
+VLLM_PYTHON
+executable
+2.6.0+gitdbfe118
+/opt/conda/envs/py_3.10/lib/python3.10/site-packages/torch/lib
+VLLM_RC=0
+STATUS
+BLINK AI runtime status
+  vLLM prod :8200              UP
+  gateway :8000                UP
+  gateway :8003                UP
+  embedding :8002              UP
+  router :8001                 UP
+  backend :8010                UP
+  backend readyz               UP
+  redis :6389                  UP
+GPU: 0
+    USAGE:
+        GFX_ACTIVITY: 0 %
+        UMC_ACTIVITY: 0 %
+        MM_ACTIVITY: N/A
+        VCN_ACTIVITY: [0 %, 0 %, 0 %, 0 %]
+        JPEG_ACTIVITY: [0 %, 0 %, 0 %, 0 %, 0 %, 0 %, 0 %, 0 %, 0 %, 0 %, 0 %, 0 %, 0 %, 0 %, 0 %, 0 %, 0 %, 0 %, 0 %, 0 %, 0 %, 0 %, 0 %, 0 %, 0 %, 0 %, 0 %, 0 %, 0 %, 0 %, 0 %, 0 %]
+        GFX_BUSY_INST:
+            XCP_0: [0 %, 0 %, 0 %, 0 %, 0 %, 0 %, 0 %, 0 %]
+        JPEG_BUSY:
+            XCP_0: [0 %, 0 %, 0 %, 0 %, 0 %, 0 %, 0 %, 0 %, 0 %, 0 %, 0 %, 0 %, 0 %, 0 %, 0 %, 0 %, 0 %, 0 %, 0 %, 0 %, 0 %, 0 %, 0 %, 0 %, 0 %, 0 %, 0 %, 0 %, 0 %, 0 %, 0 %, 0 %]
+        VCN_BUSY:

@@ -1,0 +1,20 @@
+{
+ "true_mean": 0.80288,
+ "false_mean": 0.25562,
+ "true": [
+  0.8209,
+  0.8194,
+  0.7829,
+  0.7582,
+  0.833
+ ],
+ "false": [
+  0.3049,
+  0.2551,
+  0.2093,
+  0.2978,
+  0.211
+ ],
+ "noul_true_high": true,
+ "documented": "kev api.py: noul = p('true') → high = yes"
+}

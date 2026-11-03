@@ -1,0 +1,174 @@
+{
+  "patch_id": "kg-curated-closed-comedones-v1",
+  "reviewed_at": "2026-10-31",
+  "sources": [
+    {
+      "id": "aad-acne-types-2023",
+      "title": "American Academy of Dermatology — How to treat different types of acne",
+      "url": "https://www.aad.org/public/diseases/acne/diy/types-breakouts/"
+    },
+    {
+      "id": "aad-acne-treatment",
+      "title": "American Academy of Dermatology — Acne: Diagnosis and treatment",
+      "url": "https://www.aad.org/public/diseases/acne/derm-treat/treat"
+    },
+    {
+      "id": "nhs-acne-2026",
+      "title": "NHS — Acne",
+      "url": "https://www.nhs.uk/conditions/acne/"
+    }
+  ],
+  "nodes": [
+    {
+      "id": "concern_closed_comedones",
+      "type": "SkinConcern",
+      "name": "閉鎖性粉刺",
+      "short_label": "閉鎖性粉刺",
+      "description": "毛孔被皮脂與老廢角質堵塞且開口封閉時，可能形成膚色或白色的小凸起，屬於粉刺型痤瘡。",
+      "aliases": ["內包粉刺", "白頭粉刺", "閉口粉刺", "閉鎖性面皰", "closed comedones", "whiteheads"],
+      "source_ids": ["aad-acne-types-2023", "nhs-acne-2026"]
+    },
+    {
+      "id": "symptom_skin_colored_white_bumps",
+      "type": "Symptom",
+      "name": "膚色或白色小凸起",
+      "short_label": "白色小凸起",
+      "description": "白頭粉刺常呈現膚色或白色的小凸起。",
+      "aliases": ["白色小凸起", "膚色小顆粒"],
+      "source_ids": ["aad-acne-types-2023", "nhs-acne-2026"]
+    },
+    {
+      "id": "trigger_clogged_hair_follicle",
+      "type": "Trigger",
+      "name": "毛囊被皮脂與老廢角質堵塞",
+      "short_label": "毛孔堵塞",
+      "description": "過多皮脂與老廢角質堆積可堵塞毛囊並形成粉刺。",
+      "aliases": ["毛孔堵塞", "角質與皮脂堆積"],
+      "source_ids": ["aad-acne-types-2023", "nhs-acne-2026"]
+    },
+    {
+      "id": "care_gentle_noncomedogenic_routine",
+      "type": "CareNeed",
+      "name": "溫和清潔與不致粉刺保養",
+      "short_label": "溫和清潔",
+      "description": "可選擇溫和清潔並使用標示不致粉刺的保養與彩妝產品，避免過度摩擦。",
+      "aliases": ["溫和清潔", "不致粉刺保養"],
+      "source_ids": ["nhs-acne-2026"]
+    },
+    {
+      "id": "warning_do_not_pick_comedones",
+      "type": "SafetyWarning",
+      "name": "避免摳抓或擠壓",
+      "short_label": "避免擠壓",
+      "description": "摳抓、擠壓或用力磨砂可能使痘痘惡化並增加留疤風險。",
+      "aliases": ["不要擠粉刺", "避免摳抓"],
+      "source_ids": ["aad-acne-types-2023", "nhs-acne-2026"]
+    },
+    {
+      "id": "function_unclog_pores",
+      "type": "Function",
+      "name": "疏通堵塞毛孔",
+      "short_label": "疏通毛孔",
+      "description": "粉刺照護的常見作用方向之一，是協助疏通被堵塞的毛孔。",
+      "aliases": ["暢通毛孔", "改善毛孔堵塞"],
+      "source_ids": ["aad-acne-treatment"]
+    },
+    {
+      "id": "ingredient_salicylic_acid_curated",
+      "type": "Ingredient",
+      "name": "水楊酸",
+      "short_label": "水楊酸",
+      "description": "水楊酸可幫助疏通堵塞毛孔與去除表面老廢角質；使用濃度與方式應依產品標示或專業建議。",
+      "aliases": ["BHA", "salicylic acid"],
+      "source_ids": ["aad-acne-treatment"]
+    },
+    {
+      "id": "drug_active_adapalene_curated",
+      "type": "DrugActiveIngredient",
+      "name": "阿達帕林（Adapalene）",
+      "short_label": "阿達帕林",
+      "description": "阿達帕林是外用維 A 酸類藥物，可用於白頭粉刺等痤瘡；孕期或備孕及用藥方式應先諮詢醫師或藥師。",
+      "aliases": ["Adapalene", "阿達帕林", "外用維A酸"],
+      "source_ids": ["aad-acne-treatment"]
+    }
+  ],
+  "edges": [
+    {
+      "id": "closed-comedones-has-symptom-bumps",
+      "source": "concern_closed_comedones",
+      "target": "symptom_skin_colored_white_bumps",
+      "relation": "HAS_SYMPTOM",
+      "label": "常見外觀",
+      "evidence_status": "verified",
+      "source_ids": ["aad-acne-types-2023", "nhs-acne-2026"],
+      "evidence_reference": "AAD and NHS descriptions of whiteheads",
+      "source_locator": "AAD: Blackheads and whiteheads; NHS: symptoms of acne"
+    },
+    {
+      "id": "closed-comedones-has-trigger-clogging",
+      "source": "concern_closed_comedones",
+      "target": "trigger_clogged_hair_follicle",
+      "relation": "HAS_TRIGGER",
+      "label": "形成機制",
+      "evidence_status": "verified",
+      "source_ids": ["aad-acne-types-2023", "nhs-acne-2026"],
+      "evidence_reference": "AAD and NHS explanations of clogged follicles",
+      "source_locator": "AAD: pores clogged with oil and dead skin; NHS: causes of acne"
+    },
+    {
+      "id": "closed-comedones-care-gentle-routine",
+      "source": "concern_closed_comedones",
+      "target": "care_gentle_noncomedogenic_routine",
+      "relation": "RELEVANT_TO_CARE",
+      "label": "日常照護",
+      "evidence_status": "verified",
+      "source_ids": ["nhs-acne-2026"],
+      "evidence_reference": "NHS acne self-care guidance",
+      "source_locator": "NHS: Things you can do to help with acne"
+    },
+    {
+      "id": "closed-comedones-caution-no-picking",
+      "source": "concern_closed_comedones",
+      "target": "warning_do_not_pick_comedones",
+      "relation": "REQUIRES_CAUTION",
+      "label": "注意事項",
+      "evidence_status": "verified",
+      "source_ids": ["aad-acne-types-2023", "nhs-acne-2026"],
+      "evidence_reference": "AAD and NHS warnings against squeezing or scrubbing acne",
+      "source_locator": "AAD: resist popping; NHS: do not pick, squeeze, or scrub"
+    },
+    {
+      "id": "closed-comedones-requires-unclogging",
+      "source": "concern_closed_comedones",
+      "target": "function_unclog_pores",
+      "relation": "REQUIRES_FUNCTION",
+      "label": "照護作用",
+      "evidence_status": "verified",
+      "source_ids": ["aad-acne-treatment"],
+      "evidence_reference": "AAD acne treatment guidance",
+      "source_locator": "AAD: topical retinoids and salicylic acid clear clogged pores"
+    },
+    {
+      "id": "salicylic-acid-has-function-unclogging",
+      "source": "ingredient_salicylic_acid_curated",
+      "target": "function_unclog_pores",
+      "relation": "HAS_FUNCTION",
+      "label": "主要作用",
+      "evidence_status": "verified",
+      "source_ids": ["aad-acne-treatment"],
+      "evidence_reference": "AAD salicylic acid guidance",
+      "source_locator": "AAD: salicylic acid opens clogged pores and exfoliates"
+    },
+    {
+      "id": "adapalene-has-function-unclogging",
+      "source": "drug_active_adapalene_curated",
+      "target": "function_unclog_pores",
+      "relation": "HAS_FUNCTION",
+      "label": "主要作用",
+      "evidence_status": "verified",
+      "source_ids": ["aad-acne-treatment"],
+      "evidence_reference": "AAD topical retinoid guidance",
+      "source_locator": "AAD: topical retinoids clear pores and treat whiteheads"
+    }
+  ]
+}

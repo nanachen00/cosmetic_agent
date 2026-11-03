@@ -1,0 +1,9 @@
+ 367881       1 Ss    8-16:56:19 /usr/lib/postgresql/14/bin/postgres -D /data/bl
+ 367883  367881 Ss    8-16:56:19 postgres: checkpointer 
+ 367884  367881 Ss    8-16:56:19 postgres: background writer 
+ 367885  367881 Ss    8-16:56:19 postgres: walwriter 
+ 367886  367881 Ss    8-16:56:19 postgres: autovacuum launcher 
+ 367887  367881 Ss    8-16:56:19 postgres: stats collector 
+ 367888  367881 Ss    8-16:56:19 postgres: logical replication launcher 
+ 367910       1 Ssl   8-16:56:18 redis-server 127.0.0.1:6389
+1082058 1075120 S+         00:00 grep -E restart_api|restart_frontend|run_all|ru

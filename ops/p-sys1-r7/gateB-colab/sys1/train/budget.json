@@ -1,0 +1,4 @@
+{"_doc": "固定訓練預算（handoff §4 規則 4：所有候選同一份資料、同一組頭、同一預算）。開始比較前由負責人確認；比較開始後不改。train_head.py 會把本檔 SHA-256 寫進每個 checkpoint 的 meta.json，analyze 時可核對。",
+ "hf": {"epochs": 4, "batch": 32, "lr": 3e-5, "head_lr": 1e-3, "weight_decay": 0.01, "warmup_frac": 0.06, "grad_clip": 1.0, "dropout": 0.1, "max_len": 128, "bf16_on_gpu": true},
+ "np": {"steps": 300, "lr": 0.05, "l2": 1e-5},
+ "seeds": [13, 29, 47]}

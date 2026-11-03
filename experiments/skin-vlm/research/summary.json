@@ -1,0 +1,485 @@
+{
+  "task": "acne04-box-derived-patch-presence-v1",
+  "dataset": {
+    "task": "acne04-box-derived-patch-presence-v1",
+    "seed": 20261031,
+    "manifests": {
+      "train": "/var/lib/jenkins/tomod/experiments/skin-vlm/research/data/frozen-v1/train.jsonl",
+      "val": "/var/lib/jenkins/tomod/experiments/skin-vlm/research/data/frozen-v1/val.jsonl",
+      "test": "/var/lib/jenkins/tomod/experiments/skin-vlm/research/data/frozen-v1/test.jsonl"
+    },
+    "counts": {
+      "train": {
+        "parents": 128,
+        "patches": 256,
+        "positive": 128,
+        "negative": 128,
+        "sha256": "e5e53a76b448e985603353bba5b24a269a9ac95be05cd08d18d9bd574d741e7b"
+      },
+      "val": {
+        "parents": 24,
+        "patches": 48,
+        "positive": 24,
+        "negative": 24,
+        "sha256": "60d1d509e71d20701f866c237c379d1948a92fd5ce36d0ff0ad330ca36f49a73"
+      },
+      "test": {
+        "parents": 48,
+        "patches": 96,
+        "positive": 48,
+        "negative": 48,
+        "sha256": "a5ee282c83516592c38c7cbd3d536d76cb24fbee38b617df72483453bd7bfdb0"
+      }
+    },
+    "source_rows": 1457,
+    "eligible_source_rows": 1418,
+    "rejected_sources": [
+      {
+        "file": "levle0_224.jpg",
+        "reason": "short edge below 256"
+      },
+      {
+        "file": "levle0_532.jpg",
+        "reason": "short edge below 256"
+      },
+      {
+        "file": "levle1_11.jpg",
+        "reason": "short edge below 256"
+      },
+      {
+        "file": "levle1_19.jpg",
+        "reason": "short edge below 256"
+      },
+      {
+        "file": "levle1_25.jpg",
+        "reason": "short edge below 256"
+      },
+      {
+        "file": "levle1_255.jpg",
+        "reason": "short edge below 256"
+      },
+      {
+        "file": "levle1_256.jpg",
+        "reason": "short edge below 256"
+      },
+      {
+        "file": "levle1_638.jpg",
+        "reason": "short edge below 256"
+      },
+      {
+        "file": "levle1_639.jpg",
+        "reason": "short edge below 256"
+      },
+      {
+        "file": "levle1_640.jpg",
+        "reason": "short edge below 256"
+      },
+      {
+        "file": "levle1_641.jpg",
+        "reason": "short edge below 256"
+      },
+      {
+        "file": "levle1_642.jpg",
+        "reason": "short edge below 256"
+      },
+      {
+        "file": "levle2_127.jpg",
+        "reason": "short edge below 256"
+      },
+      {
+        "file": "levle2_188.jpg",
+        "reason": "short edge below 256"
+      },
+      {
+        "file": "levle2_19.jpg",
+        "reason": "short edge below 256"
+      },
+      {
+        "file": "levle2_7.jpg",
+        "reason": "short edge below 256"
+      },
+      {
+        "file": "levle2_89.jpg",
+        "reason": "short edge below 256"
+      },
+      {
+        "file": "levle2_90.jpg",
+        "reason": "short edge below 256"
+      },
+      {
+        "file": "levle2_92.jpg",
+        "reason": "short edge below 256"
+      },
+      {
+        "file": "levle2_93.jpg",
+        "reason": "short edge below 256"
+      },
+      {
+        "file": "levle3_0.jpg",
+        "reason": "short edge below 256"
+      },
+      {
+        "file": "levle3_108.jpg",
+        "reason": "short edge below 256"
+      },
+      {
+        "file": "levle3_109.jpg",
+        "reason": "short edge below 256"
+      },
+      {
+        "file": "levle3_110.jpg",
+        "reason": "short edge below 256"
+      },
+      {
+        "file": "levle3_123.jpg",
+        "reason": "short edge below 256"
+      },
+      {
+        "file": "levle3_128.jpg",
+        "reason": "short edge below 256"
+      },
+      {
+        "file": "levle3_137.jpg",
+        "reason": "short edge below 256"
+      },
+      {
+        "file": "levle3_140.jpg",
+        "reason": "short edge below 256"
+      },
+      {
+        "file": "levle3_141.jpg",
+        "reason": "short edge below 256"
+      },
+      {
+        "file": "levle3_22.jpg",
+        "reason": "short edge below 256"
+      },
+      {
+        "file": "levle3_26.jpg",
+        "reason": "short edge below 256"
+      },
+      {
+        "file": "levle3_27.jpg",
+        "reason": "short edge below 256"
+      },
+      {
+        "file": "levle3_28.jpg",
+        "reason": "short edge below 256"
+      },
+      {
+        "file": "levle3_29.jpg",
+        "reason": "short edge below 256"
+      },
+      {
+        "file": "levle3_30.jpg",
+        "reason": "short edge below 256"
+      },
+      {
+        "file": "levle3_37.jpg",
+        "reason": "short edge below 256"
+      },
+      {
+        "file": "levle3_84.jpg",
+        "reason": "short edge below 256"
+      },
+      {
+        "file": "levle3_85.jpg",
+        "reason": "short edge below 256"
+      },
+      {
+        "file": "levle3_86.jpg",
+        "reason": "short edge below 256"
+      }
+    ],
+    "near_duplicate_clusters": 1314,
+    "canonical_train_parents_promoted_to_test_to_prevent_leakage": 43,
+    "dedup": "decoded RGB sha256 and 64-bit dHash distance <=3; all crops stay with their parent cluster",
+    "subject_disjoint": false,
+    "subject_limitation": "Reliable subject identifiers are unavailable; this is a parent-image/near-duplicate holdout, not proven person-disjoint.",
+    "scope_limitation": "Only box-derived local lesion presence. Other skin tags, anatomical region names, clinical diagnosis, and deployment safety are not evaluated.",
+    "negative_limitation": "Negatives are unannotated crops, not independently verified healthy skin. Background regions and annotation omissions may affect results."
+  },
+  "baseline": {
+    "validation": {
+      "n": 48,
+      "tp": 21,
+      "fp": 8,
+      "tn": 16,
+      "fn": 3,
+      "invalid": 0,
+      "positive_precision": 0.7241379310344828,
+      "positive_recall": 0.875,
+      "positive_f1": 0.7924528301886793,
+      "negative_f1": 0.7441860465116279,
+      "macro_f1": 0.7683194383501536,
+      "balanced_accuracy": 0.7708333333333333,
+      "accuracy": 0.7708333333333334,
+      "valid_json_rate": 1.0,
+      "latency_p50_seconds": 0.5403,
+      "latency_p95_seconds": 0.6413
+    }
+  },
+  "candidates": [
+    {
+      "name": "lora-r8-epoch1",
+      "rank": 8,
+      "alpha": 16,
+      "lr": 0.0001,
+      "epochs": 1,
+      "best_epoch": 1,
+      "validation": {
+        "n": 48,
+        "tp": 21,
+        "fp": 8,
+        "tn": 16,
+        "fn": 3,
+        "invalid": 0,
+        "positive_precision": 0.7241379310344828,
+        "positive_recall": 0.875,
+        "positive_f1": 0.7924528301886793,
+        "negative_f1": 0.7441860465116279,
+        "macro_f1": 0.7683194383501536,
+        "balanced_accuracy": 0.7708333333333333,
+        "accuracy": 0.7708333333333334,
+        "valid_json_rate": 1.0,
+        "latency_p50_seconds": 0.5958,
+        "latency_p95_seconds": 0.6851
+      },
+      "trainable_parameters": 5898240,
+      "history": [
+        {
+          "epoch": 1,
+          "step": 64,
+          "mean_train_loss": 0.11365633484145121,
+          "training_and_validation_seconds": 198.94529419601895,
+          "validation": {
+            "n": 48,
+            "tp": 21,
+            "fp": 8,
+            "tn": 16,
+            "fn": 3,
+            "invalid": 0,
+            "positive_precision": 0.7241379310344828,
+            "positive_recall": 0.875,
+            "positive_f1": 0.7924528301886793,
+            "negative_f1": 0.7441860465116279,
+            "macro_f1": 0.7683194383501536,
+            "balanced_accuracy": 0.7708333333333333,
+            "accuracy": 0.7708333333333334,
+            "valid_json_rate": 1.0,
+            "latency_p50_seconds": 0.5958,
+            "latency_p95_seconds": 0.6851
+          }
+        }
+      ],
+      "adapter": "/var/lib/jenkins/tomod/experiments/skin-vlm/research/runs/v1/lora-r8-epoch1/best"
+    },
+    {
+      "name": "lora-r8-epoch2",
+      "rank": 8,
+      "alpha": 16,
+      "lr": 5e-05,
+      "epochs": 2,
+      "best_epoch": 1,
+      "validation": {
+        "n": 48,
+        "tp": 23,
+        "fp": 9,
+        "tn": 15,
+        "fn": 1,
+        "invalid": 0,
+        "positive_precision": 0.71875,
+        "positive_recall": 0.9583333333333334,
+        "positive_f1": 0.8214285714285714,
+        "negative_f1": 0.75,
+        "macro_f1": 0.7857142857142857,
+        "balanced_accuracy": 0.7916666666666667,
+        "accuracy": 0.7916666666666666,
+        "valid_json_rate": 1.0,
+        "latency_p50_seconds": 0.59735,
+        "latency_p95_seconds": 0.6408
+      },
+      "trainable_parameters": 5898240,
+      "history": [
+        {
+          "epoch": 1,
+          "step": 64,
+          "mean_train_loss": 0.17781752432571807,
+          "training_and_validation_seconds": 169.98988670494873,
+          "validation": {
+            "n": 48,
+            "tp": 23,
+            "fp": 9,
+            "tn": 15,
+            "fn": 1,
+            "invalid": 0,
+            "positive_precision": 0.71875,
+            "positive_recall": 0.9583333333333334,
+            "positive_f1": 0.8214285714285714,
+            "negative_f1": 0.75,
+            "macro_f1": 0.7857142857142857,
+            "balanced_accuracy": 0.7916666666666667,
+            "accuracy": 0.7916666666666666,
+            "valid_json_rate": 1.0,
+            "latency_p50_seconds": 0.59735,
+            "latency_p95_seconds": 0.6408
+          }
+        },
+        {
+          "epoch": 2,
+          "step": 128,
+          "mean_train_loss": 0.020162259852838815,
+          "training_and_validation_seconds": 179.36523203796241,
+          "validation": {
+            "n": 48,
+            "tp": 21,
+            "fp": 8,
+            "tn": 16,
+            "fn": 3,
+            "invalid": 0,
+            "positive_precision": 0.7241379310344828,
+            "positive_recall": 0.875,
+            "positive_f1": 0.7924528301886793,
+            "negative_f1": 0.7441860465116279,
+            "macro_f1": 0.7683194383501536,
+            "balanced_accuracy": 0.7708333333333333,
+            "accuracy": 0.7708333333333334,
+            "valid_json_rate": 1.0,
+            "latency_p50_seconds": 0.5983,
+            "latency_p95_seconds": 0.7092
+          }
+        }
+      ],
+      "adapter": "/var/lib/jenkins/tomod/experiments/skin-vlm/research/runs/v1/lora-r8-epoch2/best"
+    },
+    {
+      "name": "lora-r16-epoch2",
+      "rank": 16,
+      "alpha": 32,
+      "lr": 5e-05,
+      "epochs": 2,
+      "best_epoch": 2,
+      "validation": {
+        "n": 48,
+        "tp": 21,
+        "fp": 6,
+        "tn": 18,
+        "fn": 3,
+        "invalid": 0,
+        "positive_precision": 0.7777777777777778,
+        "positive_recall": 0.875,
+        "positive_f1": 0.8235294117647058,
+        "negative_f1": 0.8,
+        "macro_f1": 0.8117647058823529,
+        "balanced_accuracy": 0.8125,
+        "accuracy": 0.8125,
+        "valid_json_rate": 1.0,
+        "latency_p50_seconds": 0.6355500000000001,
+        "latency_p95_seconds": 1.0797
+      },
+      "trainable_parameters": 11796480,
+      "history": [
+        {
+          "epoch": 1,
+          "step": 64,
+          "mean_train_loss": 0.14731202926383702,
+          "training_and_validation_seconds": 185.54396671394352,
+          "validation": {
+            "n": 48,
+            "tp": 21,
+            "fp": 9,
+            "tn": 15,
+            "fn": 3,
+            "invalid": 0,
+            "positive_precision": 0.7,
+            "positive_recall": 0.875,
+            "positive_f1": 0.7777777777777778,
+            "negative_f1": 0.7142857142857143,
+            "macro_f1": 0.746031746031746,
+            "balanced_accuracy": 0.75,
+            "accuracy": 0.75,
+            "valid_json_rate": 1.0,
+            "latency_p50_seconds": 0.6008,
+            "latency_p95_seconds": 0.7217
+          }
+        },
+        {
+          "epoch": 2,
+          "step": 128,
+          "mean_train_loss": 0.017984784365211226,
+          "training_and_validation_seconds": 192.4186343740439,
+          "validation": {
+            "n": 48,
+            "tp": 21,
+            "fp": 6,
+            "tn": 18,
+            "fn": 3,
+            "invalid": 0,
+            "positive_precision": 0.7777777777777778,
+            "positive_recall": 0.875,
+            "positive_f1": 0.8235294117647058,
+            "negative_f1": 0.8,
+            "macro_f1": 0.8117647058823529,
+            "balanced_accuracy": 0.8125,
+            "accuracy": 0.8125,
+            "valid_json_rate": 1.0,
+            "latency_p50_seconds": 0.6355500000000001,
+            "latency_p95_seconds": 1.0797
+          }
+        }
+      ],
+      "adapter": "/var/lib/jenkins/tomod/experiments/skin-vlm/research/runs/v1/lora-r16-epoch2/best"
+    }
+  ],
+  "updated_utc": "2026-10-31T06:40:19Z",
+  "deployment": "research only; production four-tag model unchanged",
+  "selected_by_validation": "lora-r16-epoch2",
+  "test": {
+    "baseline": {
+      "n": 96,
+      "tp": 43,
+      "fp": 9,
+      "tn": 39,
+      "fn": 5,
+      "invalid": 0,
+      "positive_precision": 0.8269230769230769,
+      "positive_recall": 0.8958333333333334,
+      "positive_f1": 0.86,
+      "negative_f1": 0.8478260869565217,
+      "macro_f1": 0.8539130434782609,
+      "balanced_accuracy": 0.8541666666666667,
+      "accuracy": 0.8541666666666666,
+      "valid_json_rate": 1.0,
+      "latency_p50_seconds": 0.5649500000000001,
+      "latency_p95_seconds": 0.6444
+    },
+    "selected": {
+      "n": 96,
+      "tp": 44,
+      "fp": 6,
+      "tn": 42,
+      "fn": 4,
+      "invalid": 0,
+      "positive_precision": 0.88,
+      "positive_recall": 0.9166666666666666,
+      "positive_f1": 0.8979591836734694,
+      "negative_f1": 0.8936170212765957,
+      "macro_f1": 0.8957881024750325,
+      "balanced_accuracy": 0.8958333333333333,
+      "accuracy": 0.8958333333333334,
+      "valid_json_rate": 1.0,
+      "latency_p50_seconds": 0.6193500000000001,
+      "latency_p95_seconds": 0.6995
+    },
+    "macro_f1_difference": 0.041875058996771575,
+    "paired_difference_ci95": {
+      "method": "paired parent-cluster bootstrap",
+      "resamples": 1000,
+      "lower_95": 0.010390655609977206,
+      "upper_95": 0.08364137514395198
+    },
+    "research_gate_passed": true,
+    "statistically_clear_positive_difference": true,
+    "automatic_deployment": false
+  }
+}

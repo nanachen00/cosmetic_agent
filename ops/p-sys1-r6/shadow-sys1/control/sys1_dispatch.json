@@ -1,0 +1,14 @@
+{
+ "arm": "off",
+ "canary_pct": 0,
+ "sys1_url": "http://127.0.0.1:8232",
+ "model": null,
+ "frozen": null,
+ "timeout_s": 2.0,
+ "trace": "logs/sys1_dispatch_trace.jsonl",
+ "trace_text": false,
+ "error_fallback": "safety_or_clarify",
+ "conversation_reply": false,
+ "skip_pain_gain": false,
+ "_doc": "arm: off | shadow | sys1。model = registry 的 model_field；frozen = gateB-colab/sys1/frozen/<id>.json 的絕對路徑；trace 請改成絕對路徑。改 arm 到 sys1（任何比例）前需要負責人明確同意（handoff T8）。error_fallback / conversation_reply 是負責人決策（§8.5），預設不退回 LLM、conversation 仍走澄清。"
+}

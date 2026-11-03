@@ -1,0 +1,2 @@
+{"arm": "off", "conf_min": 0.5, "safety_guard": 0.5, "clarify_guard": 0.5, "slot_conf_min": 0.5, "timeout_s": 8, "skip_pain_gain": false,
+ "trace": "/var/lib/jenkins/tomod/ops/vllm-experiment-suite/fullpath-kev/logs/kev_dispatch_trace.jsonl", "kev_url": "http://127.0.0.1:8230"}

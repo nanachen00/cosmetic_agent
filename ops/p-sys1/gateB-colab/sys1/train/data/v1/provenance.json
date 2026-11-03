@@ -1,0 +1,41 @@
+{
+ "generator_version": "tpl-v1",
+ "seed": 11,
+ "per": 120,
+ "sources": [
+  {
+   "source": "template",
+   "generator": "make_train_data.py tpl-v1 (rule/template, no LLM)",
+   "n": 1196
+  }
+ ],
+ "n_train": 1082,
+ "n_dev": 114,
+ "by_group": {
+  "find": 388,
+  "price": 86,
+  "knowledge": 83,
+  "record": 109,
+  "chitchat": 36,
+  "unclear": 21,
+  "safety": 88,
+  "emergency": 118,
+  "compound": 103,
+  "trap_number": 50,
+  "trap_negation": 26,
+  "trap_avoid": 34,
+  "ing_positive": 54
+ },
+ "exclusion": {
+  "exact_hits": 0,
+  "near_dups_reported": 0,
+  "eval_sets": {
+   "gate_data_cal": 95,
+   "gate_data_test": 101,
+   "extra_safety": 30,
+   "router_gold": 300,
+   "router_gold_v2": 0
+  }
+ },
+ "rule": "不得含 cal/test/extra_safety/router_gold/router_gold_v2 句子（正規化後）；合成句不得由中國模型產生"
+}

@@ -1,0 +1,148 @@
+.homePage {
+  padding-bottom: 132px;
+}
+
+.quizFab {
+  position: fixed;
+  right: max(28px, env(safe-area-inset-right));
+  bottom: max(28px, calc(env(safe-area-inset-bottom) + 20px));
+  z-index: 40;
+  display: inline-flex;
+  width: 86px;
+  height: 86px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 12px 9px 13px;
+  box-sizing: border-box;
+  color: #725746;
+  text-decoration: none;
+  background: radial-gradient(circle at 32% 24%, #fff 0 13%, transparent 14%),
+    linear-gradient(145deg, #fffdf7 8%, #faf4ff 58%, #ead9f7 100%);
+  border: 2px solid #cfaedf;
+  border-radius: 50%;
+  box-shadow: 0 7px 0 #8b659c, 0 12px 24px rgb(94 68 105 / 22%);
+  isolation: isolate;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  transition: transform 160ms ease, box-shadow 160ms ease, background 160ms ease;
+}
+
+.quizFab::before {
+  position: absolute;
+  inset: 6px;
+  z-index: -1;
+  content: "";
+  border: 1px dashed rgb(138 101 156 / 42%);
+  border-radius: inherit;
+}
+
+.quizFab::after {
+  position: absolute;
+  right: 4px;
+  bottom: calc(100% + 13px);
+  width: max-content;
+  max-width: min(220px, calc(100vw - 32px));
+  padding: 8px 12px;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1.35;
+  white-space: nowrap;
+  pointer-events: none;
+  content: "開始消費者人格測驗";
+  background: #725746;
+  border-radius: 999px;
+  box-shadow: 0 6px 16px rgb(67 45 36 / 18%);
+  opacity: 0;
+  transform: translateY(5px);
+  transition: opacity 150ms ease, transform 150ms ease;
+}
+
+.quizFab:hover {
+  background: radial-gradient(circle at 32% 24%, #fff 0 13%, transparent 14%),
+    linear-gradient(145deg, #fff8dd 8%, #fff0bd 100%);
+  box-shadow: 0 9px 0 #8b659c, 0 15px 28px rgb(94 68 105 / 28%);
+  transform: translateY(-3px);
+}
+
+.quizFab:hover::after,
+.quizFab:focus-visible::after {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.quizFab:active {
+  box-shadow: 0 3px 0 #8b659c, 0 7px 14px rgb(94 68 105 / 20%);
+  transform: translateY(4px) scale(0.97);
+}
+
+.quizFab:focus-visible {
+  outline: 4px solid rgb(114 87 70 / 25%);
+  outline-offset: 5px;
+}
+
+.quizFabIcon {
+  position: relative;
+  display: block;
+  width: 36px;
+  height: 36px;
+  flex: 0 0 auto;
+  overflow: hidden;
+}
+
+.quizFabIconImage {
+  position: absolute !important;
+  inset: 0 !important;
+  display: block !important;
+  width: 100% !important;
+  height: 100% !important;
+  max-width: 100% !important;
+  max-height: 100% !important;
+  object-fit: contain !important;
+  object-position: center !important;
+}
+
+.quizFabText {
+  font-size: 9.5px;
+  font-weight: 800;
+  line-height: 1.1;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+
+@media (max-width: 768px) {
+  .homePage { padding-bottom: 118px; }
+  .quizFab {
+    right: max(18px, env(safe-area-inset-right));
+    bottom: max(20px, calc(env(safe-area-inset-bottom) + 16px));
+    width: 74px;
+    height: 74px;
+    gap: 3px;
+    padding: 10px 7px 11px;
+    box-shadow: 0 6px 0 #8b659c, 0 10px 20px rgb(94 68 105 / 22%);
+  }
+  .quizFabIcon { width: 32px; height: 32px; }
+  .quizFabText { font-size: 9px; }
+  .quizFab::after { display: none; }
+}
+
+@media (max-width: 360px), (max-height: 640px) {
+  .homePage { padding-bottom: 104px; }
+  .quizFab {
+    right: max(14px, env(safe-area-inset-right));
+    bottom: max(16px, calc(env(safe-area-inset-bottom) + 12px));
+    width: 66px;
+    height: 66px;
+    gap: 3px;
+    padding: 9px 6px 10px;
+  }
+  .quizFabIcon { width: 28px; height: 28px; }
+  .quizFabText { font-size: 8px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .quizFab,
+  .quizFab::after { transition: none; }
+}

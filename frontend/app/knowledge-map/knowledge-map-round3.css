@@ -1,0 +1,992 @@
+.page {
+  width: min(1180px, 100%);
+  height: calc(100dvh - 36px);
+  min-height: 500px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  color: #44332d;
+  background:
+    radial-gradient(circle at 1px 1px, rgba(142, 109, 159, 0.055) 1.2px, transparent 1.4px) 0 0 / 24px 24px,
+    #fcfafc;
+}
+
+.resultMode {
+  overflow: hidden;
+}
+
+.header {
+  position: relative;
+  z-index: 10;
+  flex: 0 0 auto;
+  margin: 12px 16px 0;
+  padding: 16px 18px 14px;
+  border: 1.5px solid rgba(196, 155, 211, 0.62);
+  border-radius: 26px;
+  background: rgba(255, 253, 249, 0.95);
+  box-shadow: 0 6px 0 rgba(173, 141, 185, 0.12), 0 10px 24px rgba(88, 68, 62, 0.045);
+}
+
+.header::after {
+  content: "";
+  position: absolute;
+  inset: 7px;
+  z-index: -1;
+  border: 1px dashed rgba(131, 190, 171, 0.38);
+  border-radius: 20px;
+  pointer-events: none;
+}
+
+.headerRow {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 10px;
+}
+
+.backButton {
+  width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(135, 107, 147, 0.18);
+  border-radius: 13px;
+  color: #5f493d;
+  background: #faf5fb;
+  box-shadow: 0 3px 0 rgba(173, 141, 185, 0.2);
+}
+
+.backButton svg {
+  width: 15px;
+  height: 15px;
+  transform: rotate(180deg);
+}
+
+.header h1 {
+  margin: 0;
+  color: #58443e;
+  font-size: 26px;
+  font-weight: 800;
+  line-height: 1.12;
+  letter-spacing: -0.02em;
+}
+
+.headerRow p {
+  margin: 5px 0 0;
+  overflow: hidden;
+  color: #8b718f;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.4;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.searchForm {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px;
+  margin-top: 13px;
+}
+
+.searchField {
+  position: relative;
+}
+
+.searchField > svg {
+  position: absolute;
+  left: 13px;
+  top: 50%;
+  width: 19px;
+  height: 19px;
+  color: #8e6d9f;
+  transform: translateY(-50%);
+}
+
+.searchField input {
+  width: 100%;
+  height: 48px;
+  padding: 0 13px 0 39px;
+  border: 1px solid rgba(100, 75, 67, 0.15);
+  border-radius: 16px;
+  outline: none;
+  color: #44332d;
+  background: #fff;
+  font: inherit;
+  font-size: 15px;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.searchField input:focus {
+  border-color: rgba(142, 109, 159, 0.58);
+  box-shadow: 0 0 0 3px rgba(173, 141, 185, 0.1);
+}
+
+.searchForm > button {
+  min-width: 72px;
+  height: 48px;
+  padding: 0 16px;
+  border: 0;
+  border-radius: 16px;
+  color: #fff;
+  background: #8e6d9f;
+  box-shadow: none;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.searchForm > button:disabled {
+  cursor: wait;
+  opacity: 0.62;
+}
+
+.queryStatus {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 30px;
+  margin-top: 8px;
+  padding: 6px 10px;
+  border: 1px solid rgba(151, 113, 167, 0.16);
+  border-radius: 12px;
+  color: #6f5879;
+  background: rgba(248, 242, 250, 0.72);
+}
+
+.queryStatus span {
+  font-size: 13px;
+  font-weight: 780;
+}
+
+.queryStatus small {
+  min-width: 0;
+  overflow: hidden;
+  color: #94849b;
+  font-size: 11px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.examples {
+  display: flex;
+  gap: 6px;
+  margin-top: 10px;
+  overflow-x: auto;
+  overscroll-behavior-inline: contain;
+  scrollbar-width: none;
+}
+
+.examples::-webkit-scrollbar {
+  display: none;
+}
+
+.examples button {
+  min-height: 32px;
+  flex: 0 0 auto;
+  padding: 0 11px;
+  border: 1px solid rgba(135, 107, 147, 0.18);
+  border-radius: 999px;
+  color: #80678b;
+  background: transparent;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 750;
+  cursor: pointer;
+}
+
+.examples button[aria-pressed="true"] {
+  border-color: #8e6d9f;
+  color: #fff;
+  background: #8e6d9f;
+}
+
+.quickSuggestions {
+  display: flex;
+  gap: 7px;
+  margin-top: 9px;
+  overflow-x: auto;
+  overscroll-behavior-inline: contain;
+  scrollbar-width: none;
+}
+
+.quickSuggestions::-webkit-scrollbar {
+  display: none;
+}
+
+.quickSuggestions button {
+  min-height: 32px;
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 7px;
+  padding: 3px 11px 3px 5px;
+  border: 1px solid rgba(100, 75, 67, 0.14);
+  border-radius: 999px;
+  color: #765d80;
+  background: rgba(255, 253, 249, 0.9);
+  font: inherit;
+  cursor: pointer;
+}
+
+.quickSuggestions button:disabled {
+  cursor: wait;
+  opacity: 0.58;
+}
+
+.quickSuggestions span {
+  min-width: 35px;
+  padding: 4px 8px;
+  border-radius: 999px;
+  color: #765d66;
+  background: #d8eee5;
+  font-size: 10px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.quickSuggestions b {
+  font-size: 12px;
+  font-weight: 750;
+  line-height: 1.1;
+}
+
+.examples button:focus-visible,
+.graphControls button:focus-visible,
+.popoverClose:focus-visible {
+  outline: 2px solid rgba(142, 109, 159, 0.4);
+  outline-offset: 2px;
+}
+
+.workspace {
+  position: relative;
+  min-height: 0;
+  flex: 1 1 auto;
+  overflow: hidden;
+}
+
+.graphPanel {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+  isolation: isolate;
+  border: 0;
+  border-radius: 0;
+  background:
+    radial-gradient(circle at 15% 8%, rgba(208, 235, 224, 0.2), transparent 32%),
+    radial-gradient(circle at 85% 92%, rgba(238, 228, 241, 0.28), transparent 36%),
+    #fffdf9;
+  box-shadow: none;
+}
+
+.graphMeta {
+  position: absolute;
+  z-index: 6;
+  top: 12px;
+  left: 15px;
+  right: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.graphTitle {
+  min-width: 0;
+  display: grid;
+  gap: 1px;
+}
+
+.graphTitle strong,
+.graphTitle span,
+.graphTitle em {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.graphTitle strong {
+  color: #58443e;
+  font-size: 16px;
+  line-height: 1.2;
+}
+
+.graphTitle span {
+  color: #91817b;
+  font-size: 10px;
+  font-weight: 650;
+}
+
+.graphTitle em {
+  color: #7a5c86;
+  font-size: 10px;
+  font-style: normal;
+  font-weight: 750;
+}
+
+.graphControls > button {
+  min-height: 29px;
+  padding: 0 11px;
+  border: 1px solid rgba(100, 75, 67, 0.12);
+  border-radius: 999px;
+  color: #765d80;
+  background: rgba(255, 253, 249, 0.84);
+  font: inherit;
+  font-size: 11px;
+  cursor: pointer;
+  backdrop-filter: blur(10px);
+}
+
+.graphCanvas {
+  position: absolute;
+  inset: 50px 6px 62px;
+  overflow: hidden;
+  touch-action: none;
+  user-select: none;
+}
+
+.edgeLayer {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.edgeGroup {
+  cursor: pointer;
+  outline: none;
+}
+
+.edgeLine {
+  fill: none;
+  vector-effect: non-scaling-stroke;
+  stroke: rgba(105, 158, 143, 0.48);
+  stroke-width: 1;
+  stroke-linecap: round;
+  transition: stroke 0.16s ease, stroke-width 0.16s ease, opacity 0.16s ease;
+}
+
+.edgeGroup:hover .edgeLine,
+.selectedEdge .edgeLine,
+.relatedEdge .edgeLine {
+  stroke: rgba(112, 170, 152, 0.94);
+  stroke-width: 1.25;
+}
+
+.dimmedEdge {
+  opacity: 0.12;
+}
+
+.edgeLayer marker path {
+  fill: none;
+  stroke: rgba(92, 154, 139, 0.76);
+  stroke-width: 1;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.node {
+  --node-size: 80px;
+  position: absolute;
+  z-index: 3;
+  left: var(--node-x);
+  top: var(--node-y);
+  width: var(--node-size);
+  height: var(--node-size);
+  display: grid;
+  place-items: center;
+  align-content: center;
+  padding: 8px;
+  overflow: hidden;
+  border: 1.5px solid rgba(255, 255, 255, 0.94);
+  border-radius: 50%;
+  color: #44332d;
+  background: linear-gradient(145deg, #faf5fb, #dccde9);
+  box-shadow: 0 7px 18px rgba(88, 68, 62, 0.09);
+  text-align: center;
+  transform: translate(-50%, -50%);
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+  transition: transform 0.18s ease, box-shadow 0.18s ease, opacity 0.18s ease, filter 0.18s ease;
+}
+
+.node[data-dragging="true"] {
+  cursor: grabbing;
+  transform: translate(-50%, -50%) scale(1.04);
+}
+
+.node[data-kind*="ingredient"] {
+  background: linear-gradient(145deg, #eff9f5, #b8ddcf);
+}
+
+.node[data-kind*="medicine"],
+.node[data-kind*="drug"] {
+  background: linear-gradient(145deg, #fff4eb, #efc9ab);
+}
+
+.node[data-kind*="concern"],
+.node[data-kind*="symptom"] {
+  background: linear-gradient(145deg, #fff2f1, #e8bbb9);
+}
+
+.node[data-kind*="function"] {
+  background: linear-gradient(145deg, #faf3fb, #d7c8e5);
+}
+
+.node[data-kind*="care"] {
+  background: linear-gradient(145deg, #fff7ef, #e9cdb6);
+}
+
+.node[aria-pressed="true"] {
+  transform: translate(-50%, -50%) scale(1.06);
+  box-shadow: 0 9px 22px rgba(88, 68, 62, 0.14), 0 0 0 4px rgba(155, 119, 170, 0.14);
+}
+
+.node:focus {
+  outline: none;
+}
+
+.node:focus-visible {
+  outline: 2px solid rgba(142, 109, 159, 0.46);
+  outline-offset: 3px;
+}
+
+.dimmedNode {
+  opacity: 0.24;
+  filter: saturate(0.62);
+}
+
+.node strong {
+  display: -webkit-box;
+  width: 100%;
+  max-width: 84%;
+  max-height: 2.36em;
+  overflow: hidden;
+  color: #58443e;
+  font-size: 12px;
+  line-height: 1.16;
+  overflow-wrap: anywhere;
+  text-overflow: ellipsis;
+  word-break: break-word;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.centerNode {
+  --node-size: 116px;
+  background: linear-gradient(145deg, #eff9f5, #b9decf);
+  box-shadow: 0 10px 24px rgba(88, 68, 62, 0.12), 0 0 0 5px rgba(208, 235, 224, 0.22);
+  cursor: pointer;
+}
+
+.centerNode strong {
+  max-width: 78%;
+  max-height: 3.36em;
+  color: #5f493d;
+  font-size: 18px;
+  line-height: 1.12;
+  -webkit-line-clamp: 3;
+}
+
+.graphFooter {
+  position: absolute;
+  z-index: 6;
+  left: 12px;
+  right: 12px;
+  bottom: 10px;
+  display: grid;
+  justify-items: center;
+  gap: 5px;
+  pointer-events: none;
+}
+
+.graphLegend {
+  max-width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  overflow: hidden;
+  color: #876b93;
+  font-size: 10px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.graphLegend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.graphLegend i {
+  width: 7px;
+  height: 7px;
+  flex: 0 0 7px;
+  border-radius: 50%;
+  background: #d9cce8;
+}
+
+.graphLegend i[data-kind*="ingredient"] { background: #b8ddcf; }
+.graphLegend i[data-kind*="medicine"],
+.graphLegend i[data-kind*="drug"] { background: #efc9ab; }
+.graphLegend i[data-kind*="concern"],
+.graphLegend i[data-kind*="symptom"] { background: #e8bbb9; }
+.graphLegend i[data-kind*="function"] { background: #d7c8e5; }
+.graphLegend i[data-kind*="care"] { background: #e9cdb6; }
+
+.graphHint {
+  margin: 0;
+  color: #8b718f;
+  font-size: 11px;
+  font-weight: 650;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+.graphPopover {
+  position: absolute;
+  z-index: 9;
+  left: 50%;
+  bottom: 12px;
+  width: min(340px, calc(100% - 24px));
+  min-height: 92px;
+  padding: 12px 38px 12px 14px;
+  border: 1px solid rgba(135, 107, 147, 0.18);
+  border-radius: 17px;
+  color: #58443e;
+  background: rgba(255, 253, 249, 0.94);
+  box-shadow: 0 10px 26px rgba(88, 68, 62, 0.1);
+  transform: translateX(-50%);
+  backdrop-filter: blur(16px);
+  animation: popoverIn 0.18s ease-out;
+}
+
+.popoverRelation {
+  display: block;
+  margin-bottom: 3px;
+  overflow: hidden;
+  color: #8e6d9f;
+  font-size: 10px;
+  font-weight: 800;
+  line-height: 1.35;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.graphPopover > strong {
+  display: block;
+  overflow: hidden;
+  font-size: 17px;
+  line-height: 1.25;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.graphPopover p {
+  display: -webkit-box;
+  margin: 6px 0 0;
+  overflow: hidden;
+  color: #6f5a54;
+  font-size: 12.5px;
+  line-height: 1.5;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+}
+
+.graphPopover small {
+  display: block;
+  margin-top: 5px;
+  color: #91817b;
+  font-size: 9px;
+  line-height: 1.35;
+}
+
+.popoverClose {
+  position: absolute;
+  top: 9px;
+  right: 9px;
+  width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  color: #876b93;
+  background: rgba(238, 228, 241, 0.58);
+  font: inherit;
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.emptyState {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  padding: 26px;
+  text-align: center;
+}
+
+.emptyState::before {
+  content: "";
+  width: 42px;
+  height: 42px;
+  margin-bottom: 12px;
+  border: 1px solid rgba(142, 109, 159, 0.18);
+  border-radius: 50%;
+  background: radial-gradient(circle, #d5ebdf 0 5px, transparent 6px);
+  box-shadow: 0 0 0 10px rgba(238, 228, 241, 0.22);
+}
+
+.emptyState h2 {
+  margin: 0;
+  font-size: 18px;
+}
+
+.emptyState p {
+  margin: 6px 0 0;
+  color: #876b93;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.emptyState span {
+  margin-top: 10px;
+  color: #a2948e;
+  font-size: 10px;
+}
+
+.resultEmptyState {
+  width: min(440px, calc(100% - 36px));
+  margin: auto;
+  padding: 24px 22px;
+  border: 1px solid rgba(147, 111, 160, 0.14);
+  border-radius: 24px;
+  background: rgba(255, 253, 249, 0.84);
+  box-shadow: 0 14px 32px rgba(93, 72, 83, 0.07);
+}
+
+.resultEmptyState::before {
+  display: none;
+}
+
+.resultEmptyState p {
+  max-width: 36em;
+  color: #745f7d;
+  font-size: 14px;
+}
+
+.suggestionChips {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 7px;
+  margin-top: 13px;
+}
+
+.suggestionChips button {
+  min-height: 32px;
+  padding: 0 12px;
+  border: 1px solid rgba(151, 113, 167, 0.2);
+  border-radius: 999px;
+  color: #765d80;
+  background: #fffdf9;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 750;
+  cursor: pointer;
+}
+
+.graphNotice {
+  position: absolute;
+  z-index: 12;
+  top: 52px;
+  left: 50%;
+  width: min(520px, calc(100% - 28px));
+  padding: 9px 12px;
+  border: 1px solid rgba(151, 113, 167, 0.16);
+  border-radius: 15px;
+  color: #6f5879;
+  background: rgba(255, 253, 249, 0.95);
+  box-shadow: 0 8px 22px rgba(88, 68, 62, 0.07);
+  transform: translateX(-50%);
+}
+
+.graphNotice > div:first-child {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 7px;
+}
+
+.graphNotice strong {
+  flex: 0 0 auto;
+  font-size: 12px;
+}
+
+.graphNotice span {
+  min-width: 0;
+  overflow: hidden;
+  font-size: 11px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.graphNotice .suggestionChips {
+  margin-top: 7px;
+}
+
+.searchForm > button:focus-visible,
+.examples button:focus-visible,
+.quickSuggestions button:focus-visible,
+.suggestionChips button:focus-visible,
+.backButton:focus-visible,
+.graphControls button:focus-visible,
+.node:focus-visible,
+.popoverClose:focus-visible {
+  outline: 3px solid rgba(142, 109, 159, 0.28);
+  outline-offset: 2px;
+}
+
+.loadingState {
+  position: absolute;
+  z-index: 11;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+  background: rgba(255, 253, 249, 0.38);
+  backdrop-filter: blur(2px);
+}
+
+.loadingState span {
+  padding: 9px 14px;
+  border: 1px solid rgba(151, 113, 167, 0.16);
+  border-radius: 999px;
+  color: #715b7c;
+  background: rgba(255, 253, 249, 0.94);
+  box-shadow: 0 8px 20px rgba(88, 68, 62, 0.08);
+  font-size: 12px;
+  font-weight: 760;
+}
+
+.errorMessage {
+  position: absolute;
+  z-index: 12;
+  left: 50%;
+  bottom: 14px;
+  width: min(360px, calc(100% - 28px));
+  margin: 0;
+  padding: 10px 13px;
+  border: 1px solid rgba(164, 78, 69, 0.2);
+  border-radius: 14px;
+  color: #8b413d;
+  background: rgba(255, 246, 244, 0.96);
+  box-shadow: 0 8px 20px rgba(88, 68, 62, 0.08);
+  font-size: 10px;
+  text-align: center;
+  transform: translateX(-50%);
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+@keyframes popoverIn {
+  from { opacity: 0; transform: translate(-50%, 7px); }
+  to { opacity: 1; transform: translate(-50%, 0); }
+}
+
+@media (max-width: 700px) {
+  .page {
+    height: calc(100dvh - 88px);
+    min-height: 0;
+  }
+
+  .header {
+    margin: 9px 10px 0;
+    padding: 13px 13px 11px;
+    border-radius: 22px;
+  }
+
+  .backButton {
+    width: 36px;
+    height: 36px;
+  }
+
+  .header h1 {
+    font-size: 24px;
+  }
+
+  .headerRow p {
+    font-size: 12px;
+  }
+
+  .queryStatus {
+    min-height: 28px;
+    margin-top: 7px;
+    padding: 5px 9px;
+  }
+
+  .queryStatus span {
+    font-size: 12px;
+  }
+
+  .queryStatus small {
+    font-size: 10px;
+  }
+
+  .searchForm {
+    margin-top: 8px;
+  }
+
+  .searchField input,
+  .searchForm > button {
+    height: 44px;
+  }
+
+  .searchField input {
+    font-size: 14px;
+  }
+
+  .categoryTabs {
+    margin-top: 7px;
+  }
+
+  .examples button {
+    min-height: 30px;
+    padding: 0 10px;
+    font-size: 11px;
+  }
+
+  .quickSuggestions {
+    margin-top: 7px;
+  }
+
+  .quickSuggestions button {
+    min-height: 30px;
+  }
+
+  .quickSuggestions span {
+    font-size: 9px;
+  }
+
+  .quickSuggestions b {
+    font-size: 11px;
+  }
+
+  .graphMeta {
+    top: 10px;
+    left: 12px;
+    right: 12px;
+  }
+
+  .graphCanvas {
+    inset: 45px 2px 58px;
+  }
+
+  .graphNotice {
+    top: 47px;
+    width: calc(100% - 20px);
+    padding: 8px 10px;
+  }
+
+  .graphNotice > div:first-child {
+    justify-content: flex-start;
+  }
+
+  .node {
+    --node-size: 70px;
+    padding: 7px;
+  }
+
+  .node strong {
+    font-size: 11px;
+  }
+
+  .centerNode {
+    --node-size: 100px;
+  }
+
+  .centerNode strong {
+    font-size: 16px;
+  }
+
+  .graphLegend {
+    max-width: calc(100vw - 30px);
+    gap: 7px;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .graphPopover {
+    bottom: 10px;
+    width: calc(100% - 20px);
+    min-height: 88px;
+    padding: 11px 36px 11px 13px;
+    border-radius: 16px;
+  }
+
+  .graphPopover p {
+    -webkit-line-clamp: 2;
+  }
+}
+
+@media (max-height: 690px) and (max-width: 700px) {
+  .headerRow p {
+    display: none;
+  }
+
+  .header {
+    padding-top: 7px;
+    padding-bottom: 7px;
+  }
+
+  .searchField input,
+  .searchForm > button {
+    height: 36px;
+  }
+
+  .examples button {
+    min-height: 25px;
+  }
+
+  .quickSuggestions {
+    margin-top: 5px;
+  }
+
+  .quickSuggestions button {
+    min-height: 27px;
+  }
+
+  .graphCanvas {
+    inset: 42px 2px 52px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .node,
+  .graphPopover {
+    animation: none;
+    transition: none;
+  }
+}

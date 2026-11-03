@@ -1,0 +1,86 @@
+### LLM settings ###
+models:
+  default_chat_model:
+    type: chat
+    model_provider: openai
+    auth_type: api_key
+    api_key: ${GRAPHRAG_API_KEY}
+    model: taide-12b
+    api_base: http://localhost:8000/v1
+    model_supports_json: true
+    concurrent_requests: 1
+    async_mode: threaded
+    retry_strategy: exponential_backoff
+    max_retries: 10
+
+  default_embedding_model:
+    type: embedding
+    model_provider: openai
+    auth_type: api_key
+    api_key: ${GRAPHRAG_API_KEY}
+    model: taide-12b # 這裡也設成 taide-12b 是為了防止它跑去連外網
+    api_base: http://localhost:8000/v1
+    concurrent_requests: 1
+    async_mode: threaded
+
+### Input settings ###
+input:
+  storage:
+    type: file
+    base_dir: "input"
+  file_type: text
+  file_pattern: ".*\\.md"
+
+chunks:
+  size: 1200
+  overlap: 100
+
+### Output/storage settings ###
+output:
+  type: file
+  base_dir: "output"
+    
+cache:
+  type: file
+  base_dir: "cache"
+
+reporting:
+  type: file
+  base_dir: "logs"
+
+vector_store:
+  default_vector_store:
+    type: lancedb
+    db_uri: output/lancedb
+
+### Workflow settings ###
+embed_text:
+  enabled: false # 💡 關鍵：關閉向量化以避開 401 錯誤
+
+extract_graph:
+  model_id: default_chat_model
+  prompt: "prompts/extract_graph.txt"
+  entity_types: [ingredient, benefit, risk_level, skin_type]
+  max_gleanings: 0 # 💡 設為 0 加快速度
+
+summarize_descriptions:
+  model_id: default_chat_model
+  prompt: "prompts/summarize_descriptions.txt"
+  max_length: 500
+
+cluster_graph:
+  max_cluster_size: 10
+
+community_reports:
+  model_id: default_chat_model
+  graph_prompt: "prompts/community_report_graph.txt"
+  text_prompt: "prompts/community_report_text.txt"
+  max_length: 500
+
+extract_claims:
+  enabled: false
+
+# 💡 全域併發控制
+parallelization:
+  stagger: 1.0
+  num_threads: 1

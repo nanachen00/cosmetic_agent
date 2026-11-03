@@ -1,0 +1,58 @@
+{
+ "id": "sys1-dispatch-v1",
+ "target": "agents/root/orchestrator.py",
+ "overlay_marker": ".sys1-shadow-overlay",
+ "doc": "P+Sys1 dispatch overlay (Gate B path) for the SHADOW copy of cosmetic-agent only. Same anchors as kev-dispatch-v1 (checked against gateB-colab/vendor_prod orchestrator sha b6e372ec…). Each anchor must occur once.",
+ "hunks": [
+  {
+   "id": "H1_import",
+   "old": "from tools.agent.intent_parser import OPENAI_API_KEY, OPENAI_MODEL, parse_intent\n",
+   "new": "from tools.agent.intent_parser import OPENAI_API_KEY, OPENAI_MODEL, parse_intent\nfrom agents.root import sys1_dispatch  # SHADOW-SYS1-PATCH\n"
+  },
+  {
+   "id": "H2_parse_new_input",
+   "old": "        intent_started = time.perf_counter()\n        intent = parse_intent(\n            user_query=user_input,\n",
+   "new": "        intent_started = time.perf_counter()\n        intent = sys1_dispatch.parse_intent(  # SHADOW-SYS1-PATCH\n            _orch=self, _fallback=parse_intent,\n            user_query=user_input,\n"
+  },
+  {
+   "id": "H3_parse_confirm_retry",
+   "old": "        self._log(\"CONFIRM\", \"使用者要修正需求\")\n        intent = parse_intent(\n",
+   "new": "        self._log(\"CONFIRM\", \"使用者要修正需求\")\n        intent = sys1_dispatch.parse_intent(  # SHADOW-SYS1-PATCH\n            _orch=self, _fallback=parse_intent,\n"
+  },
+  {
+   "id": "H4_skin_tracking_early",
+   "old": "        if intent.routing_confidence < 0.5:\n            self._log(\"STEP\", \"目標 Agent 不明，先確認使用者要做的事\")\n",
+   "new": "        _sys1_early = sys1_dispatch.early_dispatch(self, user_input, intent)  # SHADOW-SYS1-PATCH\n        if _sys1_early is not None:\n            return _sys1_early\n        if intent.routing_confidence < 0.5:\n            self._log(\"STEP\", \"目標 Agent 不明，先確認使用者要做的事\")\n"
+  },
+  {
+   "id": "H5_force_safety",
+   "old": "        if (intent.intent_type == IntentType.FIND_PRODUCT and\n                any(kw in (intent.raw_query or '') for kw in SAFETY_KEYWORDS)):\n",
+   "new": "        if ((intent.intent_type == IntentType.FIND_PRODUCT and\n                any(kw in (intent.raw_query or '') for kw in SAFETY_KEYWORDS))\n                or sys1_dispatch.force_safety(self, intent)):  # SHADOW-SYS1-PATCH\n"
+  },
+  {
+   "id": "H6_pain_gain_optional",
+   "old": "        elif len(user_input) > 20:\n            pain_gain_started = time.perf_counter()\n",
+   "new": "        elif len(user_input) > 20 and not sys1_dispatch.skip_pain_gain():  # SHADOW-SYS1-PATCH\n            pain_gain_started = time.perf_counter()\n"
+  }
+ ],
+ "add_files": [
+  {
+   "src": "payload/sys1_dispatch.py",
+   "dest": "agents/root/sys1_dispatch.py"
+  },
+  {
+   "src": "payload/sys1_vendor/kevlib.py",
+   "dest": "agents/root/sys1_vendor/kevlib.py"
+  },
+  {
+   "src": "payload/sys1_vendor/parser_v2.py",
+   "dest": "agents/root/sys1_vendor/parser_v2.py"
+  },
+  {
+   "src": "payload/sys1_vendor/payload/kev_slot_parser.py",
+   "dest": "agents/root/sys1_vendor/payload/kev_slot_parser.py"
+  }
+ ],
+ "tag": "SHADOW-SYS1-PATCH",
+ "control_default": "control/sys1_dispatch.json"
+}

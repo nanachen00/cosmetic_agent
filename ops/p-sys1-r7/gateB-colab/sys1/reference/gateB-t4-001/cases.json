@@ -1,0 +1,3648 @@
+[
+ {
+  "safety": false,
+  "intents": [
+   "find_product"
+  ],
+  "concern": "保濕",
+  "budget": {
+   "value": 500,
+   "role": "target"
+  },
+  "avoid": [],
+  "other_numbers": false,
+  "emergency": false,
+  "text": "我是敏感肌，想找面霜，主要想保濕，預算五百元左右",
+  "group": "find",
+  "id": "c0000",
+  "split": "cal"
+ },
+ {
+  "safety": false,
+  "intents": [
+   "find_product"
+  ],
+  "concern": "美白",
+  "budget": {
+   "value": 2000,
+   "role": "upper"
+  },
+  "avoid": [],
+  "other_numbers": false,
+  "emergency": false,
+  "text": "我是油肌，想找面霜，主要想美白，預算2k以內",
+  "group": "find",
+  "id": "c0001",
+  "split": "test"
+ },
+ {
+  "safety": false,
+  "intents": [
+   "find_product"
+  ],
+  "concern": null,
+  "budget": {
+   "value": 300,
+   "role": "target"
+  },
+  "avoid": [],
+  "other_numbers": false,
+  "emergency": false,
+  "text": "我是油肌，想找乳液，預算300塊左右",
+  "group": "find",
+  "id": "c0002",
+  "split": "cal"
+ },
+ {
+  "safety": false,
+  "intents": [
+   "find_product"
+  ],
+  "concern": null,
+  "budget": {
+   "value": 1200,
+   "role": "upper"
+  },
+  "avoid": [],
+  "other_numbers": false,
+  "emergency": false,
+  "text": "我是油性肌，想找精華，預算最高1200 元",
+  "group": "find",
+  "id": "c0003",
+  "split": "test"
+ },
+ {
+  "safety": false,
+  "intents": [
+   "find_product"
+  ],
+  "concern": null,
+  "budget": {
+   "value": 800,
+   "role": "upper"
+  },
+  "avoid": [],
+  "other_numbers": false,
+  "emergency": false,
+  "text": "我是敏感肌，想找精華，預算800 元以內",
+  "group": "find",
+  "id": "c0004",
+  "split": "cal"
+ },
+ {
+  "safety": false,
+  "intents": [
+   "find_product"
+  ],
+  "concern": "保濕",
+  "budget": {
+   "value": 1000,
+   "role": "upper"
+  },
+  "avoid": [],
+  "other_numbers": false,
+  "emergency": false,
+  "text": "我是油肌，想找化妝水，主要想補水，預算最高1k",
+  "group": "find",
+  "id": "c0005",
+  "split": "cal"
+ },
+ {
+  "safety": false,
+  "intents": [
+   "find_product"
+  ],
+  "concern": "毛孔",
+  "budget": {
+   "value": 800,
+   "role": "target"
+  },
+  "avoid": [],
+  "other_numbers": false,
+  "emergency": false,
+  "text": "我是混合肌，想找洗面乳，主要想縮小毛孔，大約八百元",
+  "group": "find",
+  "id": "c0006",
+  "split": "cal"
+ },
+ {
+  "safety": false,
+  "intents": [
+   "find_product"
+  ],
+  "concern": null,
+  "budget": {
+   "value": 3000,
+   "role": "upper"
+  },
+  "avoid": [],
+  "other_numbers": false,
+  "emergency": false,
+  "text": "我是油肌，想找防曬，預算最高3000元",
+  "group": "find",
+  "id": "c0007",
+  "split": "cal"
+ },
+ {
+  "safety": false,
+  "intents": [
+   "find_product"
+  ],
+  "concern": null,
+  "budget": {
+   "value": 800,
+   "role": "upper"
+  },
+  "avoid": [],
+  "other_numbers": false,
+  "emergency": false,
+  "text": "我是混合肌，想找面霜，預算800塊以內",
+  "group": "find",
+  "id": "c0008",
+  "split": "cal"
+ },
+ {
+  "safety": false,
+  "intents": [
+   "find_product"
+  ],
+  "concern": null,
+  "budget": {
+   "value": 1500,
+   "role": "upper"
+  },
+  "avoid": [],
+  "other_numbers": false,
+  "emergency": false,
+  "text": "我是油肌，想找精華，預算最高1.5k",
+  "group": "find",
+  "id": "c0009",
+  "split": "cal"
+ },
+ {
+  "safety": false,
+  "intents": [
+   "find_product"
+  ],
+  "concern": null,
+  "budget": {
+   "value": 1200,
+   "role": "upper"
+  },
+  "avoid": [],
+  "other_numbers": false,
+  "emergency": false,
+  "text": "我是混合肌，想找乳液，預算不超過1200元",
+  "group": "find",
+  "id": "c0010",
+  "split": "cal"
+ },
+ {
+  "safety": false,
+  "intents": [
+   "find_product"
+  ],
+  "concern": null,
+  "budget": {
+   "value": 3000,
+   "role": "upper"
+  },
+  "avoid": [],
+  "other_numbers": false,
+  "emergency": false,
+  "text": "我是乾肌，想找精華，預算三千元以內",
+  "group": "find",
+  "id": "c0011",
+  "split": "cal"
+ },
+ {
+  "safety": false,
+  "intents": [
+   "find_product"
+  ],
+  "concern": "保濕",
+  "budget": {
+   "value": 3000,
+   "role": "upper"
+  },
+  "avoid": [],
+  "other_numbers": false,
+  "emergency": false,
+  "text": "我是混合肌，想找洗面乳，主要想保濕，NT$3000以內",
+  "group": "find",
+  "id": "c0012",
+  "split": "cal"
+ },
+ {
+  "safety": false,
+  "intents": [
+   "find_product"
+  ],
+  "concern": null,
+  "budget": {
+   "value": 3000,
+   "role": "upper"
+  },
+  "avoid": [],
+  "other_numbers": false,
+  "emergency": false,
+  "text": "我是混合肌，想找防曬，最多3k",
+  "group": "find",
+  "id": "c0013",
+  "split": "cal"
+ },
+ {
+  "safety": false,
+  "intents": [
+   "find_product"
+  ],
+  "concern": null,
+  "budget": {
+   "value": 2000,
+   "role": "target"
+  },
+  "avoid": [],
+  "other_numbers": false,
+  "emergency": false,
+  "text": "我是油肌，想找洗面乳，大約2k",
+  "group": "find",
+  "id": "c0014",
+  "split": "test"
+ },
+ {
+  "safety": false,
+  "intents": [
+   "find_product"
+  ],
+  "concern": null,
+  "budget": {
+   "value": 800,
+   "role": "upper"
+  },
+  "avoid": [],
+  "other_numbers": false,
+  "emergency": false,
+  "text": "我是乾肌，想找防曬，800 元以內",
+  "group": "find",
+  "id": "c0015",
+  "split": "test"
+ },
+ {
+  "safety": false,
+  "intents": [
+   "find_product"
+  ],
+  "concern": "毛孔",
+  "budget": {
+   "value": 800,
+   "role": "upper"
+  },
+  "avoid": [],
+  "other_numbers": false,
+  "emergency": false,
+  "text": "我是乾肌，想找面霜，主要想改善毛孔，最多800元",
+  "group": "find",
+  "id": "c0016",
+  "split": "test"
+ },
+ {
+  "safety": false,
+  "intents": [
+   "find_product"
+  ],
+  "concern": null,
+  "budget": {
+   "value": 1500,
+   "role": "upper"
+  },
+  "avoid": [],
+  "other_numbers": false,
+  "emergency": false,
+  "text": "我是油肌，想找洗面乳，預算最高1.5k",
+  "group": "find",
+  "id": "c0017",
+  "split": "cal"
+ },
+ {
+  "safety": false,
+  "intents": [
+   "find_product"
+  ],
+  "concern": "保濕",
+  "budget": {
+   "value": 3000,
+   "role": "target"
+  },
+  "avoid": [],
+  "other_numbers": false,
+  "emergency": false,
+  "text": "我是混合肌，想找防曬，主要想補水，預算3000元左右",
+  "group": "find",
+  "id": "c0018",
+  "split": "cal"
+ },
+ {
+  "safety": false,
+  "intents": [
+   "find_product"
+  ],
+  "concern": "控油",
+  "budget": {
+   "value": 300,
+   "role": "upper"
+  },
+  "avoid": [],
+  "other_numbers": false,
+  "emergency": false,
+  "text": "我是乾性肌，想找防曬，主要想控油，預算三百元以內",
+  "group": "find",
+  "id": "c0019",
+  "split": "cal"
+ },
+ {
+  "safety": false,
+  "intents": [
+   "find_product"
+  ],
+  "concern": "毛孔",
+  "budget": {
+   "value": 1000,
+   "role": "target"
+  },
+  "avoid": [],
+  "other_numbers": false,
+  "emergency": false,
+  "text": "我是敏感肌，想找精華，主要想改善毛孔，大約一千元",
+  "group": "find",
+  "id": "c0020",
+  "split": "cal"
+ },
+ {
+  "safety": false,
+  "intents": [
+   "find_product"
+  ],
+  "concern": "保濕",
+  "budget": {
+   "value": 3000,
+   "role": "upper"
+  },
+  "avoid": [],
+  "other_numbers": false,
+  "emergency": false,
+  "text": "我是油肌，想找洗面乳，主要想補水，預算三千元以內",
+  "group": "find",
+  "id": "c0021",
+  "split": "cal"
+ },
+ {
+  "safety": false,
+  "intents": [
+   "find_product"
+  ],
+  "concern": null,
+  "budget": {
+   "value": 1200,
+   "role": "upper"
+  },
+  "avoid": [],
+  "other_numbers": false,
+  "emergency": false,
+  "text": "我是乾性肌，想找乳液，1200 元以內",
+  "group": "find",
+  "id": "c0022",
+  "split": "test"
+ },
+ {
+  "safety": false,
+  "intents": [
+   "find_product"
+  ],
+  "concern": "舒緩",
+  "budget": {
+   "value": 300,
+   "role": "target"
+  },
+  "avoid": [],
+  "other_numbers": false,
+  "emergency": false,
+  "text": "我是油肌，想找洗面乳，主要想鎮靜，大約三百元",
+  "group": "find",
+  "id": "c0023",
+  "split": "test"
+ },
+ {
+  "safety": false,
+  "intents": [
+   "find_product"
+  ],
+  "concern": null,
+  "budget": {
+   "value": 1500,
+   "role": "upper"
+  },
+  "avoid": [],
+  "other_numbers": false,
+  "emergency": false,
+  "text": "我是油肌，想找洗面乳，預算最高NT$1500",
+  "group": "find",
+  "id": "c0024",
+  "split": "test"
+ },
+ {
+  "safety": false,
+  "intents": [
+   "find_product"
+  ],
+  "concern": "美白",
+  "budget": {
+   "value": 1000,
+   "role": "upper"
+  },
+  "avoid": [],
+  "other_numbers": false,
+  "emergency": false,
+  "text": "我是乾性肌，想找面膜，主要想美白，預算NT$1000以內",
+  "group": "find",
+  "id": "c0025",
+  "split": "cal"
+ },
+ {
+  "safety": false,
+  "intents": [
+   "find_product"
+  ],
+  "concern": "抗皺",
+  "budget": {
+   "value": 1500,
+   "role": "upper"
+  },
+  "avoid": [],
+  "other_numbers": false,
+  "emergency": false,
+  "text": "我是敏感肌，想找防曬，主要想抗皺，NT$1500以內",
+  "group": "find",
+  "id": "c0026",
+  "split": "cal"
+ },
+ {
+  "safety": false,
+  "intents": [
+   "find_product"
+  ],
+  "concern": "控油",
+  "budget": {
+   "value": 1000,
+   "role": "upper"
+  },
+  "avoid": [],
+  "other_numbers": false,
+  "emergency": false,
+  "text": "我是油性肌，想找面霜，主要想控油，預算一千元以內",
+  "group": "find",
+  "id": "c0027",
+  "split": "cal"
+ },
+ {
+  "safety": false,
+  "intents": [
+   "find_product"
+  ],
+  "concern": null,
+  "budget": {
+   "value": 1000,
+   "role": "upper"
+  },
+  "avoid": [],
+  "other_numbers": false,
+  "emergency": false,
+  "text": "我是乾肌，想找乳液，預算不超過1k",
+  "group": "find",
+  "id": "c0028",
+  "split": "test"
+ },
+ {
+  "safety": false,
+  "intents": [
+   "find_product"
+  ],
+  "concern": null,
+  "budget": {
+   "value": 2000,
+   "role": "upper"
+  },
+  "avoid": [],
+  "other_numbers": false,
+  "emergency": false,
+  "text": "我是油性肌，想找面膜，2000塊以內",
+  "group": "find",
+  "id": "c0029",
+  "split": "test"
+ },
+ {
+  "safety": false,
+  "intents": [
+   "find_product"
+  ],
+  "concern": "舒緩",
+  "budget": {
+   "value": 3000,
+   "role": "target"
+  },
+  "avoid": [],
+  "other_numbers": false,
+  "emergency": false,
+  "text": "我是乾性肌，想找面霜，主要想舒緩，預算三千元左右",
+  "group": "find",
+  "id": "c0030",
+  "split": "cal"
+ },
+ {
+  "safety": false,
+  "intents": [
+   "find_product"
+  ],
+  "concern": "保濕",
+  "budget": {
+   "value": 500,
+   "role": "target"
+  },
+  "avoid": [],
+  "other_numbers": false,
+  "emergency": false,
+  "text": "我是油肌，想找精華，主要想保濕，預算500塊左右",
+  "group": "find",
+  "id": "c0031",
+  "split": "cal"
+ },
+ {
+  "safety": false,
+  "intents": [
+   "find_product"
+  ],
+  "concern": "舒緩",
+  "budget": {
+   "value": 1000,
+   "role": "target"
+  },
+  "avoid": [],
+  "other_numbers": false,
+  "emergency": false,
+  "text": "我是油性肌，想找洗面乳，主要想鎮靜，預算1k左右",
+  "group": "find",
+  "id": "c0032",
+  "split": "test"
+ },
+ {
+  "safety": false,
+  "intents": [
+   "find_product"
+  ],
+  "concern": "美白",
+  "budget": {
+   "value": 2000,
+   "role": "target"
+  },
+  "avoid": [],
+  "other_numbers": false,
+  "emergency": false,
+  "text": "我是油性肌，想找化妝水，主要想美白，大約2000 元",
+  "group": "find",
+  "id": "c0033",
+  "split": "test"
+ },
+ {
+  "safety": false,
+  "intents": [
+   "find_product"
+  ],
+  "concern": "毛孔",
+  "budget": {
+   "value": 800,
+   "role": "upper"
+  },
+  "avoid": [],
+  "other_numbers": false,
+  "emergency": false,
+  "text": "我是乾性肌，想找精華，主要想縮小毛孔，預算八百元以內",
+  "group": "find",
+  "id": "c0034",
+  "split": "test"
+ },
+ {
+  "safety": false,
+  "intents": [
+   "find_product"
+  ],
+  "concern": "舒緩",
+  "budget": {
+   "value": 3000,
+   "role": "upper"
+  },
+  "avoid": [],
+  "other_numbers": false,
+  "emergency": false,
+  "text": "我是油肌，想找乳液，主要想舒緩，預算不超過3000 元",
+  "group": "find",
+  "id": "c0035",
+  "split": "test"
+ },
+ {
+  "safety": false,
+  "intents": [
+   "find_product"
+  ],
+  "concern": "美白",
+  "budget": {
+   "value": 300,
+   "role": "upper"
+  },
+  "avoid": [],
+  "other_numbers": false,
+  "emergency": false,
+  "text": "我是油性肌，想找面膜，主要想美白，預算最高三百元",
+  "group": "find",
+  "id": "c0036",
+  "split": "test"
+ },
+ {
+  "safety": false,
+  "intents": [
+   "find_product"
+  ],
+  "concern": "控油",
+  "budget": {
+   "value": 3000,
+   "role": "target"
+  },
+  "avoid": [],
+  "other_numbers": false,
+  "emergency": false,
+  "text": "我是油肌，想找精華，主要想控油，三千元左右",
+  "group": "find",
+  "id": "c0037",
+  "split": "cal"
+ },
+ {
+  "safety": false,
+  "intents": [
+   "find_product"
+  ],
+  "concern": "美白",
+  "budget": {
+   "value": 500,
+   "role": "upper"
+  },
+  "avoid": [],
+  "other_numbers": false,
+  "emergency": false,
+  "text": "我是乾性肌，想找面膜，主要想美白，NT$500以內",
+  "group": "find",
+  "id": "c0038",
+  "split": "test"
+ },
+ {
+  "safety": false,
+  "intents": [
+   "find_product"
+  ],
+  "concern": "控油",
+  "budget": {
+   "value": 500,
+   "role": "upper"
+  },
+  "avoid": [],
+  "other_numbers": false,
+  "emergency": false,
+  "text": "我是混合肌，想找乳液，主要想控油，500 元以內",
+  "group": "find",
+  "id": "c0039",
+  "split": "test"
+ },
+ {
+  "safety": false,
+  "intents": [
+   "find_product"
+  ],
+  "concern": null,
+  "budget": {
+   "value": 500,
+   "role": "upper"
+  },
+  "avoid": [],
+  "other_numbers": false,
+  "emergency": false,
+  "text": "我是混合肌，想找面霜，500塊以內",
+  "group": "find",
+  "id": "c0040",
+  "split": "test"
+ },
+ {
+  "safety": false,
+  "intents": [
+   "find_product"
+  ],
+  "concern": "舒緩",
+  "budget": {
+   "value": 2000,
+   "role": "upper"
+  },
+  "avoid": [],
+  "other_numbers": false,
+  "emergency": false,
+  "text": "我是乾性肌，想找化妝水，主要想鎮靜，預算不超過兩千元",
+  "group": "find",
+  "id": "c0041",
+  "split": "cal"
+ },
+ {
+  "safety": false,
+  "intents": [
+   "find_product"
+  ],
+  "concern": "控油",
+  "budget": {
+   "value": 3000,
+   "role": "upper"
+  },
+  "avoid": [],
+  "other_numbers": false,
+  "emergency": false,
+  "text": "我是油性肌，想找化妝水，主要想控油，預算最高三千元",
+  "group": "find",
+  "id": "c0042",
+  "split": "cal"
+ },
+ {
+  "safety": false,
+  "intents": [
+   "find_product"
+  ],
+  "concern": "保濕",
+  "budget": {
+   "value": 500,
+   "role": "upper"
+  },
+  "avoid": [],
+  "other_numbers": false,
+  "emergency": false,
+  "text": "我是油肌，想找洗面乳，主要想保濕，預算不超過500元",
+  "group": "find",
+  "id": "c0043",
+  "split": "test"
+ },
+ {
+  "safety": false,
+  "intents": [
+   "find_product"
+  ],
+  "concern": "毛孔",
+  "budget": {
+   "value": 800,
+   "role": "upper"
+  },
+  "avoid": [],
+  "other_numbers": false,
+  "emergency": false,
+  "text": "我是油性肌，想找面膜，主要想改善毛孔，預算最高800塊",
+  "group": "find",
+  "id": "c0044",
+  "split": "cal"
+ },
+ {
+  "safety": false,
+  "intents": [
+   "find_product"
+  ],
+  "concern": "控油",
+  "budget": {
+   "value": 500,
+   "role": "upper"
+  },
+  "avoid": [],
+  "other_numbers": false,
+  "emergency": false,
+  "text": "我是油肌，想找精華，主要想控油，預算500 元以內",
+  "group": "find",
+  "id": "c0045",
+  "split": "cal"
+ },
+ {
+  "safety": false,
+  "intents": [
+   "find_product"
+  ],
+  "concern": null,
+  "budget": {
+   "value": 1200,
+   "role": "upper"
+  },
+  "avoid": [],
+  "other_numbers": false,
+  "emergency": false,
+  "text": "我是敏感肌，想找乳液，預算不超過1200 元",
+  "group": "find",
+  "id": "c0046",
+  "split": "cal"
+ },
+ {
+  "safety": false,
+  "intents": [
+   "find_product"
+  ],
+  "concern": "舒緩",
+  "budget": {
+   "value": 2000,
+   "role": "upper"
+  },
+  "avoid": [],
+  "other_numbers": false,
+  "emergency": false,
+  "text": "我是油性肌，想找防曬，主要想舒緩，預算2000元以內",
+  "group": "find",
+  "id": "c0047",
+  "split": "cal"
+ },
+ {
+  "safety": false,
+  "intents": [
+   "find_product"
+  ],
+  "concern": "控油",
+  "budget": null,
+  "avoid": [],
+  "other_numbers": false,
+  "emergency": false,
+  "text": "有沒有控油的面霜可以推薦",
+  "group": "find",
+  "id": "c0048",
+  "split": "test"
+ },
+ {
+  "safety": false,
+  "intents": [
+   "find_product"
+  ],
+  "concern": "控油",
+  "budget": null,
+  "avoid": [],
+  "other_numbers": false,
+  "emergency": false,
+  "text": "想買化妝水，控油為主",
+  "group": "find",
+  "id": "c0049",
+  "split": "test"
+ },
+ {
+  "safety": false,
+  "intents": [
+   "find_product"
+  ],
+  "concern": "抗痘",
+  "budget": null,
+  "avoid": [],
+  "other_numbers": false,
+  "emergency": false,
+  "text": "有沒有改善痘痘的化妝水可以推薦",
+  "group": "find",
+  "id": "c0050",
+  "split": "test"
+ },
+ {
+  "safety": false,
+  "intents": [
+   "find_product"
+  ],
+  "concern": "保濕",
+  "budget": null,
+  "avoid": [],
+  "other_numbers": false,
+  "emergency": false,
+  "text": "推薦一款保濕的乳液",
+  "group": "find",
+  "id": "c0051",
+  "split": "cal"
+ },
+ {
+  "safety": false,
+  "intents": [
+   "find_product"
+  ],
+  "concern": "保濕",
+  "budget": null,
+  "avoid": [],
+  "other_numbers": false,
+  "emergency": false,
+  "text": "想買防曬，補水為主",
+  "group": "find",
+  "id": "c0052",
+  "split": "test"
+ },
+ {
+  "safety": false,
+  "intents": [
+   "find_product"
+  ],
+  "concern": "抗皺",
+  "budget": null,
+  "avoid": [],
+  "other_numbers": false,
+  "emergency": false,
+  "text": "推薦一款抗皺的洗面乳",
+  "group": "find",
+  "id": "c0053",
+  "split": "test"
+ },
+ {
+  "safety": false,
+  "intents": [
+   "find_product"
+  ],
+  "concern": "抗皺",
+  "budget": null,
+  "avoid": [],
+  "other_numbers": false,
+  "emergency": false,
+  "text": "推薦一款抗皺的面膜",
+  "group": "find",
+  "id": "c0054",
+  "split": "cal"
+ },
+ {
+  "safety": false,
+  "intents": [
+   "find_product"
+  ],
+  "concern": "抗痘",
+  "budget": null,
+  "avoid": [],
+  "other_numbers": false,
+  "emergency": false,
+  "text": "有沒有抗痘的面膜可以推薦",
+  "group": "find",
+  "id": "c0055",
+  "split": "cal"
+ },
+ {
+  "safety": false,
+  "intents": [
+   "find_product"
+  ],
+  "concern": "保濕",
+  "budget": null,
+  "avoid": [],
+  "other_numbers": false,
+  "emergency": false,
+  "text": "想買面霜，補水為主",
+  "group": "find",
+  "id": "c0056",
+  "split": "test"
+ },
+ {
+  "safety": false,
+  "intents": [
+   "find_product"
+  ],
+  "concern": "抗皺",
+  "budget": null,
+  "avoid": [],
+  "other_numbers": false,
+  "emergency": false,
+  "text": "推薦一款抗皺的面霜",
+  "group": "find",
+  "id": "c0057",
+  "split": "test"
+ },
+ {
+  "safety": false,
+  "intents": [
+   "find_product"
+  ],
+  "concern": "舒緩",
+  "budget": null,
+  "avoid": [],
+  "other_numbers": false,
+  "emergency": false,
+  "text": "有沒有舒緩的洗面乳可以推薦",
+  "group": "find",
+  "id": "c0058",
+  "split": "cal"
+ },
+ {
+  "safety": false,
+  "intents": [
+   "find_product"
+  ],
+  "concern": "美白",
+  "budget": null,
+  "avoid": [],
+  "other_numbers": false,
+  "emergency": false,
+  "text": "想買乳液，美白為主",
+  "group": "find",
+  "id": "c0059",
+  "split": "cal"
+ },
+ {
+  "safety": false,
+  "intents": [
+   "find_product"
+  ],
+  "concern": "保濕",
+  "budget": null,
+  "avoid": [],
+  "other_numbers": false,
+  "emergency": false,
+  "text": "推薦一款保濕的面膜",
+  "group": "find",
+  "id": "c0060",
+  "split": "test"
+ },
+ {
+  "safety": false,
+  "intents": [
+   "find_product"
+  ],
+  "concern": "舒緩",
+  "budget": null,
+  "avoid": [],
+  "other_numbers": false,
+  "emergency": false,
+  "text": "有沒有鎮靜的防曬可以推薦",
+  "group": "find",
+  "id": "c0061",
+  "split": "cal"
+ },
+ {
+  "safety": false,
+  "intents": [
+   "find_product"
+  ],
+  "concern": "抗皺",
+  "budget": null,
+  "avoid": [],
+  "other_numbers": false,
+  "emergency": false,
+  "text": "想買洗面乳，抗皺為主",
+  "group": "find",
+  "id": "c0062",
+  "split": "cal"
+ },
+ {
+  "safety": false,
+  "intents": [
+   "find_product"
+  ],
+  "concern": "毛孔",
+  "budget": null,
+  "avoid": [],
+  "other_numbers": false,
+  "emergency": false,
+  "text": "推薦一款改善毛孔的化妝水",
+  "group": "find",
+  "id": "c0063",
+  "split": "cal"
+ },
+ {
+  "safety": false,
+  "intents": [
+   "find_product"
+  ],
+  "concern": "毛孔",
+  "budget": null,
+  "avoid": [],
+  "other_numbers": false,
+  "emergency": false,
+  "text": "推薦一款縮小毛孔的化妝水",
+  "group": "find",
+  "id": "c0064",
+  "split": "cal"
+ },
+ {
+  "safety": false,
+  "intents": [
+   "find_product"
+  ],
+  "concern": "保濕",
+  "budget": null,
+  "avoid": [],
+  "other_numbers": false,
+  "emergency": false,
+  "text": "有沒有補水的乳液可以推薦",
+  "group": "find",
+  "id": "c0065",
+  "split": "test"
+ },
+ {
+  "safety": false,
+  "intents": [
+   "find_product"
+  ],
+  "concern": "美白",
+  "budget": null,
+  "avoid": [],
+  "other_numbers": false,
+  "emergency": false,
+  "text": "有沒有美白的面膜可以推薦",
+  "group": "find",
+  "id": "c0066",
+  "split": "test"
+ },
+ {
+  "safety": false,
+  "intents": [
+   "find_product"
+  ],
+  "concern": "保濕",
+  "budget": null,
+  "avoid": [],
+  "other_numbers": false,
+  "emergency": false,
+  "text": "想買洗面乳，保濕為主",
+  "group": "find",
+  "id": "c0067",
+  "split": "test"
+ },
+ {
+  "safety": false,
+  "intents": [
+   "find_product"
+  ],
+  "concern": "保濕",
+  "budget": null,
+  "avoid": [],
+  "other_numbers": false,
+  "emergency": false,
+  "text": "有沒有補水的精華可以推薦",
+  "group": "find",
+  "id": "c0068",
+  "split": "cal"
+ },
+ {
+  "safety": false,
+  "intents": [
+   "price_comparison"
+  ],
+  "concern": null,
+  "budget": null,
+  "avoid": [],
+  "other_numbers": false,
+  "emergency": false,
+  "text": "這兩款面霜哪一款比較划算",
+  "group": "price",
+  "id": "c0069",
+  "split": "test"
+ },
+ {
+  "safety": false,
+  "intents": [
+   "price_comparison"
+  ],
+  "concern": null,
+  "budget": null,
+  "avoid": [],
+  "other_numbers": false,
+  "emergency": false,
+  "text": "幫我比較兩瓶面霜的價格",
+  "group": "price",
+  "id": "c0070",
+  "split": "test"
+ },
+ {
+  "safety": false,
+  "intents": [
+   "price_comparison"
+  ],
+  "concern": null,
+  "budget": null,
+  "avoid": [],
+  "other_numbers": false,
+  "emergency": false,
+  "text": "防曬A和防曬B價格差多少，哪個CP值高",
+  "group": "price",
+  "id": "c0071",
+  "split": "cal"
+ },
+ {
+  "safety": false,
+  "intents": [
+   "price_comparison"
+  ],
+  "concern": null,
+  "budget": null,
+  "avoid": [],
+  "other_numbers": false,
+  "emergency": false,
+  "text": "幫我比較兩瓶乳液的價格",
+  "group": "price",
+  "id": "c0072",
+  "split": "test"
+ },
+ {
+  "safety": false,
+  "intents": [
+   "price_comparison"
+  ],
+  "concern": null,
+  "budget": null,
+  "avoid": [],
+  "other_numbers": false,
+  "emergency": false,
+  "text": "幫我比較兩瓶洗面乳的價格",
+  "group": "price",
+  "id": "c0073",
+  "split": "cal"
+ },
+ {
+  "safety": false,
+  "intents": [
+   "price_comparison"
+  ],
+  "concern": null,
+  "budget": null,
+  "avoid": [],
+  "other_numbers": false,
+  "emergency": false,
+  "text": "這兩款化妝水哪一款比較划算",
+  "group": "price",
+  "id": "c0074",
+  "split": "test"
+ },
+ {
+  "safety": false,
+  "intents": [
+   "price_comparison"
+  ],
+  "concern": null,
+  "budget": null,
+  "avoid": [],
+  "other_numbers": false,
+  "emergency": false,
+  "text": "這兩款乳液哪一款比較划算",
+  "group": "price",
+  "id": "c0075",
+  "split": "cal"
+ },
+ {
+  "safety": false,
+  "intents": [
+   "price_comparison"
+  ],
+  "concern": null,
+  "budget": null,
+  "avoid": [],
+  "other_numbers": false,
+  "emergency": false,
+  "text": "化妝水A和化妝水B價格差多少，哪個CP值高",
+  "group": "price",
+  "id": "c0076",
+  "split": "cal"
+ },
+ {
+  "safety": false,
+  "intents": [
+   "price_comparison"
+  ],
+  "concern": null,
+  "budget": null,
+  "avoid": [],
+  "other_numbers": false,
+  "emergency": false,
+  "text": "這兩款精華哪一款比較划算",
+  "group": "price",
+  "id": "c0077",
+  "split": "test"
+ },
+ {
+  "safety": false,
+  "intents": [
+   "price_comparison"
+  ],
+  "concern": null,
+  "budget": null,
+  "avoid": [],
+  "other_numbers": false,
+  "emergency": false,
+  "text": "幫我比較兩瓶防曬的價格",
+  "group": "price",
+  "id": "c0078",
+  "split": "test"
+ },
+ {
+  "safety": false,
+  "intents": [
+   "price_comparison"
+  ],
+  "concern": null,
+  "budget": null,
+  "avoid": [],
+  "other_numbers": false,
+  "emergency": false,
+  "text": "幫我比較兩瓶面膜的價格",
+  "group": "price",
+  "id": "c0079",
+  "split": "cal"
+ },
+ {
+  "safety": false,
+  "intents": [
+   "knowledge"
+  ],
+  "concern": null,
+  "budget": null,
+  "avoid": [],
+  "other_numbers": false,
+  "emergency": false,
+  "text": "菸鹼醯胺的作用原理是什麼",
+  "group": "knowledge",
+  "id": "c0080",
+  "split": "cal"
+ },
+ {
+  "safety": false,
+  "intents": [
+   "knowledge"
+  ],
+  "concern": null,
+  "budget": null,
+  "avoid": [],
+  "other_numbers": false,
+  "emergency": false,
+  "text": "為什麼水楊酸可以幫助保養",
+  "group": "knowledge",
+  "id": "c0081",
+  "split": "test"
+ },
+ {
+  "safety": false,
+  "intents": [
+   "knowledge"
+  ],
+  "concern": null,
+  "budget": null,
+  "avoid": [],
+  "other_numbers": false,
+  "emergency": false,
+  "text": "為什麼玻尿酸可以幫助保養",
+  "group": "knowledge",
+  "id": "c0082",
+  "split": "test"
+ },
+ {
+  "safety": false,
+  "intents": [
+   "knowledge"
+  ],
+  "concern": null,
+  "budget": null,
+  "avoid": [],
+  "other_numbers": false,
+  "emergency": false,
+  "text": "神經醯胺適合什麼膚質",
+  "group": "knowledge",
+  "id": "c0083",
+  "split": "test"
+ },
+ {
+  "safety": false,
+  "intents": [
+   "knowledge"
+  ],
+  "concern": null,
+  "budget": null,
+  "avoid": [],
+  "other_numbers": false,
+  "emergency": false,
+  "text": "A酸適合什麼膚質",
+  "group": "knowledge",
+  "id": "c0084",
+  "split": "test"
+ },
+ {
+  "safety": false,
+  "intents": [
+   "knowledge"
+  ],
+  "concern": null,
+  "budget": null,
+  "avoid": [],
+  "other_numbers": false,
+  "emergency": false,
+  "text": "玻尿酸的作用原理是什麼",
+  "group": "knowledge",
+  "id": "c0085",
+  "split": "test"
+ },
+ {
+  "safety": false,
+  "intents": [
+   "knowledge"
+  ],
+  "concern": null,
+  "budget": null,
+  "avoid": [],
+  "other_numbers": false,
+  "emergency": false,
+  "text": "玻尿酸適合什麼膚質",
+  "group": "knowledge",
+  "id": "c0086",
+  "split": "cal"
+ },
+ {
+  "safety": false,
+  "intents": [
+   "knowledge"
+  ],
+  "concern": null,
+  "budget": null,
+  "avoid": [],
+  "other_numbers": false,
+  "emergency": false,
+  "text": "果酸適合什麼膚質",
+  "group": "knowledge",
+  "id": "c0087",
+  "split": "cal"
+ },
+ {
+  "safety": false,
+  "intents": [
+   "knowledge"
+  ],
+  "concern": null,
+  "budget": null,
+  "avoid": [],
+  "other_numbers": false,
+  "emergency": false,
+  "text": "為什麼A酸可以幫助保養",
+  "group": "knowledge",
+  "id": "c0088",
+  "split": "test"
+ },
+ {
+  "safety": false,
+  "intents": [
+   "knowledge"
+  ],
+  "concern": null,
+  "budget": null,
+  "avoid": [],
+  "other_numbers": false,
+  "emergency": false,
+  "text": "果酸的作用原理是什麼",
+  "group": "knowledge",
+  "id": "c0089",
+  "split": "test"
+ },
+ {
+  "safety": false,
+  "intents": [
+   "knowledge"
+  ],
+  "concern": null,
+  "budget": null,
+  "avoid": [],
+  "other_numbers": false,
+  "emergency": false,
+  "text": "菸鹼醯胺適合什麼膚質",
+  "group": "knowledge",
+  "id": "c0090",
+  "split": "test"
+ },
+ {
+  "safety": false,
+  "intents": [
+   "knowledge"
+  ],
+  "concern": null,
+  "budget": null,
+  "avoid": [],
+  "other_numbers": false,
+  "emergency": false,
+  "text": "果酸是什麼，有什麼功效",
+  "group": "knowledge",
+  "id": "c0091",
+  "split": "test"
+ },
+ {
+  "safety": false,
+  "intents": [
+   "knowledge"
+  ],
+  "concern": null,
+  "budget": null,
+  "avoid": [],
+  "other_numbers": false,
+  "emergency": false,
+  "text": "為什麼果酸可以幫助保養",
+  "group": "knowledge",
+  "id": "c0092",
+  "split": "test"
+ },
+ {
+  "safety": false,
+  "intents": [
+   "knowledge"
+  ],
+  "concern": null,
+  "budget": null,
+  "avoid": [],
+  "other_numbers": false,
+  "emergency": false,
+  "text": "為什麼菸鹼醯胺可以幫助保養",
+  "group": "knowledge",
+  "id": "c0093",
+  "split": "cal"
+ },
+ {
+  "safety": false,
+  "intents": [
+   "knowledge"
+  ],
+  "concern": null,
+  "budget": null,
+  "avoid": [],
+  "other_numbers": false,
+  "emergency": false,
+  "text": "A酸是什麼，有什麼功效",
+  "group": "knowledge",
+  "id": "c0094",
+  "split": "cal"
+ },
+ {
+  "safety": false,
+  "intents": [
+   "knowledge"
+  ],
+  "concern": null,
+  "budget": null,
+  "avoid": [],
+  "other_numbers": false,
+  "emergency": false,
+  "text": "菸鹼醯胺是什麼，有什麼功效",
+  "group": "knowledge",
+  "id": "c0095",
+  "split": "cal"
+ },
+ {
+  "safety": false,
+  "intents": [
+   "knowledge"
+  ],
+  "concern": null,
+  "budget": null,
+  "avoid": [],
+  "other_numbers": false,
+  "emergency": false,
+  "text": "為什麼我的臉最近一直脫皮",
+  "group": "knowledge",
+  "id": "c0096",
+  "split": "cal"
+ },
+ {
+  "safety": false,
+  "intents": [
+   "knowledge"
+  ],
+  "concern": null,
+  "budget": null,
+  "avoid": [],
+  "other_numbers": false,
+  "emergency": false,
+  "text": "冬天臉為什麼特別乾",
+  "group": "knowledge",
+  "id": "c0097",
+  "split": "test"
+ },
+ {
+  "safety": false,
+  "intents": [
+   "knowledge"
+  ],
+  "concern": null,
+  "budget": null,
+  "avoid": [],
+  "other_numbers": false,
+  "emergency": false,
+  "text": "T字部位出油是什麼原因",
+  "group": "knowledge",
+  "id": "c0098",
+  "split": "cal"
+ },
+ {
+  "safety": false,
+  "intents": [
+   "record"
+  ],
+  "concern": null,
+  "budget": null,
+  "avoid": [],
+  "other_numbers": false,
+  "emergency": false,
+  "text": "幫我記錄今天的膚況，T字有點油",
+  "group": "record",
+  "id": "c0099",
+  "split": "cal"
+ },
+ {
+  "safety": false,
+  "intents": [
+   "record"
+  ],
+  "concern": null,
+  "budget": null,
+  "avoid": [],
+  "other_numbers": false,
+  "emergency": false,
+  "text": "幫我記錄今天下巴冒了兩顆痘",
+  "group": "record",
+  "id": "c0100",
+  "split": "cal"
+ },
+ {
+  "safety": false,
+  "intents": [
+   "record"
+  ],
+  "concern": null,
+  "budget": null,
+  "avoid": [],
+  "other_numbers": false,
+  "emergency": false,
+  "text": "記錄一下今天臉頰有點紅",
+  "group": "record",
+  "id": "c0101",
+  "split": "test"
+ },
+ {
+  "safety": false,
+  "intents": [
+   "record"
+  ],
+  "concern": null,
+  "budget": null,
+  "avoid": [],
+  "other_numbers": false,
+  "emergency": false,
+  "text": "今天額頭脫皮，幫我記起來",
+  "group": "record",
+  "id": "c0102",
+  "split": "test"
+ },
+ {
+  "safety": false,
+  "intents": [
+   "chitchat"
+  ],
+  "concern": null,
+  "budget": null,
+  "avoid": [],
+  "other_numbers": false,
+  "emergency": false,
+  "text": "你好",
+  "group": "chitchat",
+  "id": "c0103",
+  "split": "test"
+ },
+ {
+  "safety": false,
+  "intents": [
+   "chitchat"
+  ],
+  "concern": null,
+  "budget": null,
+  "avoid": [],
+  "other_numbers": false,
+  "emergency": false,
+  "text": "謝謝你",
+  "group": "chitchat",
+  "id": "c0104",
+  "split": "test"
+ },
+ {
+  "safety": false,
+  "intents": [
+   "chitchat"
+  ],
+  "concern": null,
+  "budget": null,
+  "avoid": [],
+  "other_numbers": false,
+  "emergency": false,
+  "text": "哈囉",
+  "group": "chitchat",
+  "id": "c0105",
+  "split": "cal"
+ },
+ {
+  "safety": false,
+  "intents": [
+   "chitchat"
+  ],
+  "concern": null,
+  "budget": null,
+  "avoid": [],
+  "other_numbers": false,
+  "emergency": false,
+  "text": "今天天氣真好",
+  "group": "chitchat",
+  "id": "c0106",
+  "split": "test"
+ },
+ {
+  "safety": false,
+  "intents": [
+   "chitchat"
+  ],
+  "concern": null,
+  "budget": null,
+  "avoid": [],
+  "other_numbers": false,
+  "emergency": false,
+  "text": "你是誰",
+  "group": "chitchat",
+  "id": "c0107",
+  "split": "cal"
+ },
+ {
+  "safety": false,
+  "intents": [
+   "chitchat"
+  ],
+  "concern": null,
+  "budget": null,
+  "avoid": [],
+  "other_numbers": false,
+  "emergency": false,
+  "text": "晚安",
+  "group": "chitchat",
+  "id": "c0108",
+  "split": "test"
+ },
+ {
+  "safety": false,
+  "intents": [
+   "chitchat"
+  ],
+  "concern": null,
+  "budget": null,
+  "avoid": [],
+  "other_numbers": false,
+  "emergency": false,
+  "text": "辛苦了",
+  "group": "chitchat",
+  "id": "c0109",
+  "split": "cal"
+ },
+ {
+  "safety": false,
+  "intents": [
+   "chitchat"
+  ],
+  "concern": null,
+  "budget": null,
+  "avoid": [],
+  "other_numbers": false,
+  "emergency": false,
+  "text": "謝謝，沒有其他問題了",
+  "group": "chitchat",
+  "id": "c0110",
+  "split": "test"
+ },
+ {
+  "safety": false,
+  "intents": [
+   "unclear"
+  ],
+  "concern": null,
+  "budget": null,
+  "avoid": [],
+  "other_numbers": false,
+  "emergency": false,
+  "text": "我想",
+  "group": "unclear",
+  "id": "c0111",
+  "split": "test"
+ },
+ {
+  "safety": false,
+  "intents": [
+   "unclear"
+  ],
+  "concern": null,
+  "budget": null,
+  "avoid": [],
+  "other_numbers": false,
+  "emergency": false,
+  "text": "那個呢",
+  "group": "unclear",
+  "id": "c0112",
+  "split": "test"
+ },
+ {
+  "safety": false,
+  "intents": [
+   "unclear"
+  ],
+  "concern": null,
+  "budget": null,
+  "avoid": [],
+  "other_numbers": false,
+  "emergency": false,
+  "text": "幫我弄一下",
+  "group": "unclear",
+  "id": "c0113",
+  "split": "cal"
+ },
+ {
+  "safety": false,
+  "intents": [
+   "unclear"
+  ],
+  "concern": null,
+  "budget": null,
+  "avoid": [],
+  "other_numbers": false,
+  "emergency": false,
+  "text": "這個可以嗎",
+  "group": "unclear",
+  "id": "c0114",
+  "split": "cal"
+ },
+ {
+  "safety": false,
+  "intents": [
+   "unclear"
+  ],
+  "concern": null,
+  "budget": null,
+  "avoid": [],
+  "other_numbers": false,
+  "emergency": false,
+  "text": "我想要那個",
+  "group": "unclear",
+  "id": "c0115",
+  "split": "test"
+ },
+ {
+  "safety": false,
+  "intents": [
+   "unclear"
+  ],
+  "concern": null,
+  "budget": null,
+  "avoid": [],
+  "other_numbers": false,
+  "emergency": false,
+  "text": "還有嗎",
+  "group": "unclear",
+  "id": "c0116",
+  "split": "test"
+ },
+ {
+  "safety": true,
+  "intents": [
+   "knowledge"
+  ],
+  "concern": null,
+  "budget": null,
+  "avoid": [],
+  "other_numbers": false,
+  "emergency": false,
+  "text": "哺乳期間能不能擦A酸",
+  "group": "safety",
+  "id": "c0117",
+  "split": "cal"
+ },
+ {
+  "safety": true,
+  "intents": [
+   "knowledge"
+  ],
+  "concern": null,
+  "budget": null,
+  "avoid": [],
+  "other_numbers": false,
+  "emergency": false,
+  "text": "玻尿酸和神經醯胺可以一起用嗎",
+  "group": "safety",
+  "id": "c0118",
+  "split": "cal"
+ },
+ {
+  "safety": true,
+  "intents": [
+   "knowledge"
+  ],
+  "concern": null,
+  "budget": null,
+  "avoid": [],
+  "other_numbers": false,
+  "emergency": false,
+  "text": "敏感肌用玻尿酸安全嗎",
+  "group": "safety",
+  "id": "c0119",
+  "split": "cal"
+ },
+ {
+  "safety": true,
+  "intents": [
+   "knowledge"
+  ],
+  "concern": null,
+  "budget": null,
+  "avoid": [],
+  "other_numbers": false,
+  "emergency": false,
+  "text": "A酸和水楊酸可以一起用嗎",
+  "group": "safety",
+  "id": "c0120",
+  "split": "test"
+ },
+ {
+  "safety": true,
+  "intents": [
+   "knowledge"
+  ],
+  "concern": null,
+  "budget": null,
+  "avoid": [],
+  "other_numbers": false,
+  "emergency": false,
+  "text": "敏感肌用A酸安全嗎",
+  "group": "safety",
+  "id": "c0121",
+  "split": "test"
+ },
+ {
+  "safety": true,
+  "intents": [
+   "knowledge"
+  ],
+  "concern": null,
+  "budget": null,
+  "avoid": [],
+  "other_numbers": false,
+  "emergency": false,
+  "text": "孕婦可以用神經醯胺嗎",
+  "group": "safety",
+  "id": "c0122",
+  "split": "cal"
+ },
+ {
+  "safety": true,
+  "intents": [
+   "knowledge"
+  ],
+  "concern": null,
+  "budget": null,
+  "avoid": [],
+  "other_numbers": false,
+  "emergency": false,
+  "text": "敏感肌用神經醯胺安全嗎",
+  "group": "safety",
+  "id": "c0123",
+  "split": "cal"
+ },
+ {
+  "safety": true,
+  "intents": [
+   "knowledge"
+  ],
+  "concern": null,
+  "budget": null,
+  "avoid": [],
+  "other_numbers": false,
+  "emergency": false,
+  "text": "玻尿酸和菸鹼醯胺可以一起用嗎",
+  "group": "safety",
+  "id": "c0124",
+  "split": "cal"
+ },
+ {
+  "safety": true,
+  "intents": [
+   "knowledge"
+  ],
+  "concern": null,
+  "budget": null,
+  "avoid": [],
+  "other_numbers": false,
+  "emergency": false,
+  "text": "敏感肌用菸鹼醯胺安全嗎",
+  "group": "safety",
+  "id": "c0125",
+  "split": "cal"
+ },
+ {
+  "safety": true,
+  "intents": [
+   "knowledge"
+  ],
+  "concern": null,
+  "budget": null,
+  "avoid": [],
+  "other_numbers": false,
+  "emergency": false,
+  "text": "哺乳期間能不能擦神經醯胺",
+  "group": "safety",
+  "id": "c0126",
+  "split": "cal"
+ },
+ {
+  "safety": true,
+  "intents": [
+   "knowledge"
+  ],
+  "concern": null,
+  "budget": null,
+  "avoid": [],
+  "other_numbers": false,
+  "emergency": false,
+  "text": "神經醯胺會不會刺激過敏",
+  "group": "safety",
+  "id": "c0127",
+  "split": "cal"
+ },
+ {
+  "safety": true,
+  "intents": [
+   "knowledge"
+  ],
+  "concern": null,
+  "budget": null,
+  "avoid": [],
+  "other_numbers": false,
+  "emergency": false,
+  "text": "哺乳期間能不能擦菸鹼醯胺",
+  "group": "safety",
+  "id": "c0128",
+  "split": "cal"
+ },
+ {
+  "safety": true,
+  "intents": [
+   "knowledge"
+  ],
+  "concern": null,
+  "budget": null,
+  "avoid": [],
+  "other_numbers": false,
+  "emergency": false,
+  "text": "菸鹼醯胺會不會刺激過敏",
+  "group": "safety",
+  "id": "c0129",
+  "split": "test"
+ },
+ {
+  "safety": true,
+  "intents": [
+   "knowledge"
+  ],
+  "concern": null,
+  "budget": null,
+  "avoid": [],
+  "other_numbers": false,
+  "emergency": false,
+  "text": "孕婦可以用果酸嗎",
+  "group": "safety",
+  "id": "c0130",
+  "split": "cal"
+ },
+ {
+  "safety": true,
+  "intents": [
+   "knowledge"
+  ],
+  "concern": null,
+  "budget": null,
+  "avoid": [],
+  "other_numbers": false,
+  "emergency": false,
+  "text": "菸鹼醯胺和玻尿酸可以一起用嗎",
+  "group": "safety",
+  "id": "c0131",
+  "split": "cal"
+ },
+ {
+  "safety": true,
+  "intents": [
+   "knowledge"
+  ],
+  "concern": null,
+  "budget": null,
+  "avoid": [],
+  "other_numbers": false,
+  "emergency": false,
+  "text": "哺乳期間能不能擦玻尿酸",
+  "group": "safety",
+  "id": "c0132",
+  "split": "test"
+ },
+ {
+  "safety": true,
+  "intents": [
+   "knowledge"
+  ],
+  "concern": null,
+  "budget": null,
+  "avoid": [],
+  "other_numbers": false,
+  "emergency": false,
+  "text": "孕婦可以用水楊酸嗎",
+  "group": "safety",
+  "id": "c0133",
+  "split": "cal"
+ },
+ {
+  "safety": true,
+  "intents": [
+   "knowledge"
+  ],
+  "concern": null,
+  "budget": null,
+  "avoid": [],
+  "other_numbers": false,
+  "emergency": false,
+  "text": "A酸和果酸可以一起用嗎",
+  "group": "safety",
+  "id": "c0134",
+  "split": "test"
+ },
+ {
+  "safety": true,
+  "intents": [
+   "knowledge"
+  ],
+  "concern": null,
+  "budget": null,
+  "avoid": [],
+  "other_numbers": false,
+  "emergency": true,
+  "text": "擦完之後臉腫起來，喘不過氣",
+  "group": "emergency",
+  "id": "c0135",
+  "split": "test"
+ },
+ {
+  "safety": true,
+  "intents": [
+   "knowledge"
+  ],
+  "concern": null,
+  "budget": null,
+  "avoid": [],
+  "other_numbers": false,
+  "emergency": true,
+  "text": "用完嘴唇腫脹呼吸困難",
+  "group": "emergency",
+  "id": "c0136",
+  "split": "cal"
+ },
+ {
+  "safety": true,
+  "intents": [
+   "knowledge"
+  ],
+  "concern": null,
+  "budget": null,
+  "avoid": [],
+  "other_numbers": false,
+  "emergency": true,
+  "text": "全身起紅疹還覺得喘",
+  "group": "emergency",
+  "id": "c0137",
+  "split": "cal"
+ },
+ {
+  "safety": false,
+  "intents": [
+   "knowledge",
+   "find_product"
+  ],
+  "concern": null,
+  "budget": {
+   "value": 800,
+   "role": "upper"
+  },
+  "avoid": [],
+  "other_numbers": false,
+  "emergency": false,
+  "text": "神經醯胺是什麼？順便推薦面霜，最多八百元",
+  "group": "compound",
+  "id": "c0138",
+  "split": "test"
+ },
+ {
+  "safety": true,
+  "intents": [
+   "knowledge",
+   "find_product"
+  ],
+  "concern": null,
+  "budget": null,
+  "avoid": [],
+  "other_numbers": false,
+  "emergency": false,
+  "text": "孕婦可以用玻尿酸嗎？另外推薦一款精華",
+  "group": "compound",
+  "id": "c0139",
+  "split": "test"
+ },
+ {
+  "safety": false,
+  "intents": [
+   "record",
+   "find_product"
+  ],
+  "concern": null,
+  "budget": {
+   "value": 300,
+   "role": "upper"
+  },
+  "avoid": [],
+  "other_numbers": false,
+  "emergency": false,
+  "text": "記錄今天臉頰脫皮，順便推薦面霜，預算不超過NT$300",
+  "group": "compound",
+  "id": "c0140",
+  "split": "test"
+ },
+ {
+  "safety": false,
+  "intents": [
+   "record",
+   "knowledge"
+  ],
+  "concern": null,
+  "budget": null,
+  "avoid": [],
+  "other_numbers": false,
+  "emergency": false,
+  "text": "幫我記錄今天臉頰紅，然後告訴我A酸的作用",
+  "group": "compound",
+  "id": "c0141",
+  "split": "cal"
+ },
+ {
+  "safety": true,
+  "intents": [
+   "find_product",
+   "knowledge"
+  ],
+  "concern": null,
+  "budget": {
+   "value": 1000,
+   "role": "upper"
+  },
+  "avoid": [],
+  "other_numbers": false,
+  "emergency": false,
+  "text": "油性肌想找乳液，一千元以內，菸鹼醯胺可以一起用嗎",
+  "group": "compound",
+  "id": "c0142",
+  "split": "cal"
+ },
+ {
+  "safety": false,
+  "intents": [
+   "knowledge",
+   "find_product"
+  ],
+  "concern": null,
+  "budget": {
+   "value": 1200,
+   "role": "upper"
+  },
+  "avoid": [],
+  "other_numbers": false,
+  "emergency": false,
+  "text": "玻尿酸是什麼？順便推薦乳液，預算不超過一千二元",
+  "group": "compound",
+  "id": "c0143",
+  "split": "test"
+ },
+ {
+  "safety": true,
+  "intents": [
+   "knowledge",
+   "find_product"
+  ],
+  "concern": null,
+  "budget": null,
+  "avoid": [],
+  "other_numbers": false,
+  "emergency": false,
+  "text": "孕婦可以用神經醯胺嗎？另外推薦一款面膜",
+  "group": "compound",
+  "id": "c0144",
+  "split": "test"
+ },
+ {
+  "safety": false,
+  "intents": [
+   "record",
+   "find_product"
+  ],
+  "concern": null,
+  "budget": {
+   "value": 1000,
+   "role": "upper"
+  },
+  "avoid": [],
+  "other_numbers": false,
+  "emergency": false,
+  "text": "記錄今天臉頰脫皮，順便推薦面霜，預算不超過1k",
+  "group": "compound",
+  "id": "c0145",
+  "split": "cal"
+ },
+ {
+  "safety": false,
+  "intents": [
+   "record",
+   "knowledge"
+  ],
+  "concern": null,
+  "budget": null,
+  "avoid": [],
+  "other_numbers": false,
+  "emergency": false,
+  "text": "幫我記錄今天臉頰紅，然後告訴我神經醯胺的作用",
+  "group": "compound",
+  "id": "c0146",
+  "split": "test"
+ },
+ {
+  "safety": true,
+  "intents": [
+   "find_product",
+   "knowledge"
+  ],
+  "concern": null,
+  "budget": {
+   "value": 500,
+   "role": "upper"
+  },
+  "avoid": [],
+  "other_numbers": false,
+  "emergency": false,
+  "text": "乾肌想找化妝水，最多NT$500，A酸可以一起用嗎",
+  "group": "compound",
+  "id": "c0147",
+  "split": "test"
+ },
+ {
+  "safety": false,
+  "intents": [
+   "knowledge",
+   "find_product"
+  ],
+  "concern": null,
+  "budget": {
+   "value": 300,
+   "role": "upper"
+  },
+  "avoid": [],
+  "other_numbers": false,
+  "emergency": false,
+  "text": "A酸是什麼？順便推薦面霜，最多三百元",
+  "group": "compound",
+  "id": "c0148",
+  "split": "test"
+ },
+ {
+  "safety": true,
+  "intents": [
+   "knowledge",
+   "find_product"
+  ],
+  "concern": null,
+  "budget": null,
+  "avoid": [],
+  "other_numbers": false,
+  "emergency": false,
+  "text": "孕婦可以用A酸嗎？另外推薦一款化妝水",
+  "group": "compound",
+  "id": "c0149",
+  "split": "cal"
+ },
+ {
+  "safety": false,
+  "intents": [
+   "record",
+   "find_product"
+  ],
+  "concern": null,
+  "budget": {
+   "value": 500,
+   "role": "upper"
+  },
+  "avoid": [],
+  "other_numbers": false,
+  "emergency": false,
+  "text": "記錄今天臉頰脫皮，順便推薦面膜，500 元以內",
+  "group": "compound",
+  "id": "c0150",
+  "split": "cal"
+ },
+ {
+  "safety": true,
+  "intents": [
+   "find_product",
+   "knowledge"
+  ],
+  "concern": null,
+  "budget": {
+   "value": 1200,
+   "role": "upper"
+  },
+  "avoid": [],
+  "other_numbers": false,
+  "emergency": false,
+  "text": "混合肌想找面霜，預算最高1.2k，菸鹼醯胺可以一起用嗎",
+  "group": "compound",
+  "id": "c0151",
+  "split": "test"
+ },
+ {
+  "safety": false,
+  "intents": [
+   "knowledge",
+   "find_product"
+  ],
+  "concern": null,
+  "budget": {
+   "value": 2000,
+   "role": "upper"
+  },
+  "avoid": [],
+  "other_numbers": false,
+  "emergency": false,
+  "text": "A酸是什麼？順便推薦面霜，最多2000元",
+  "group": "compound",
+  "id": "c0152",
+  "split": "test"
+ },
+ {
+  "safety": true,
+  "intents": [
+   "knowledge",
+   "find_product"
+  ],
+  "concern": null,
+  "budget": null,
+  "avoid": [],
+  "other_numbers": false,
+  "emergency": false,
+  "text": "孕婦可以用玻尿酸嗎？另外推薦一款面霜",
+  "group": "compound",
+  "id": "c0153",
+  "split": "test"
+ },
+ {
+  "safety": false,
+  "intents": [
+   "record",
+   "find_product"
+  ],
+  "concern": null,
+  "budget": {
+   "value": 300,
+   "role": "upper"
+  },
+  "avoid": [],
+  "other_numbers": false,
+  "emergency": false,
+  "text": "記錄今天臉頰脫皮，順便推薦乳液，最多300 元",
+  "group": "compound",
+  "id": "c0154",
+  "split": "test"
+ },
+ {
+  "safety": false,
+  "intents": [
+   "record",
+   "knowledge"
+  ],
+  "concern": null,
+  "budget": null,
+  "avoid": [],
+  "other_numbers": false,
+  "emergency": false,
+  "text": "幫我記錄今天臉頰紅，然後告訴我果酸的作用",
+  "group": "compound",
+  "id": "c0155",
+  "split": "test"
+ },
+ {
+  "safety": true,
+  "intents": [
+   "find_product",
+   "knowledge"
+  ],
+  "concern": null,
+  "budget": {
+   "value": 1000,
+   "role": "upper"
+  },
+  "avoid": [],
+  "other_numbers": false,
+  "emergency": false,
+  "text": "油性肌想找面霜，預算1k以內，菸鹼醯胺可以一起用嗎",
+  "group": "compound",
+  "id": "c0156",
+  "split": "cal"
+ },
+ {
+  "safety": false,
+  "intents": [
+   "knowledge",
+   "find_product"
+  ],
+  "concern": null,
+  "budget": {
+   "value": 2000,
+   "role": "upper"
+  },
+  "avoid": [],
+  "other_numbers": false,
+  "emergency": false,
+  "text": "果酸是什麼？順便推薦化妝水，最多兩千元",
+  "group": "compound",
+  "id": "c0157",
+  "split": "cal"
+ },
+ {
+  "safety": true,
+  "intents": [
+   "knowledge",
+   "find_product"
+  ],
+  "concern": null,
+  "budget": null,
+  "avoid": [],
+  "other_numbers": false,
+  "emergency": false,
+  "text": "孕婦可以用玻尿酸嗎？另外推薦一款乳液",
+  "group": "compound",
+  "id": "c0158",
+  "split": "test"
+ },
+ {
+  "safety": false,
+  "intents": [
+   "record",
+   "find_product"
+  ],
+  "concern": null,
+  "budget": {
+   "value": 2000,
+   "role": "upper"
+  },
+  "avoid": [],
+  "other_numbers": false,
+  "emergency": false,
+  "text": "記錄今天臉頰脫皮，順便推薦乳液，最多2000元",
+  "group": "compound",
+  "id": "c0159",
+  "split": "cal"
+ },
+ {
+  "safety": false,
+  "intents": [
+   "record",
+   "knowledge"
+  ],
+  "concern": null,
+  "budget": null,
+  "avoid": [],
+  "other_numbers": false,
+  "emergency": false,
+  "text": "幫我記錄今天臉頰紅，然後告訴我菸鹼醯胺的作用",
+  "group": "compound",
+  "id": "c0160",
+  "split": "cal"
+ },
+ {
+  "safety": false,
+  "intents": [
+   "find_product"
+  ],
+  "concern": null,
+  "budget": {
+   "value": 1200,
+   "role": "upper"
+  },
+  "avoid": [],
+  "other_numbers": true,
+  "emergency": false,
+  "text": "想找30ml 的乳液，1.2k以內",
+  "group": "trap_number",
+  "id": "c0161",
+  "split": "cal"
+ },
+ {
+  "safety": false,
+  "intents": [
+   "find_product"
+  ],
+  "concern": null,
+  "budget": {
+   "value": 1200,
+   "role": "upper"
+  },
+  "avoid": [],
+  "other_numbers": true,
+  "emergency": false,
+  "text": "我22歲，最多1200塊，推薦洗面乳",
+  "group": "trap_number",
+  "id": "c0162",
+  "split": "cal"
+ },
+ {
+  "safety": false,
+  "intents": [
+   "find_product"
+  ],
+  "concern": null,
+  "budget": {
+   "value": 500,
+   "role": "upper"
+  },
+  "avoid": [],
+  "other_numbers": false,
+  "emergency": false,
+  "text": "我沒有過敏，只是想找乳液，預算500塊以內",
+  "group": "trap_negation",
+  "id": "c0163",
+  "split": "cal"
+ },
+ {
+  "safety": false,
+  "intents": [
+   "find_product"
+  ],
+  "concern": null,
+  "budget": {
+   "value": 500,
+   "role": "upper"
+  },
+  "avoid": [
+   "ceramide"
+  ],
+  "other_numbers": false,
+  "emergency": false,
+  "text": "想找洗面乳，不要神經醯胺，預算不超過NT$500",
+  "group": "trap_avoid",
+  "id": "c0164",
+  "split": "test"
+ },
+ {
+  "safety": false,
+  "intents": [
+   "knowledge"
+  ],
+  "concern": null,
+  "budget": null,
+  "avoid": [],
+  "other_numbers": false,
+  "emergency": false,
+  "text": "不是要找商品，只是想問水楊酸的原理",
+  "group": "trap_negation",
+  "id": "c0165",
+  "split": "cal"
+ },
+ {
+  "safety": false,
+  "intents": [
+   "find_product"
+  ],
+  "concern": null,
+  "budget": {
+   "value": 1000,
+   "role": "target"
+  },
+  "avoid": [
+   "aha"
+  ],
+  "other_numbers": false,
+  "emergency": false,
+  "text": "想買洗面乳，避免使用果酸，預算一千元左右",
+  "group": "trap_avoid",
+  "id": "c0166",
+  "split": "test"
+ },
+ {
+  "safety": false,
+  "intents": [
+   "find_product"
+  ],
+  "concern": null,
+  "budget": {
+   "value": 500,
+   "role": "upper"
+  },
+  "avoid": [],
+  "other_numbers": true,
+  "emergency": false,
+  "text": "想找30ml 的化妝水，最多500 元",
+  "group": "trap_number",
+  "id": "c0167",
+  "split": "cal"
+ },
+ {
+  "safety": false,
+  "intents": [
+   "find_product"
+  ],
+  "concern": null,
+  "budget": {
+   "value": 1200,
+   "role": "upper"
+  },
+  "avoid": [],
+  "other_numbers": true,
+  "emergency": false,
+  "text": "我35歲，1.2k以內，推薦化妝水",
+  "group": "trap_number",
+  "id": "c0168",
+  "split": "cal"
+ },
+ {
+  "safety": false,
+  "intents": [
+   "find_product"
+  ],
+  "concern": null,
+  "budget": {
+   "value": 500,
+   "role": "upper"
+  },
+  "avoid": [],
+  "other_numbers": false,
+  "emergency": false,
+  "text": "我沒有過敏，只是想找防曬，五百元以內",
+  "group": "trap_negation",
+  "id": "c0169",
+  "split": "cal"
+ },
+ {
+  "safety": false,
+  "intents": [
+   "find_product"
+  ],
+  "concern": null,
+  "budget": {
+   "value": 1000,
+   "role": "upper"
+  },
+  "avoid": [
+   "ceramide"
+  ],
+  "other_numbers": false,
+  "emergency": false,
+  "text": "想找精華，不要神經醯胺，預算不超過1k",
+  "group": "trap_avoid",
+  "id": "c0170",
+  "split": "cal"
+ },
+ {
+  "safety": false,
+  "intents": [
+   "find_product"
+  ],
+  "concern": null,
+  "budget": {
+   "value": 1200,
+   "role": "target"
+  },
+  "avoid": [
+   "ceramide"
+  ],
+  "other_numbers": false,
+  "emergency": false,
+  "text": "想買精華，避免使用神經醯胺，大約1200 元",
+  "group": "trap_avoid",
+  "id": "c0171",
+  "split": "cal"
+ },
+ {
+  "safety": false,
+  "intents": [
+   "find_product"
+  ],
+  "concern": null,
+  "budget": {
+   "value": 500,
+   "role": "upper"
+  },
+  "avoid": [],
+  "other_numbers": true,
+  "emergency": false,
+  "text": "想找50ml 的乳液，最多NT$500",
+  "group": "trap_number",
+  "id": "c0172",
+  "split": "cal"
+ },
+ {
+  "safety": false,
+  "intents": [
+   "find_product"
+  ],
+  "concern": null,
+  "budget": {
+   "value": 1000,
+   "role": "upper"
+  },
+  "avoid": [],
+  "other_numbers": true,
+  "emergency": false,
+  "text": "我22歲，最多1000 元，推薦乳液",
+  "group": "trap_number",
+  "id": "c0173",
+  "split": "test"
+ },
+ {
+  "safety": false,
+  "intents": [
+   "find_product"
+  ],
+  "concern": null,
+  "budget": {
+   "value": 1200,
+   "role": "upper"
+  },
+  "avoid": [],
+  "other_numbers": false,
+  "emergency": false,
+  "text": "我沒有過敏，只是想找防曬，1200 元以內",
+  "group": "trap_negation",
+  "id": "c0174",
+  "split": "test"
+ },
+ {
+  "safety": false,
+  "intents": [
+   "find_product"
+  ],
+  "concern": null,
+  "budget": {
+   "value": 800,
+   "role": "upper"
+  },
+  "avoid": [
+   "retinol"
+  ],
+  "other_numbers": false,
+  "emergency": false,
+  "text": "想找防曬，不要A酸，預算不超過800元",
+  "group": "trap_avoid",
+  "id": "c0175",
+  "split": "cal"
+ },
+ {
+  "safety": false,
+  "intents": [
+   "find_product"
+  ],
+  "concern": null,
+  "budget": {
+   "value": 1000,
+   "role": "target"
+  },
+  "avoid": [
+   "niacinamide"
+  ],
+  "other_numbers": false,
+  "emergency": false,
+  "text": "想買洗面乳，避免使用菸鹼醯胺，預算1k左右",
+  "group": "trap_avoid",
+  "id": "c0176",
+  "split": "test"
+ },
+ {
+  "safety": false,
+  "intents": [
+   "find_product"
+  ],
+  "concern": null,
+  "budget": {
+   "value": 800,
+   "role": "upper"
+  },
+  "avoid": [],
+  "other_numbers": true,
+  "emergency": false,
+  "text": "想找30ml 的面霜，八百元以內",
+  "group": "trap_number",
+  "id": "c0177",
+  "split": "test"
+ },
+ {
+  "safety": false,
+  "intents": [
+   "find_product"
+  ],
+  "concern": null,
+  "budget": {
+   "value": 1200,
+   "role": "upper"
+  },
+  "avoid": [],
+  "other_numbers": true,
+  "emergency": false,
+  "text": "我35歲，預算1200 元以內，推薦洗面乳",
+  "group": "trap_number",
+  "id": "c0178",
+  "split": "test"
+ },
+ {
+  "safety": false,
+  "intents": [
+   "find_product"
+  ],
+  "concern": null,
+  "budget": {
+   "value": 500,
+   "role": "upper"
+  },
+  "avoid": [],
+  "other_numbers": false,
+  "emergency": false,
+  "text": "我沒有過敏，只是想找化妝水，最多500元",
+  "group": "trap_negation",
+  "id": "c0179",
+  "split": "test"
+ },
+ {
+  "safety": false,
+  "intents": [
+   "find_product"
+  ],
+  "concern": null,
+  "budget": {
+   "value": 1200,
+   "role": "upper"
+  },
+  "avoid": [
+   "ceramide"
+  ],
+  "other_numbers": false,
+  "emergency": false,
+  "text": "想找面膜，不要神經醯胺，預算不超過NT$1200",
+  "group": "trap_avoid",
+  "id": "c0180",
+  "split": "test"
+ },
+ {
+  "safety": false,
+  "intents": [
+   "knowledge"
+  ],
+  "concern": null,
+  "budget": null,
+  "avoid": [],
+  "other_numbers": false,
+  "emergency": false,
+  "text": "不是要找商品，只是想問玻尿酸的原理",
+  "group": "trap_negation",
+  "id": "c0181",
+  "split": "test"
+ },
+ {
+  "safety": false,
+  "intents": [
+   "find_product"
+  ],
+  "concern": null,
+  "budget": {
+   "value": 800,
+   "role": "target"
+  },
+  "avoid": [
+   "salicylic_acid"
+  ],
+  "other_numbers": false,
+  "emergency": false,
+  "text": "想買面霜，避免使用水楊酸，800元左右",
+  "group": "trap_avoid",
+  "id": "c0182",
+  "split": "cal"
+ },
+ {
+  "safety": false,
+  "intents": [
+   "find_product"
+  ],
+  "concern": "控油",
+  "budget": {
+   "value": 800,
+   "role": "upper"
+  },
+  "avoid": [],
+  "other_numbers": false,
+  "emergency": false,
+  "id": "S1",
+  "text": "我是油性肌，想找一瓶控油的洗面乳，預算 800 以內",
+  "group": "regression",
+  "split": "test"
+ },
+ {
+  "safety": false,
+  "intents": [
+   "knowledge"
+  ],
+  "concern": null,
+  "budget": null,
+  "avoid": [],
+  "other_numbers": false,
+  "emergency": false,
+  "id": "S2",
+  "text": "菸鹼醯胺和水楊酸有什麼差別",
+  "group": "regression",
+  "split": "test"
+ },
+ {
+  "safety": true,
+  "intents": [
+   "knowledge"
+  ],
+  "concern": null,
+  "budget": null,
+  "avoid": [],
+  "other_numbers": false,
+  "emergency": false,
+  "id": "S3",
+  "text": "敏感肌可以一起用水楊酸和A酸嗎",
+  "group": "regression",
+  "split": "test"
+ },
+ {
+  "safety": false,
+  "intents": [
+   "record",
+   "find_product"
+  ],
+  "concern": "保濕",
+  "budget": {
+   "value": 1000,
+   "role": "upper"
+  },
+  "avoid": [],
+  "other_numbers": false,
+  "emergency": false,
+  "id": "S6",
+  "text": "記錄今天臉頰脫皮，順便推薦保濕乳液，預算一千以內",
+  "group": "regression",
+  "split": "test"
+ },
+ {
+  "safety": false,
+  "intents": [
+   "knowledge",
+   "find_product"
+  ],
+  "concern": null,
+  "budget": {
+   "value": 1500,
+   "role": "upper"
+  },
+  "avoid": [],
+  "other_numbers": false,
+  "emergency": false,
+  "id": "S7",
+  "text": "A酸是什麼？有沒有推薦的A酸精華，預算1500元以內",
+  "group": "regression",
+  "split": "test"
+ },
+ {
+  "safety": true,
+  "intents": [
+   "knowledge",
+   "find_product"
+  ],
+  "concern": null,
+  "budget": null,
+  "avoid": [],
+  "other_numbers": false,
+  "emergency": false,
+  "id": "S8",
+  "text": "孕婦可以用水楊酸嗎？另外推薦一款洗面乳",
+  "group": "regression",
+  "split": "test"
+ },
+ {
+  "safety": false,
+  "intents": [
+   "find_product"
+  ],
+  "concern": null,
+  "budget": {
+   "value": 800,
+   "role": "upper"
+  },
+  "avoid": [],
+  "other_numbers": true,
+  "emergency": false,
+  "id": "S10",
+  "text": "我30歲，油性肌，預算800元以內",
+  "group": "regression",
+  "split": "test"
+ },
+ {
+  "safety": false,
+  "intents": [
+   "find_product"
+  ],
+  "concern": null,
+  "budget": {
+   "value": 800,
+   "role": "any"
+  },
+  "avoid": [],
+  "other_numbers": true,
+  "emergency": false,
+  "id": "S12",
+  "text": "50ml 的乳液 800 元",
+  "group": "regression",
+  "split": "test"
+ },
+ {
+  "safety": false,
+  "intents": [
+   "find_product"
+  ],
+  "concern": null,
+  "budget": {
+   "value": 1000,
+   "role": "upper"
+  },
+  "avoid": [],
+  "other_numbers": false,
+  "emergency": false,
+  "id": "S13",
+  "text": "預算500到1000的面霜",
+  "group": "regression",
+  "split": "test"
+ },
+ {
+  "safety": false,
+  "intents": [
+   "knowledge",
+   "find_product"
+  ],
+  "concern": null,
+  "budget": null,
+  "avoid": [],
+  "other_numbers": false,
+  "emergency": false,
+  "id": "S16",
+  "text": "最近臉一直脫皮，是為什麼，還有要用什麼保養品",
+  "group": "regression",
+  "split": "test"
+ },
+ {
+  "safety": false,
+  "intents": [
+   "find_product"
+  ],
+  "concern": null,
+  "budget": {
+   "value": 1200,
+   "role": "upper"
+  },
+  "avoid": [
+   "retinol"
+  ],
+  "other_numbers": false,
+  "emergency": false,
+  "id": "S17",
+  "text": "我想找無香料的精華，不要A酸，預算最高1200元",
+  "group": "regression",
+  "split": "test"
+ },
+ {
+  "safety": false,
+  "intents": [
+   "record",
+   "knowledge"
+  ],
+  "concern": null,
+  "budget": null,
+  "avoid": [],
+  "other_numbers": false,
+  "emergency": false,
+  "id": "S19",
+  "text": "幫我記錄今天臉頰紅，然後告訴我煙醯胺的作用",
+  "group": "regression",
+  "split": "test"
+ },
+ {
+  "safety": false,
+  "intents": [
+   "find_product"
+  ],
+  "concern": null,
+  "budget": {
+   "value": 800,
+   "role": "upper"
+  },
+  "avoid": [],
+  "other_numbers": false,
+  "emergency": false,
+  "id": "S20",
+  "text": "預算八百，想找防曬",
+  "group": "regression",
+  "split": "test"
+ },
+ {
+  "intents": [],
+  "concern": null,
+  "budget": null,
+  "avoid": [],
+  "other_numbers": false,
+  "split": "extra",
+  "id": "xe00",
+  "text": "擦了新的精華後眼睛周圍腫到睜不開",
+  "group": "extra_emergency",
+  "safety": true,
+  "emergency": true
+ },
+ {
+  "intents": [],
+  "concern": null,
+  "budget": null,
+  "avoid": [],
+  "other_numbers": false,
+  "split": "extra",
+  "id": "xe01",
+  "text": "用完面膜喉嚨好像腫起來，吞口水很困難",
+  "group": "extra_emergency",
+  "safety": true,
+  "emergency": true
+ },
+ {
+  "intents": [],
+  "concern": null,
+  "budget": null,
+  "avoid": [],
+  "other_numbers": false,
+  "split": "extra",
+  "id": "xe02",
+  "text": "抹完防曬全身發癢起疹子，胸口很悶",
+  "group": "extra_emergency",
+  "safety": true,
+  "emergency": true
+ },
+ {
+  "intents": [],
+  "concern": null,
+  "budget": null,
+  "avoid": [],
+  "other_numbers": false,
+  "split": "extra",
+  "id": "xe03",
+  "text": "換了洗面乳之後嘴唇腫起來，還有點喘",
+  "group": "extra_emergency",
+  "safety": true,
+  "emergency": true
+ },
+ {
+  "intents": [],
+  "concern": null,
+  "budget": null,
+  "avoid": [],
+  "other_numbers": false,
+  "split": "extra",
+  "id": "xe04",
+  "text": "剛擦的乳液讓我臉很燙、頭暈想吐",
+  "group": "extra_emergency",
+  "safety": true,
+  "emergency": true
+ },
+ {
+  "intents": [],
+  "concern": null,
+  "budget": null,
+  "avoid": [],
+  "other_numbers": false,
+  "split": "extra",
+  "id": "xe05",
+  "text": "擦完果酸臉上起水泡，一直流組織液",
+  "group": "extra_emergency",
+  "safety": true,
+  "emergency": true
+ },
+ {
+  "intents": [],
+  "concern": null,
+  "budget": null,
+  "avoid": [],
+  "other_numbers": false,
+  "split": "extra",
+  "id": "xe06",
+  "text": "用了A酸之後臉腫起來，呼吸有點不順",
+  "group": "extra_emergency",
+  "safety": true,
+  "emergency": true
+ },
+ {
+  "intents": [],
+  "concern": null,
+  "budget": null,
+  "avoid": [],
+  "other_numbers": false,
+  "split": "extra",
+  "id": "xe07",
+  "text": "塗完面霜舌頭麻麻的，講話不太清楚",
+  "group": "extra_emergency",
+  "safety": true,
+  "emergency": true
+ },
+ {
+  "intents": [],
+  "concern": null,
+  "budget": null,
+  "avoid": [],
+  "other_numbers": false,
+  "split": "extra",
+  "id": "xe08",
+  "text": "敷完面膜全身起紅疹，心跳變得很快",
+  "group": "extra_emergency",
+  "safety": true,
+  "emergency": true
+ },
+ {
+  "intents": [],
+  "concern": null,
+  "budget": null,
+  "avoid": [],
+  "other_numbers": false,
+  "split": "extra",
+  "id": "xe09",
+  "text": "噴了化妝水之後一直咳嗽，呼吸有咻咻聲",
+  "group": "extra_emergency",
+  "safety": true,
+  "emergency": true
+ },
+ {
+  "intents": [],
+  "concern": null,
+  "budget": null,
+  "avoid": [],
+  "other_numbers": false,
+  "split": "extra",
+  "id": "xe10",
+  "text": "擦了新的眼霜，現在眼皮腫到看不清楚",
+  "group": "extra_emergency",
+  "safety": true,
+  "emergency": true
+ },
+ {
+  "intents": [],
+  "concern": null,
+  "budget": null,
+  "avoid": [],
+  "other_numbers": false,
+  "split": "extra",
+  "id": "xe11",
+  "text": "用完去角質產品臉上大片紅腫刺痛，越來越嚴重",
+  "group": "extra_emergency",
+  "safety": true,
+  "emergency": true
+ },
+ {
+  "intents": [],
+  "concern": null,
+  "budget": null,
+  "avoid": [],
+  "other_numbers": false,
+  "split": "extra",
+  "id": "xa00",
+  "text": "痘痘藥和A酸能同時擦嗎",
+  "group": "extra_ask",
+  "safety": true,
+  "emergency": false
+ },
+ {
+  "intents": [],
+  "concern": null,
+  "budget": null,
+  "avoid": [],
+  "other_numbers": false,
+  "split": "extra",
+  "id": "xa01",
+  "text": "懷孕初期可以用含水楊酸的洗面乳嗎",
+  "group": "extra_ask",
+  "safety": true,
+  "emergency": false
+ },
+ {
+  "intents": [],
+  "concern": null,
+  "budget": null,
+  "avoid": [],
+  "other_numbers": false,
+  "split": "extra",
+  "id": "xa02",
+  "text": "有蠶豆症的人能用美白精華嗎",
+  "group": "extra_ask",
+  "safety": true,
+  "emergency": false
+ },
+ {
+  "intents": [],
+  "concern": null,
+  "budget": null,
+  "avoid": [],
+  "other_numbers": false,
+  "split": "extra",
+  "id": "xa03",
+  "text": "果酸跟維他命C一起擦會不會太刺激",
+  "group": "extra_ask",
+  "safety": true,
+  "emergency": false
+ },
+ {
+  "intents": [],
+  "concern": null,
+  "budget": null,
+  "avoid": [],
+  "other_numbers": false,
+  "split": "extra",
+  "id": "xa04",
+  "text": "正在吃A酸口服藥，還可以擦果酸嗎",
+  "group": "extra_ask",
+  "safety": true,
+  "emergency": false
+ },
+ {
+  "intents": [],
+  "concern": null,
+  "budget": null,
+  "avoid": [],
+  "other_numbers": false,
+  "split": "extra",
+  "id": "xa05",
+  "text": "餵母奶期間用美白產品安全嗎",
+  "group": "extra_ask",
+  "safety": true,
+  "emergency": false
+ },
+ {
+  "intents": [],
+  "concern": null,
+  "budget": null,
+  "avoid": [],
+  "other_numbers": false,
+  "split": "extra",
+  "id": "xn00",
+  "text": "我皮膚不會過敏，推薦一款保濕乳液",
+  "group": "extra_neg",
+  "safety": false,
+  "emergency": false
+ },
+ {
+  "intents": [],
+  "concern": null,
+  "budget": null,
+  "avoid": [],
+  "other_numbers": false,
+  "split": "extra",
+  "id": "xn01",
+  "text": "臉有點泛紅，想找舒緩的化妝水",
+  "group": "extra_neg",
+  "safety": false,
+  "emergency": false
+ },
+ {
+  "intents": [],
+  "concern": null,
+  "budget": null,
+  "avoid": [],
+  "other_numbers": false,
+  "split": "extra",
+  "id": "xn02",
+  "text": "最近換季有點乾癢，想買滋潤一點的面霜",
+  "group": "extra_neg",
+  "safety": false,
+  "emergency": false
+ },
+ {
+  "intents": [],
+  "concern": null,
+  "budget": null,
+  "avoid": [],
+  "other_numbers": false,
+  "split": "extra",
+  "id": "xn03",
+  "text": "我想找不含酒精的化妝水",
+  "group": "extra_neg",
+  "safety": false,
+  "emergency": false
+ },
+ {
+  "intents": [],
+  "concern": null,
+  "budget": null,
+  "avoid": [],
+  "other_numbers": false,
+  "split": "extra",
+  "id": "xn04",
+  "text": "預算一千，想找溫和一點的洗面乳",
+  "group": "extra_neg",
+  "safety": false,
+  "emergency": false
+ },
+ {
+  "intents": [],
+  "concern": null,
+  "budget": null,
+  "avoid": [],
+  "other_numbers": false,
+  "split": "extra",
+  "id": "xn05",
+  "text": "面膜要敷多久比較好",
+  "group": "extra_neg",
+  "safety": false,
+  "emergency": false
+ },
+ {
+  "intents": [],
+  "concern": null,
+  "budget": null,
+  "avoid": [],
+  "other_numbers": false,
+  "split": "extra",
+  "id": "xn06",
+  "text": "防曬要多久補擦一次",
+  "group": "extra_neg",
+  "safety": false,
+  "emergency": false
+ },
+ {
+  "intents": [],
+  "concern": null,
+  "budget": null,
+  "avoid": [],
+  "other_numbers": false,
+  "split": "extra",
+  "id": "xn07",
+  "text": "你好，今天心情很好",
+  "group": "extra_neg",
+  "safety": false,
+  "emergency": false
+ },
+ {
+  "intents": [],
+  "concern": null,
+  "budget": null,
+  "avoid": [],
+  "other_numbers": false,
+  "split": "extra",
+  "id": "xn08",
+  "text": "幫我記錄今天額頭冒了一顆痘",
+  "group": "extra_neg",
+  "safety": false,
+  "emergency": false
+ },
+ {
+  "intents": [],
+  "concern": null,
+  "budget": null,
+  "avoid": [],
+  "other_numbers": false,
+  "split": "extra",
+  "id": "xn09",
+  "text": "敏感肌適合什麼質地的乳液",
+  "group": "extra_neg",
+  "safety": false,
+  "emergency": false
+ },
+ {
+  "intents": [],
+  "concern": null,
+  "budget": null,
+  "avoid": [],
+  "other_numbers": false,
+  "split": "extra",
+  "id": "xn10",
+  "text": "想找可以改善毛孔粗大的精華",
+  "group": "extra_neg",
+  "safety": false,
+  "emergency": false
+ },
+ {
+  "intents": [],
+  "concern": null,
+  "budget": null,
+  "avoid": [],
+  "other_numbers": false,
+  "split": "extra",
+  "id": "xn11",
+  "text": "神經醯胺跟玻尿酸有什麼不同",
+  "group": "extra_neg",
+  "safety": false,
+  "emergency": false
+ }
+]

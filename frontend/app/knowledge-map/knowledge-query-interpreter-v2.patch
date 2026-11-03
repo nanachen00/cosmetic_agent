@@ -1,0 +1,279 @@
+diff --git a/app/services/knowledge_query_pipeline.py b/app/services/knowledge_query_pipeline.py
+--- a/app/services/knowledge_query_pipeline.py
++++ b/app/services/knowledge_query_pipeline.py
+@@ -8,10 +8,12 @@ relation policy before any graph is returned or explained.
+ from __future__ import annotations
+ 
+ import asyncio
++import json
+ import logging
+ import os
+ from typing import Any, Protocol
+ 
+ from app.clients.embedding_client import EmbeddingClient
+ from app.clients.reranker_client import RerankerClient
++from app.clients.terra_completion_client import TerraCompletionClient
+ from app.repositories.knowledge_seed_repository import normalize_lookup
+ from app.services.knowledge_explorer_service import KnowledgeExplorerService
+ from app.services.knowledge_graph_view import apply_graph_view
+@@ -52,6 +54,18 @@ ALLOWED_KNOWLEDGE_RELATIONS = frozenset({
+ })
+ logger = logging.getLogger(__name__)
+ 
++_QUERY_INTERPRETER_SYSTEM_PROMPT = (
++    "你是 BLINK AI 的美妝知識搜尋理解器。你的工作不是診斷或回答問題，而是把使用者的自然語句、"
++    "俗稱、別名或錯別字整理成可能存在於美妝知識圖譜的標準實體名稱。"
++    "實體類型只可為肌膚狀況、成分、照護需求或藥品。"
++    "請輸出一個 JSON 物件，格式固定為 "
++    '{"terms":["最可能詞","次可能詞"],"intent":"concern|ingredient|care|drug|unknown"}。'
++    "terms 依可能性排序，最多四個，每個不超過四十字；只輸出 JSON，不要解釋。"
++    "不要捏造療效、診斷、用量或圖譜關係；不確定時可回傳空 terms。"
++)
++
+ 
+ class KnowledgeQueryUnavailable(RuntimeError):
+     """Raised when a required semantic stage is not configured or available."""
+@@ -73,6 +87,14 @@ class _Reranker(Protocol):
+     ) -> list[dict[str, float | int]]: ...
+ 
+ 
++class _QueryInterpreter(Protocol):
++    def complete(
++        self,
++        *,
++        model: str,
++        messages: list[dict[str, str]],
++        temperature: float,
++        max_tokens: int,
++    ) -> str: ...
++
++
+ def _admission_from_env(max_running: int, max_queued: int):
+@@ -128,6 +150,8 @@ class KnowledgeQueryPipeline:
+         *,
+         embedding_client: _Embedder,
+         reranker_client: _Reranker | None,
++        query_interpreter: _QueryInterpreter | None = None,
++        query_interpreter_model: str | None = None,
+         semantic_limit: int = 12,
+         rerank_limit: int = 5,
+@@ -143,6 +167,11 @@ class KnowledgeQueryPipeline:
+             explorer.repository.configure_semantic(embedding_client)
+         self.reranker_client = reranker_client
++        self.query_interpreter = query_interpreter
++        self.query_interpreter_model = (
++            query_interpreter_model
++            or os.getenv("KNOWLEDGE_QUERY_TERRA_MODEL", "").strip()
++            or TerraCompletionClient.DEFAULT_MODEL
++        )
+         self.semantic_limit = max(1, min(int(semantic_limit), 30))
+@@ -161,6 +190,15 @@ class KnowledgeQueryPipeline:
+         reranker = RerankerClient.from_env() if reranker_url else None
+         max_running = int(os.getenv("KNOWLEDGE_QUERY_MAX_RUNNING", "2"))
+         max_queued = int(os.getenv("KNOWLEDGE_QUERY_MAX_QUEUED", "8"))
++        interpreter = None
++        if os.getenv("KNOWLEDGE_QUERY_LLM_ENABLED", "1").strip().lower() in {
++            "1", "true", "yes", "on",
++        }:
++            try:
++                interpreter = TerraCompletionClient.from_env()
++            except Exception:
++                logger.warning("knowledge query interpreter unavailable", exc_info=True)
+         return cls(
+             explorer,
+             embedding_client=EmbeddingClient.from_env(),
+             reranker_client=reranker,
++            query_interpreter=interpreter,
++            query_interpreter_model=(
++                os.getenv("KNOWLEDGE_QUERY_TERRA_MODEL", "").strip()
++                or os.getenv("KNOWLEDGE_TERRA_MODEL", "").strip()
++                or TerraCompletionClient.DEFAULT_MODEL
++            ),
+@@ -190,6 +228,11 @@ class KnowledgeQueryPipeline:
+             "reranker_model": (
+                 self.reranker_client.model if self.reranker_client else None
+             ),
++            "query_understanding": {
++                "enabled": self.query_interpreter is not None,
++                "provider": "terra" if self.query_interpreter is not None else None,
++                "model": self.query_interpreter_model if self.query_interpreter is not None else None,
++                "verified_against_graph": True,
++            },
+             "accelerator_target": "mi300x-external-services",
+@@ -336,6 +379,51 @@ class KnowledgeQueryPipeline:
+             results.append(node)
+         return results
+ 
++    def _interpret_query(self, query: str) -> list[str]:
++        """Translate free-form wording into graph candidates without trusting LLM facts."""
++        if self.query_interpreter is None:
++            return []
++        try:
++            response = self.query_interpreter.complete(
++                model=self.query_interpreter_model,
++                messages=[
++                    {"role": "system", "content": _QUERY_INTERPRETER_SYSTEM_PROMPT},
++                    {
++                        "role": "user",
++                        "content": (
++                            "使用者輸入：" + query + "\n"
++                            "請整理最可能的圖譜實體候選詞。"
++                        ),
++                    },
++                ],
++                temperature=0.0,
++                max_tokens=180,
++            )
++        except Exception:
++            logger.warning("knowledge query interpretation failed", exc_info=True)
++            return []
++        text = str(response or "").strip()
++        start = text.find("{")
++        end = text.rfind("}")
++        if start < 0 or end <= start:
++            return []
++        try:
++            payload = json.loads(text[start : end + 1])
++        except (TypeError, ValueError, json.JSONDecodeError):
++            return []
++        terms = payload.get("terms") if isinstance(payload, dict) else None
++        if not isinstance(terms, list):
++            return []
++        result: list[str] = []
++        seen: set[str] = set()
++        for value in terms:
++            if not isinstance(value, str):
++                continue
++            term = " ".join(value.split())[:40]
++            key = normalize_lookup(term)
++            if not key or key in seen:
++                continue
++            seen.add(key)
++            result.append(term)
++            if len(result) >= 4:
++                break
++        return result
++
+     @staticmethod
+     def _filter_graph(graph: dict[str, Any]) -> dict[str, Any]:
+@@ -382,12 +470,30 @@ class KnowledgeQueryPipeline:
+             raise ValueError("knowledge query must not be empty")
+         candidates = self._exact_candidates(clean_query)
+         strategy = "exact-alias"
++        interpreted_terms: list[str] = []
++        if not candidates:
++            interpreted_terms = self._interpret_query(clean_query)
++            seen_candidate_ids: set[str] = set()
++            interpreted_candidates: list[dict[str, Any]] = []
++            for term in interpreted_terms:
++                for node in self._exact_candidates(term):
++                    node_id = str(node.get("id") or "")
++                    if not node_id or node_id in seen_candidate_ids:
++                        continue
++                    seen_candidate_ids.add(node_id)
++                    interpreted_candidates.append(node)
++            if interpreted_candidates:
++                candidates = interpreted_candidates
++                strategy = "terra-query-understanding"
+         if not candidates:
+-            candidates = self._semantic_candidates(clean_query)
+-            strategy = "bge-m3-plus-reranker"
++            semantic_query = interpreted_terms[0] if interpreted_terms else clean_query
++            candidates = self._semantic_candidates(semantic_query)
++            strategy = (
++                "terra-query-understanding-plus-bge-m3"
++                if interpreted_terms else "bge-m3-plus-reranker"
++            )
+         if not candidates:
+             return None
+         center_id = str(candidates[0]["id"])
++        canonical_name = str(candidates[0].get("name") or "").strip()
+@@ -404,6 +510,9 @@ class KnowledgeQueryPipeline:
+             "canonical_node_id": center_id,
+             "matched_alias": candidates[0].get("matched_alias"),
+             "strategy": strategy,
++            "interpreted_terms": interpreted_terms,
++            "interpreted_query": canonical_name or None,
++            "input_was_rewritten": normalize_lookup(canonical_name) != normalize_lookup(clean_query),
+             "ambiguous": len(candidates) > 1,
+diff --git a/tests/services/test_knowledge_query_pipeline.py b/tests/services/test_knowledge_query_pipeline.py
+--- a/tests/services/test_knowledge_query_pipeline.py
++++ b/tests/services/test_knowledge_query_pipeline.py
+@@ -29,4 +29,16 @@ class FakeReranker:
+         return [{"index": 1, "score": 0.95}, {"index": 0, "score": 0.7}]
+ 
+ 
++class FakeQueryInterpreter:
++    def __init__(self, response):
++        self.response = response
++        self.calls = []
++
++    def complete(self, **kwargs):
++        self.calls.append(kwargs)
++        if isinstance(self.response, Exception):
++            raise self.response
++        return self.response
++
++
+ class FakeSeedRepository:
+@@ -104,4 +116,60 @@ def test_exact_alias_bypasses_gpu_stages_and_filters_relations():
+     assert reranker.calls == []
+ 
+ 
++@pytest.mark.parametrize(
++    ("query", "response"),
++    [
++        ("內包粉次怎麼辦", '{"terms":["閉鎖性粉刺","白頭粉刺"],"intent":"concern"}'),
++        ("水揚酸可以改善粉刺嗎", '{"terms":["水楊酸"],"intent":"ingredient"}'),
++    ],
++)
++def test_llm_understanding_maps_question_alias_or_typo_to_verified_graph_node(
++    query, response,
++):
++    explorer = FakeExplorer(
++        [{
++            "id": "verified-node",
++            "name": "閉鎖性粉刺" if "閉鎖性" in response else "水楊酸",
++            "type": "SkinConcern" if "閉鎖性" in response else "Ingredient",
++            "properties": {},
++        }]
++    )
++    embedder = FakeEmbedder()
++    interpreter = FakeQueryInterpreter(response)
++    pipeline = KnowledgeQueryPipeline(
++        explorer,
++        embedding_client=embedder,
++        reranker_client=FakeReranker(),
++        query_interpreter=interpreter,
++        query_interpreter_model="gpt-5.6-terra",
++    )
++
++    result = pipeline.resolve(query)
++
++    assert result["center"]["id"] == "verified-node"
++    assert result["resolution"]["strategy"] == "terra-query-understanding"
++    assert result["resolution"]["input_was_rewritten"] is True
++    assert result["resolution"]["interpreted_query"] in {"閉鎖性粉刺", "水楊酸"}
++    assert embedder.queries == []
++    assert query in interpreter.calls[0]["messages"][1]["content"]
++    assert interpreter.calls[0]["temperature"] == 0.0
++
++
++def test_query_interpreter_failure_falls_back_to_existing_semantic_pipeline():
++    interpreter = FakeQueryInterpreter(RuntimeError("offline"))
++    embedder = FakeEmbedder()
++    pipeline = KnowledgeQueryPipeline(
++        FakeExplorer(),
++        embedding_client=embedder,
++        reranker_client=FakeReranker(),
++        query_interpreter=interpreter,
++    )
++
++    result = pipeline.resolve("修護乾燥屏障")
++
++    assert result["center"]["id"] == "n2"
++    assert result["resolution"]["strategy"] == "bge-m3-plus-reranker"
++    assert embedder.queries == ["修護乾燥屏障"]
++
++
+ def test_semantic_candidates_are_reranked_before_graph_lookup():
