@@ -1,0 +1,35 @@
+# Secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+credentials*.json
+secrets*.json
+
+# Runtime and user data
+*.db
+*.sqlite*
+*.dump
+*.sql
+uploads/
+data/
+logs/
+*.log
+models/
+checkpoints/
+conversations/
+user-data/
+
+# Dependencies and builds
+node_modules/
+.next/
+dist/
+build/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+coverage/
