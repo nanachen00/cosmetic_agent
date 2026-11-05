@@ -232,6 +232,22 @@ def test_allergen_filter_covers_catalog_graph_extracted_and_unknown_ingredients(
     assert [product["id"] for product in filtered] == ["safe"]
 
 
+def test_fragrance_allergy_filters_common_declared_fragrance_sensitizers():
+    candidates = [
+        {"id": "lavender", "key_ingredients": ["Lavandula Angustifolia Extract"]},
+        {"id": "linalool", "ingredients_list": ["Aqua", "Linalool"]},
+        {"id": "safe", "key_ingredients": ["玻尿酸", "神經醯胺"]},
+    ]
+
+    filtered = product_agent._filter_disliked_ingredients(
+        candidates,
+        ["香料"],
+        [],
+    )
+
+    assert [product["id"] for product in filtered] == ["safe"]
+
+
 def test_graph_warning_penalizes_only_the_product_with_the_warned_ingredient():
     rows = [
         {

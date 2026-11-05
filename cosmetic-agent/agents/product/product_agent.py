@@ -471,10 +471,6 @@ def _matches_requested_category(product: dict, requested_category: str = "") -> 
     wanted = str(requested_category or "").strip()
     if not wanted or wanted in _GENERIC_PRODUCT_CATEGORIES:
         return True
-    expected_type = _PRODUCT_TYPE_BY_CATEGORY.get(wanted)
-    stored_type = str(product.get("product_type") or "").strip()
-    if expected_type and stored_type:
-        return stored_type == expected_type
     actual = str(product.get("category") or "").strip()
     normalized = str(product.get("category_normalized") or "").strip()
     name = str(product.get("name") or "").strip()
@@ -489,6 +485,13 @@ def _matches_requested_category(product: dict, requested_category: str = "") -> 
         marker in searchable_text for marker in _MAKEUP_PRODUCT_MARKERS
     ):
         return False
+    # product_type only identifies the dosage form.  A body lotion can still
+    # carry the generic ``emulsion`` type, so explicit body/makeup evidence
+    # must win before the stored-type fast path.
+    expected_type = _PRODUCT_TYPE_BY_CATEGORY.get(wanted)
+    stored_type = str(product.get("product_type") or "").strip()
+    if expected_type and stored_type:
+        return stored_type == expected_type
     if actual == wanted or wanted in actual or normalized == wanted:
         return True
     keywords = _CATEGORY_KEYWORDS.get(wanted, (wanted,))
@@ -602,9 +605,14 @@ def _filter_disliked_ingredients(
             str(ingredient.get("ingredient_name_en") or ""),
         ])
 
+    fragrance_aliases = (
+        "香料", "香精", "fragrance", "parfum", "aroma", "essentialoil", "精油",
+        "lavender", "lavandula", "薰衣草", "linalool", "limonene", "geraniol",
+        "citronellol", "eugenol",
+    )
     allergen_aliases = {
-        "香料": ("香料", "香精", "fragrance", "parfum", "aroma"),
-        "香精": ("香料", "香精", "fragrance", "parfum", "aroma"),
+        "香料": fragrance_aliases,
+        "香精": fragrance_aliases,
         "酒精": ("酒精", "變性酒精", "alcoholdenat", "denaturedalcohol", "ethanol", "ethylalcohol"),
     }
     disliked_terms: list[str] = []

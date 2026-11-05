@@ -70,6 +70,7 @@ def test_face_lotion_rejects_body_and_makeup_products():
     body_lotion = {
         "name": "淡斑勻亮精華凝乳",
         "category": "身體乳液",
+        "product_type": "emulsion",
         "description": "身體肌膚保濕用",
     }
     tone_up_lotion = {
