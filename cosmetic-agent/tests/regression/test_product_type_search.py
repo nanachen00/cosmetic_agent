@@ -66,6 +66,28 @@ def test_untyped_product_keeps_legacy_name_fallback():
     assert not _matches_requested_category(item, "acne_patch")
 
 
+def test_face_lotion_rejects_body_and_makeup_products():
+    body_lotion = {
+        "name": "淡斑勻亮精華凝乳",
+        "category": "身體乳液",
+        "description": "身體肌膚保濕用",
+    }
+    tone_up_lotion = {
+        "name": "提亮保濕乳",
+        "category": "乳液",
+        "description": "三色膠囊可呈現妝效與覆蓋效果",
+    }
+    face_lotion = {
+        "name": "清爽保濕乳",
+        "category": "乳液",
+        "description": "臉部日常保濕",
+    }
+
+    assert not _matches_requested_category(body_lotion, "乳液")
+    assert not _matches_requested_category(tone_up_lotion, "乳液")
+    assert _matches_requested_category(face_lotion, "乳液")
+
+
 def test_category_search_passes_product_type_to_neo4j(monkeypatch):
     from agents.product import product_agent as agent
 

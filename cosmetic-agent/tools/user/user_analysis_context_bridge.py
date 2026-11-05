@@ -163,6 +163,11 @@ class UserAnalysisContextBridge:
         context["preferred_effects"] = _list(
             context.get("preferred_effects") or preferences_data.get("preferred_effects")
         )
+        context["preferred_textures"] = _list(
+            context.get("preferred_textures")
+            or preferences_data.get("preferred_textures")
+            or preferences_data.get("texture_preferences")
+        )
         context["budget_min"] = context.get("budget_min") or profile_row.get("budget_min")
         context["budget_max"] = context.get("budget_max") or profile_row.get("budget_max")
         context["total_event_count"] = int(event_row.get("event_count") or 0)
@@ -211,9 +216,15 @@ class UserAnalysisContextBridge:
 
     @staticmethod
     def build_prompt_context(context: dict[str, Any]) -> str:
-        if not context or not context.get("customer_type"):
+        if not context:
             return ""
-        items = [f"消費人格：{context.get('customer_type_label') or context['customer_type']}"]
+        items: list[str] = []
+        if context.get("customer_type"):
+            items.append(
+                f"消費人格：{context.get('customer_type_label') or context['customer_type']}"
+            )
+        if context.get("preferred_categories"):
+            items.append("偏好品類：" + "、".join(context["preferred_categories"][:5]))
         if context.get("preferred_brands"):
             items.append("偏好品牌：" + "、".join(context["preferred_brands"][:5]))
         if context.get("avoided_brands"):
@@ -222,4 +233,18 @@ class UserAnalysisContextBridge:
             items.append("偏好功效：" + "、".join(context["preferred_effects"][:5]))
         if context.get("avoid_ingredients"):
             items.append("避開成分：" + "、".join(context["avoid_ingredients"][:8]))
+        if context.get("preferred_textures"):
+            items.append("偏好質地：" + "、".join(context["preferred_textures"][:5]))
+        budget_min = context.get("budget_min")
+        budget_max = context.get("budget_max")
+        if budget_min or budget_max:
+            if budget_min and budget_max:
+                budget_text = f"NT${budget_min}–{budget_max}"
+            elif budget_max:
+                budget_text = f"NT${budget_max} 以內"
+            else:
+                budget_text = f"NT${budget_min} 以上"
+            items.append("常用預算：" + budget_text)
+        if not items:
+            return ""
         return "【個人化偏好】\n" + "；".join(items)

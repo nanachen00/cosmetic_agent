@@ -140,6 +140,10 @@ def test_ingredient_copy_uses_chinese_names_without_changing_product_or_link():
         "category": "乳液",
         "price": 229,
         "rank_reason": "菸鹼醯胺（Niacinamide）可協助調理油脂",
+        "key_ingredients": [
+            "菸鹼醯胺（Niacinamide）",
+            "傳明酸（Tranexamic Acid）",
+        ],
         "copy": "添加 Tranexamic Acid，協助改善暗沉外觀。",
         "sources": [{"url": "https://example.com/Niacinamide"}],
     }
@@ -151,12 +155,119 @@ def test_ingredient_copy_uses_chinese_names_without_changing_product_or_link():
         {},
         IntentParseResult(intent_type=IntentType.FIND_PRODUCT, raw_query="找美白乳液"),
     )
-    assert "可留意菸鹼醯胺與傳明酸" in reply
     assert "菸鹼醯胺可協助調理油脂" in reply
-    assert "添加 傳明酸" in reply
+    assert "重點成分：** 菸鹼醯胺、傳明酸" in reply
     assert "Niacinamide 亮白乳液" in reply
     assert "https://example.com/Niacinamide" in reply
     assert "（Niacinamide）" not in reply
+    assert "商品特色" not in reply
+
+
+def test_mobile_product_reply_uses_profile_history_and_only_three_items():
+    from agents.root.orchestrator import _format_ranked_products
+    from schemas.intent import IntentParseResult, IntentType, ProductCategory
+
+    products = [
+        {
+            "id": f"demo-{index}",
+            "name": f"保濕乳液 {index}",
+            "brand": "Demo",
+            "category": "乳液",
+            "price": 300 + index,
+            "recommendation_reason": "符合清爽保濕與日間使用需求",
+            "ingredients": ["玻尿酸", "神經醯胺"],
+        }
+        for index in range(1, 5)
+    ]
+    reply = _format_ranked_products(
+        {
+            "products": products,
+            "personalization_context": {
+                "applied": [
+                    "膚質：混合肌",
+                    "避開：香料、酒精",
+                    "近期膚況：保濕、抗痘",
+                    "質地偏好：清爽",
+                    "預算：1000元以內",
+                ]
+            },
+        },
+        {},
+        IntentParseResult(
+            intent_type=IntentType.FIND_PRODUCT,
+            product_category=ProductCategory.LOTION,
+            raw_query="幫我找一瓶千元內白天可用的保濕乳液",
+        ),
+    )
+
+    assert "已自動套用你的資料" in reply
+    assert "近期膚況：保濕、抗痘" in reply
+    assert "### 3." in reply
+    assert "保濕乳液 4" not in reply
+    assert "商品特色" not in reply
+
+
+def test_allergen_filter_covers_catalog_graph_extracted_and_unknown_ingredients():
+    candidates = [
+        {"id": "catalog-hit", "ingredients_list": ["Aqua", "Parfum"]},
+        {"id": "graph-hit", "ingredients_list": ["Aqua"]},
+        {"id": "extract-hit", "extracted_ingredients": ["香料"]},
+        {"id": "safe", "key_ingredients": ["玻尿酸", "神經醯胺"]},
+        {"id": "unknown"},
+    ]
+    graph_rows = [
+        {
+            "product_id": "graph-hit",
+            "ingredient_name_zh": "香料",
+            "ingredient_name_en": "Fragrance",
+        }
+    ]
+
+    filtered = product_agent._filter_disliked_ingredients(
+        candidates,
+        ["香料"],
+        graph_rows,
+    )
+
+    assert [product["id"] for product in filtered] == ["safe"]
+
+
+def test_graph_warning_penalizes_only_the_product_with_the_warned_ingredient():
+    rows = [
+        {
+            "product_id": "risky",
+            "ingredient_name_zh": "水楊酸",
+            "ingredient_name_en": "Salicylic Acid",
+        },
+        {
+            "product_id": "safe",
+            "ingredient_name_zh": "玻尿酸",
+            "ingredient_name_en": "Hyaluronic Acid",
+        },
+    ]
+
+    assert product_agent._warned_product_ids(["水楊酸不建議敏感肌使用"], rows) == {
+        "risky"
+    }
+
+
+def test_no_product_message_dict_is_rendered_as_plain_mobile_copy():
+    from agents.root.orchestrator import _format_ranked_products
+    from schemas.intent import IntentParseResult, IntentType
+
+    reply = _format_ranked_products(
+        {
+            "products": [],
+            "message": {
+                "main": "目前沒有可安全核對的商品。",
+                "sub": "可改品類再查。",
+            },
+        },
+        {},
+        IntentParseResult(intent_type=IntentType.FIND_PRODUCT, raw_query="找乳液"),
+    )
+
+    assert reply == "目前沒有可安全核對的商品。\n- 可改品類再查。"
 
 
 def test_chinese_ingredient_cleaner_keeps_unrelated_english_parentheses():

@@ -4,6 +4,7 @@ L4/O1 (response composer) are covered in test_response_composer.py.
 """
 
 import pytest
+from types import SimpleNamespace
 
 import agents.root.orchestrator as orchestrator
 import tools.a2a.skin_product_bridge as skin_bridge
@@ -40,6 +41,26 @@ def test_tracking_issue_values_and_labels_map_to_product_concerns(monkeypatch):
 
 def test_chinese_high_severity_is_flagged(monkeypatch):
     assert _skin_context(monkeypatch, ["dryness"], severity="嚴重")["risk_flags"] == ["dryness_high_severity"]
+
+
+def test_explicit_purchase_preferences_are_reused_from_skin_history(monkeypatch):
+    records = [
+        {
+            "issue": "oiliness",
+            "severity": 2,
+            "note": "喜歡清爽不黏的保濕品，單品 800 元以內。",
+        }
+    ]
+    monkeypatch.setattr(
+        skin_bridge.postgres_skin_record_store,
+        "query",
+        lambda user_id: records,
+    )
+
+    context = skin_bridge.get_skin_context("u1")
+
+    assert context["preference_hints"] == ["清爽", "不黏"]
+    assert context["budget_max_hint"] == 800
 
 
 # ── L2 confirmation reply ─────────────────────────────────────────
@@ -110,6 +131,37 @@ def test_rejection_with_content_is_parsed_again(monkeypatch):
 def test_affirmative_confirm_reply_dispatches(monkeypatch):
     root, _ = _confirm_root(monkeypatch)
     assert root._handle_confirm_reply("對，就是這樣")["stage"] == "dispatch"
+
+
+def test_complete_compound_product_request_dispatches_without_confirmation(monkeypatch):
+    parsed_intent = IntentParseResult(
+        intent_type=IntentType.FIND_PRODUCT,
+        skin_type="combination",
+        concern=["保濕", "抗痘"],
+        product_category="乳液",
+        budget_range="1000元以內",
+        raw_query="長需求",
+    )
+    monkeypatch.setattr(orchestrator, "parse_intent", lambda **kwargs: parsed_intent)
+    monkeypatch.setattr(orchestrator, "get_skin_context", lambda user_id: None)
+
+    root = RootAgentOrchestrator.__new__(RootAgentOrchestrator)
+    root._log = lambda *args: None
+    root.model = "stub"
+    root.state = ConversationState()
+    root.memory = SimpleNamespace(user_id="demo-user")
+    root.user_analysis_context = {}
+    root._intent_memory_context = lambda: ""
+    root._routing_context = lambda: {}
+    root._enrich_intent_from_memory = lambda intent: intent
+    root._do_dispatch = lambda intent: {"stage": "dispatch", "intent": intent}
+
+    result = root._handle_new_input(
+        "我想一次比較多個平台，找混合敏感、容易長粉刺且白天可以使用的千元內保濕乳液，直接縮小成三款。"
+    )
+
+    assert result["stage"] == "dispatch"
+    assert root.state.is_waiting_confirm is False
 
 
 # ── L3 emergency before profile query ─────────────────────────────

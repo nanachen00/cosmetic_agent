@@ -455,6 +455,18 @@ _CATEGORY_KEYWORDS = {
     "makeup_remover": ("卸妝油", "卸妝水", "卸妝乳", "卸妝膏", "卸妝凝膠", "卸妝慕斯", "卸妝棉"),
 }
 
+_FACIAL_CATEGORIES = {
+    "精華液", "化妝水", "乳液", "乳霜", "面膜", "洗面乳", "防曬", "防曬乳",
+    "acne_patch", "pore_strip", "exfoliant", "spot_care", "eye_care", "makeup_remover",
+}
+_BODY_PRODUCT_MARKERS = (
+    "身體", "身體乳", "身體凝乳", "身體保養", "體乳", "護手", "護足",
+    "body lotion", "body cream", "body care", "hand cream", "foot cream",
+)
+_MAKEUP_PRODUCT_MARKERS = (
+    "底妝", "粉底", "妝前", "潤色", "遮瑕", "妝效", "覆蓋效果", "色素", "primer", "foundation",
+)
+
 def _matches_requested_category(product: dict, requested_category: str = "") -> bool:
     wanted = str(requested_category or "").strip()
     if not wanted or wanted in _GENERIC_PRODUCT_CATEGORIES:
@@ -467,6 +479,16 @@ def _matches_requested_category(product: dict, requested_category: str = "") -> 
     normalized = str(product.get("category_normalized") or "").strip()
     name = str(product.get("name") or "").strip()
     name_zh = str(product.get("name_zh") or "").strip()
+    description = str(product.get("description") or "").strip()
+    searchable_text = " ".join((actual, normalized, name, name_zh, description)).casefold()
+    if wanted in _FACIAL_CATEGORIES and any(
+        marker in searchable_text for marker in _BODY_PRODUCT_MARKERS
+    ):
+        return False
+    if wanted in {"乳液", "乳霜"} and any(
+        marker in searchable_text for marker in _MAKEUP_PRODUCT_MARKERS
+    ):
+        return False
     if actual == wanted or wanted in actual or normalized == wanted:
         return True
     keywords = _CATEGORY_KEYWORDS.get(wanted, (wanted,))
@@ -502,8 +524,26 @@ def _normalize_personalization_context(value: dict = None) -> dict:
     context = value if isinstance(value, dict) else {}
     customer_type = str(context.get("customer_type") or "").strip()
     supplied = context.get("ranking_weights")
-    if not customer_type or not isinstance(supplied, dict):
+    has_preference_signal = bool(
+        customer_type
+        or context.get("preferred_brands")
+        or context.get("avoided_brands")
+        or context.get("preferred_effects")
+        or context.get("preferred_textures")
+        or context.get("budget_min")
+        or context.get("budget_max")
+    )
+    if not has_preference_signal:
         return {"enabled": False}
+
+    if not isinstance(supplied, dict):
+        supplied = {
+            "safety_score": 0.35,
+            "price_value_score": 0.20,
+            "review_score": 0.10,
+            "ingredient_match_score": 0.25,
+            "brand_score": 0.10,
+        }
 
     weights = {}
     for key in _RANKING_WEIGHT_KEYS:
@@ -517,8 +557,10 @@ def _normalize_personalization_context(value: dict = None) -> dict:
 
     return {
         "enabled": True,
-        "customer_type": customer_type,
-        "customer_type_label": str(context.get("customer_type_label") or customer_type),
+        "customer_type": customer_type or "known_preferences",
+        "customer_type_label": str(
+            context.get("customer_type_label") or customer_type or "已知偏好"
+        ),
         "weights": {key: weights[key] / total for key in _RANKING_WEIGHT_KEYS},
         "preferred_brands": {
             str(item).strip().casefold()
@@ -531,6 +573,84 @@ def _normalize_personalization_context(value: dict = None) -> dict:
             if str(item).strip()
         },
     }
+
+
+def _normalized_ingredient_text(values) -> str:
+    return re.sub(
+        r"[\s_\-()（）]+",
+        "",
+        " ".join(str(value or "") for value in values).casefold(),
+    )
+
+
+def _filter_disliked_ingredients(
+    candidates: list[dict],
+    disliked_ingredients: list[str],
+    graph_rows: list[dict],
+) -> list[dict]:
+    """Hard-filter allergens across graph, catalog and extracted ingredients."""
+    if not disliked_ingredients:
+        return candidates
+
+    graph_ingredients: dict[str, list[str]] = {}
+    for ingredient in graph_rows:
+        product_id = str(ingredient.get("product_id") or "")
+        if not product_id:
+            continue
+        graph_ingredients.setdefault(product_id, []).extend([
+            str(ingredient.get("ingredient_name_zh") or ""),
+            str(ingredient.get("ingredient_name_en") or ""),
+        ])
+
+    allergen_aliases = {
+        "香料": ("香料", "香精", "fragrance", "parfum", "aroma"),
+        "香精": ("香料", "香精", "fragrance", "parfum", "aroma"),
+        "酒精": ("酒精", "變性酒精", "alcoholdenat", "denaturedalcohol", "ethanol", "ethylalcohol"),
+    }
+    disliked_terms: list[str] = []
+    for value in disliked_ingredients:
+        normalized_value = _normalized_ingredient_text([value])
+        if not normalized_value:
+            continue
+        aliases = allergen_aliases.get(normalized_value, (value,))
+        disliked_terms.extend(
+            term
+            for term in (_normalized_ingredient_text([alias]) for alias in aliases)
+            if term and term not in disliked_terms
+        )
+    safe_candidates = []
+    for product in candidates:
+        ingredient_values = (
+            graph_ingredients.get(str(product.get("id") or ""), [])
+            + list(product.get("ingredients_list") or [])
+            + list(product.get("key_ingredients") or [])
+            + list(product.get("extracted_ingredients") or [])
+        )
+        ingredient_text = _normalized_ingredient_text(ingredient_values)
+        # 有明確過敏條件時，成分未知的商品不可冒充安全。
+        if not ingredient_text:
+            continue
+        if any(term in ingredient_text for term in disliked_terms):
+            continue
+        safe_candidates.append(product)
+    return safe_candidates
+
+
+def _warned_product_ids(warnings: list, graph_rows: list[dict]) -> set[str]:
+    """Map ingredient warnings back to products instead of penalizing every result."""
+    warned_ids: set[str] = set()
+    warning_text = " ".join(str(value or "") for value in warnings).casefold()
+    if not warning_text:
+        return warned_ids
+    for ingredient in graph_rows:
+        product_id = str(ingredient.get("product_id") or "")
+        names = (
+            str(ingredient.get("ingredient_name_zh") or "").casefold(),
+            str(ingredient.get("ingredient_name_en") or "").casefold(),
+        )
+        if product_id and any(name and name in warning_text for name in names):
+            warned_ids.add(product_id)
+    return warned_ids
 
 
 def _apply_personalization_scores(
@@ -1521,17 +1641,23 @@ def run(
     global_warnings = graph_result.get('warnings', [])
 
     if disliked_ingredients:
-        filtered_ids = set()
-        for ing in graph_result.get('ingredients', []):
-            ing_zh = ing.get('ingredient_name_zh', '')
-            ing_en = ing.get('ingredient_name_en', '').lower()
-            for disliked in disliked_ingredients:
-                if disliked in ing_zh or disliked.lower() in ing_en:
-                    pid = ing.get('product_id', '')
-                    if pid:
-                        filtered_ids.add(pid)
-        candidates = [p for p in candidates if p['id'] not in filtered_ids]
+        candidates = _filter_disliked_ingredients(
+            candidates,
+            disliked_ingredients,
+            graph_result.get('ingredients', []),
+        )
         _log("STEP4", f"過濾禁忌成分後剩 {len(candidates)} 筆")
+        if not candidates:
+            return {
+                "products": [],
+                "graph_summary": "",
+                "warnings": global_warnings,
+                "total_candidates": 0,
+                "message": {
+                    "main": "已套用你的過敏／禁忌成分，但目前沒有可安全核對的商品。",
+                    "sub": "我不會用成分不完整的商品冒充符合；可改品類或指定商品再查。",
+                },
+            }
 
     # ── Step 5：排序（安全/預算 → 需求 → 個人化/語意 → partner 同分優先）──
     if trend_request:
@@ -1550,10 +1676,10 @@ def run(
         candidates = evidenced_candidates
         _log("STEP4", f"熱門證據篩選後剩 {len(candidates)} 筆")
 
-    warned_ids = set()
-    for w in global_warnings:
-        for p in candidates:
-            warned_ids.add(p['id'])
+    warned_ids = _warned_product_ids(
+        global_warnings,
+        graph_result.get('ingredients', []),
+    )
 
     if budget_val:
         hard_budget = bool(re.search(
@@ -1738,7 +1864,7 @@ def run(
 
     # ── Step 6：生成合規文案 ──
     output_products = []
-    for p in candidates[:5]:
+    for p in candidates[:3]:
         # 成分來源：partner 用 graph_search 結果，external 用 TAIDE 抽取
         ing_for_copy = _dedupe_display_ingredients([i['ingredient_name_zh'] for i in graph_result.get('ingredients', []) if i.get('product_id') == p['id'] and i.get('ingredient_name_zh')] + list(p.get('ingredients_list') or []) + list(p.get('key_ingredients') or []))
 

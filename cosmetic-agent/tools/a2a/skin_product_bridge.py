@@ -7,6 +7,7 @@ main recommendation response.
 from __future__ import annotations
 
 from collections import Counter
+import re
 from typing import Any
 
 from database.postgres.repositories.skin_record import postgres_skin_record_store
@@ -37,6 +38,7 @@ _CONDITION_TO_CONCERN = {
 }
 
 _HIGH_SEVERITY = {"high", "severe", "嚴重", "重度", "3", "4", "5"}
+_TEXTURE_HINTS = ("清爽", "不黏", "滋潤", "凝膠", "乳霜", "油類")
 
 
 def _condition(record: dict[str, Any]) -> str:
@@ -79,6 +81,21 @@ def get_skin_context(
                 if flag not in risk_flags:
                     risk_flags.append(flag)
 
+        # 只擷取使用者在歷史記錄中明確寫過的選購偏好，不用 LLM 猜測。
+        notes = [str(record.get("note") or "").strip() for record in recent_records]
+        preference_hints: list[str] = []
+        for note in notes:
+            for hint in _TEXTURE_HINTS:
+                if hint in note and hint not in preference_hints:
+                    preference_hints.append(hint)
+
+        budget_max_hint = None
+        for note in notes:
+            match = re.search(r"(?:單品|預算)?\s*(\d{2,5})\s*元\s*(?:以內|以下)", note)
+            if match:
+                budget_max_hint = int(match.group(1))
+                break
+
         return {
             "raw": {
                 "source": "postgres",
@@ -88,6 +105,8 @@ def get_skin_context(
             "concern_hints": concern_hints,
             "risk_flags": risk_flags,
             "trend_note": ", ".join(risk_flags[:2]) if risk_flags else "",
+            "preference_hints": preference_hints,
+            "budget_max_hint": budget_max_hint,
         }
     except Exception as exc:
         print(f"ℹ️ [SkinProductBridge] PostgreSQL context unavailable ({exc})")

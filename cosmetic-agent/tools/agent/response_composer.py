@@ -45,7 +45,13 @@ _NUMBER_PATTERN = re.compile(r"\d+(?:[.,]\d+)*")
 # Fallback/error replies carry no facts to rephrase; a rewrite can only invent some.
 _SYSTEM_NOTICE_PATTERN = re.compile(r"請稍後再試|發生錯誤|暫時無法|維護中|無法取得|找不到|不太理解")
 _SYSTEM_NOTICE_MAX_CHARS = 120
-_DEFAULT_SKIP_INTENTS = ("knowledge_query", "symptom_solving")
+_DEFAULT_SKIP_INTENTS = (
+    "knowledge_query",
+    "symptom_solving",
+    "find_product",
+    "recommendation",
+    "price_comparison",
+)
 _MAX_EXPANSION_RATIO = 2.0
 _MAX_EXPANSION_SLACK_CHARS = 80
 

@@ -179,11 +179,17 @@ def test_root_passes_product_facts_and_history_to_composer():
 # ── hotfix 2026-10-29 (post-dispatch review L4/O1) ─────────────────
 
 
-def test_knowledge_and_symptom_replies_skip_the_rewrite_by_default(monkeypatch):
+def test_structured_agent_replies_skip_the_rewrite_by_default(monkeypatch):
     monkeypatch.delenv("RESPONSE_COMPOSER_SKIP_INTENTS", raising=False)
     client = FakeClient(reply="改寫版")
     composer = ResponseComposer(client=client, enabled=True)
-    for intent_type in ("knowledge_query", "symptom_solving"):
+    for intent_type in (
+        "knowledge_query",
+        "symptom_solving",
+        "find_product",
+        "recommendation",
+        "price_comparison",
+    ):
         result = composer.compose(user_query="A酸呢？", intent_type=intent_type, raw_reply="A酸能加速角質代謝。")
         assert result.reply == "A酸能加速角質代謝。"
         assert result.fallback_reason == f"skipped_intent:{intent_type}"

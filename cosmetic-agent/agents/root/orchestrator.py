@@ -378,8 +378,8 @@ def _format_ranked_products(
     注意：
     1. 這裡不會重新排序商品。
     2. 商品順序由 Product Agent 決定。
-    3. 最多顯示五項商品。
-    4. 排名只顯示 1、2、3、4、5。
+    3. 手機回覆最多顯示三項商品。
+    4. 只顯示影響決策的重點，不重複商品長文案。
     """
 
     products = (
@@ -408,7 +408,14 @@ def _format_ranked_products(
     )
 
     if not products:
-        detailed_message = str(result.get("message") or "").strip()
+        message = result.get("message")
+        if isinstance(message, dict):
+            detailed_message = str(message.get("main") or "").strip()
+            sub_message = str(message.get("sub") or "").strip()
+            if sub_message:
+                detailed_message += "\n- " + sub_message
+        else:
+            detailed_message = str(message or "").strip()
         if detailed_message:
             return detailed_message
         return (
@@ -417,99 +424,24 @@ def _format_ranked_products(
             "或喜歡清爽還是滋潤的質地，我再幫你找。"
         )
 
-    # =====================================================
-    # 開頭文字
-    # =====================================================
-
-    pain_gain = (
-        pain_gain
-        or {}
-    )
-
-    generic_pain = (
-        "您提到了一些肌膚困擾"
-    )
-
-    generic_gain = (
-        "希望找到適合的保養品"
-    )
-
-    pain = str(
-        pain_gain.get("pain")
-        or ""
-    ).strip()
-
-    gain = str(
-        pain_gain.get("gain")
-        or ""
-    ).strip()
-
-    # 避免顯示分析失敗時的預設文字。
-    if pain == generic_pain:
-        pain = ""
-
-    if gain == generic_gain:
-        gain = ""
-
-    # 把偏系統分析的語氣改得自然一點。
-    pain = (
-        pain
-        .replace(
-            "使用者",
-            "你",
-        )
-        .replace(
-            "您的",
-            "你的",
-        )
-    )
-
-    gain = (
-        gain
-        .replace(
-            "使用者",
-            "你",
-        )
-        .replace(
-            "您的",
-            "你的",
-        )
-    )
-
-    reply = ""
-    terra_intro = str(result.get("terra_intro") or "").strip()
-    if terra_intro:
-        reply += terra_intro + "\n\n"
-
-
-    if pain and gain:
-        reply += (
-            f"依照你提到的情況，"
-            f"我先找了幾款比較接近「{gain}」需求的商品：\n\n"
-        )
-
-    elif gain:
-        reply += (
-            f"我先找了幾款比較接近「{gain}」需求的商品：\n\n"
-        )
-
-    elif pain:
-        reply += (
-            "依照你剛剛提到的肌膚情況，"
-            "我先整理了幾款可以參考的商品：\n\n"
-        )
-
-    else:
-        reply += (
-            "我先整理了幾款比較符合你目前需求的商品：\n\n"
-        )
+    result_count = min(3, len(products))
+    reply = f"我已把條件一次合併，先縮小到 {result_count} 款：\n"
+    personalization = result.get("personalization_context") or {}
+    applied_context = [
+        str(item).strip()
+        for item in (personalization.get("applied") or [])
+        if str(item).strip()
+    ]
+    if applied_context:
+        reply += "\n**已自動套用你的資料**\n"
+        reply += "- " + "｜".join(applied_context[:5]) + "\n"
 
     # =====================================================
     # 商品內容
     # =====================================================
 
     for index, product in enumerate(
-        products[:5]
+        products[:3]
     ):
         # 只顯示數字排名。
         label = (
@@ -560,27 +492,6 @@ def _format_ranked_products(
             or ""
         ).strip()
 
-        copy_text = str(product.get("copy") or "").strip()
-        copy_text = (
-            copy_text
-
-            .replace("建議再查看完整成分標示與使用方式，確認是否符合你的需求。", "")
-            .strip("；。 " )
-        )
-        copy_text = copy_text.lstrip("•˙*- " )
-        if copy_text.startswith("目前商品資料列出") and "包含" in copy_text:
-            copy_text = copy_text.split("包含", 1)[1].strip()
-        if (
-            copy_text.startswith("此商品符合目前")
-            and "可從商品頁核對容量、用法與適用部位" in copy_text
-        ):
-            copy_text = ""
-
-        trending = str(
-            product.get("trending")
-            or ""
-        ).strip()
-
         over_budget = bool(
             product.get("over_budget")
         )
@@ -591,49 +502,10 @@ def _format_ranked_products(
             else ""
         )
 
-        # 使用標題層級，讓商品名稱比內文明顯。
-        reply += f"### {label} {title}{partner_tag}\n"
-
-        # 商品資料只顯示有內容的欄位，
-        # 避免出現「品牌： | 面膜」。
-        product_information = []
-
-        if (
-            brand
-            and brand not in {
-                "未知品牌",
-                "未提供",
-            }
-        ):
-            product_information.append(
-                f"**品牌：** {brand}"
-            )
-
-        if (
-            category
-            and category not in {
-                "未知分類",
-            }
-        ):
-            product_information.append(
-                f"**類型：** {category}"
-            )
-
-        if price not in {
-            None,
-            "",
-        }:
-            product_information.append(
-                f"**價格：** NT${price}{budget_tag}"
-            )
-
-        if product_information:
-            reply += (
-                " ｜ ".join(
-                    product_information
-                )
-                + "\n"
-            )
+        price_text = ""
+        if price not in {None, ""}:
+            price_text = f" — NT${price}{budget_tag}"
+        reply += f"\n### {label} {title}{partner_tag}{price_text}\n"
 
         # 推薦原因
         if rank_reason:
@@ -649,18 +521,16 @@ def _format_ranked_products(
                 )
             )
 
-            reply += (
-                f"**適合你的原因：** {natural_reason}" + chr(10)
-        )
+            reply += f"- **為什麼適合：** {_trim_to_sentence(natural_reason, 92)}\n"
 
         ingredients = (
             product.get("key_ingredients")
-
+            or product.get("ingredients")
             or []
         )
         ingredient_text = "、".join(
             str(value).strip()
-            for value in ingredients[:4]
+            for value in ingredients[:3]
             if str(value).strip()
             and len(str(value).strip()) <= 45
             and not any(
@@ -669,18 +539,7 @@ def _format_ranked_products(
             )
         )
         if ingredient_text:
-            reply += (
-                f"**重點成分：** {_trim_to_sentence(ingredient_text, 100)}"
-                + chr(10)
-            )
-
-    # 商品介紹
-        if copy_text:
-            reply += (
-                "**商品特色：** "
-                + _trim_to_sentence(copy_text, 180)
-                + chr(10)
-            )
+            reply += f"- **重點成分：** {_trim_to_sentence(ingredient_text, 72)}\n"
 
         sources = product.get("sources") or []
         for source in sources[:1]:
@@ -688,14 +547,7 @@ def _format_ranked_products(
                 continue
             source_url = str(source.get("url") or "").strip()
             if source_url.startswith(("https://", "http://")):
-                reply += f"查看商品資料：{source_url}" + chr(10)
-
-        if trending:
-            reply += (
-                    f"**熱門資訊：** {trending}" + chr(10)
-            )
-
-        reply += "\n"
+                reply += f"- [查看商品資料]({source_url})\n"
 
     # =====================================================
     # 注意事項
@@ -710,57 +562,10 @@ def _format_ranked_products(
 
         if warning_text:
             reply += (
-                f"注意事項：{warning_text}\n\n"
+                f"\n**共同留意：** {warning_text}\n"
             )
 
-    # =====================================================
-    # Neo4j 成分資訊
-    # =====================================================
-
-    graph_summary = str(
-        result.get("graph_summary")
-        or ""
-    ).strip()
-
-    if (
-        graph_summary
-        and "無特殊禁忌"
-        not in graph_summary
-    ):
-        graph_lines = [
-            line.strip()
-            for line in graph_summary.splitlines()
-            if (
-                "邊1" in line
-                or "警告" in line
-            )
-        ]
-
-        if graph_lines:
-            ingredient_note = (
-                graph_lines[0]
-                .replace(
-                    "【邊1 含有成分】",
-                    "",
-                )
-                .strip()
-            )
-
-            if ingredient_note:
-                reply += (
-                    f"成分方面要注意：{ingredient_note}\n\n"
-                )
-
-    # =====================================================
-    # 結尾
-    # =====================================================
-
-    reply += "─────────────────\n"
-    reply += "以上是依照你的膚質和需求整理的結果。\n"
-    reply += (
-        "如果你比較在意價格、品牌或質地，"
-        "可以直接告訴我，我再幫你調整。"
-    )
+    reply += "\n想改價格、質地或品牌，直接說要改哪一項就好。"
 
 
     
@@ -1246,10 +1051,30 @@ class RootAgentOrchestrator:
         excluded_product_ids: Optional[set[str]] = None,
     ) -> dict:
         disliked = list(self.memory.get("disliked_ingredients", []) or [])
+        profile_allergens = list(self.basic_profile.get("allergens") or [])
+        other_allergen = str(self.basic_profile.get("otherAllergen") or "").strip()
+        if other_allergen:
+            profile_allergens.extend(
+                item.strip()
+                for item in re.split(r"[、,，/／;；]+", other_allergen)
+                if item.strip()
+            )
+        for ingredient in profile_allergens:
+            if ingredient not in disliked:
+                disliked.append(ingredient)
         for ingredient in self.user_analysis_context.get("avoid_ingredients", []):
             if ingredient not in disliked:
                 disliked.append(ingredient)
         memory_parts = [self._memory_prompt()]
+        personalization_context = self._product_personalization_context(
+            intent,
+            disliked_ingredients=disliked,
+        )
+        if personalization_context["applied"]:
+            memory_parts.append(
+                "【本次已驗證的個人化條件】\n- "
+                + "\n- ".join(personalization_context["applied"])
+            )
         consumer_prompt = self.user_analysis_bridge.build_prompt_context(
             self.user_analysis_context,
         )
@@ -1266,6 +1091,7 @@ class RootAgentOrchestrator:
             preference_context=self.user_analysis_context,
             excluded_product_ids=sorted(excluded_product_ids or set()),
         )
+        result["personalization_context"] = personalization_context
         products = result.get("products") or []
         self.state.last_products = products
         self.state.seen_product_ids.update(
@@ -1274,6 +1100,70 @@ class RootAgentOrchestrator:
             if product_stable_key(product)
         )
         return result
+
+    def _product_personalization_context(
+        self,
+        intent: IntentParseResult,
+        *,
+        disliked_ingredients: list[str],
+    ) -> dict:
+        """Return only the recommendation signals actually applied this turn."""
+        applied: list[str] = []
+        skin_value = str(getattr(intent.skin_type, "value", intent.skin_type) or "")
+        if skin_value and skin_value != "unknown":
+            applied.append(f"膚質：{self._skin_label(skin_value)}")
+
+        avoid = list(dict.fromkeys(str(item).strip() for item in disliked_ingredients if str(item).strip()))
+        if avoid:
+            applied.append("避開：" + "、".join(avoid[:3]))
+
+        history_concerns = [
+            str(item).strip()
+            for item in self.user_analysis_context.get("skin_history_concerns", [])
+            if str(item).strip()
+        ]
+        if history_concerns:
+            applied.append("近期膚況：" + "、".join(history_concerns[:3]))
+
+        textures = [
+            str(item).strip()
+            for item in self.user_analysis_context.get("preferred_textures", [])
+            if str(item).strip()
+        ]
+        if textures:
+            applied.append("質地偏好：" + "、".join(textures[:2]))
+
+        budget = getattr(intent, "budget_range", None) or self.user_analysis_context.get("budget_max")
+        if budget:
+            budget_text = str(budget).strip()
+            if budget_text.replace(".", "", 1).isdigit():
+                budget_text = f"NT${budget_text} 以內"
+            applied.append("預算：" + budget_text)
+
+        return {"applied": applied}
+
+    def _apply_skin_product_context(self, skin_context: dict | None) -> None:
+        """Merge deterministic history signals without overwriting saved preferences."""
+        if not skin_context:
+            return
+        self.user_analysis_context["skin_history_concerns"] = list(
+            skin_context.get("concern_hints") or []
+        )
+        self.user_analysis_context["skin_history_risk_flags"] = list(
+            skin_context.get("risk_flags") or []
+        )
+        if (
+            not self.user_analysis_context.get("preferred_textures")
+            and skin_context.get("preference_hints")
+        ):
+            self.user_analysis_context["preferred_textures"] = list(
+                skin_context["preference_hints"]
+            )
+        if (
+            not self.user_analysis_context.get("budget_max")
+            and skin_context.get("budget_max_hint")
+        ):
+            self.user_analysis_context["budget_max"] = skin_context["budget_max_hint"]
 
     def _log(self, stage: str, message: str):
         print(f"[{stage}] {message}")
@@ -1797,6 +1687,10 @@ class RootAgentOrchestrator:
             current['concern'] = self.memory.get('concerns')[-2:]
             self._log("MEMORY", f"補入訴求：{current['concern']}")
             changed = True
+        if not current['concern'] and self.user_analysis_context.get('preferred_effects'):
+            current['concern'] = self.user_analysis_context.get('preferred_effects')[:2]
+            self._log("偏好", f"補入長期功效偏好：{current['concern']}")
+            changed = True
         raw_query = str(current.get("raw_query") or "")
         no_budget_markers = (
             "\u50f9\u683c\u4e0d\u9650",
@@ -1817,6 +1711,31 @@ class RootAgentOrchestrator:
             current['budget_range'] = self.memory.get('budget_range')
             self._log("MEMORY", f"補入預算：{current['budget_range']}")
             changed = True
+        if (
+            not explicitly_unlimited_budget
+            and not current.get('budget_range')
+            and self.user_analysis_context.get('budget_max')
+        ):
+            current['budget_range'] = f"{self.user_analysis_context['budget_max']}元以內"
+            self._log("偏好", f"補入常用預算：{current['budget_range']}")
+            changed = True
+        if (
+            str(current.get('texture_preference') or '') in {'', '不明'}
+            and self.user_analysis_context.get('preferred_textures')
+        ):
+            known_textures = {'清爽', '滋潤', '凝膠', '乳霜', '油類'}
+            preferred_texture = next(
+                (
+                    str(value).strip()
+                    for value in self.user_analysis_context['preferred_textures']
+                    if str(value).strip() in known_textures
+                ),
+                '',
+            )
+            if preferred_texture:
+                current['texture_preference'] = preferred_texture
+                self._log("偏好", f"補入質地偏好：{preferred_texture}")
+                changed = True
         if changed:
             try:
                 if current.get('intent_type') == 'unclear':
@@ -2907,6 +2826,21 @@ class RootAgentOrchestrator:
 
 
         intent = self._enrich_intent_from_memory(intent)
+        if intent.intent_type in {
+            IntentType.FIND_PRODUCT,
+            IntentType.RECOMMENDATION,
+            IntentType.PRICE_COMPARISON,
+        }:
+            skin_context = get_skin_context(self.memory.user_id)
+            self._apply_skin_product_context(skin_context)
+            history_concerns = list((skin_context or {}).get("concern_hints") or [])
+            if history_concerns and not intent.concern:
+                current = intent.model_dump()
+                current["concern"] = history_concerns[:2]
+                intent = IntentParseResult(**current)
+                self._log("歷史膚況", f"補入訴求：{history_concerns[:2]}")
+            # 歷史紀錄中的明確質地／預算偏好也要在補齊後再套用一次。
+            intent = self._enrich_intent_from_memory(intent)
         if (
             had_product_results
             and previous_product_intent is not None
@@ -2983,8 +2917,17 @@ class RootAgentOrchestrator:
             return self._ask_clarification("routing")
 
 
-        # 長文字 + 意圖明確 → 先做需求確認對話
-        if len(user_input) > 40 and intent.ambiguity_score < 0.7:
+        # 商品複合需求要能一次執行，不得只因文字較長就要求再確認。
+        product_intents = {
+            IntentType.FIND_PRODUCT,
+            IntentType.RECOMMENDATION,
+            IntentType.PRICE_COMPARISON,
+        }
+        if (
+            len(user_input) > 40
+            and intent.ambiguity_score < 0.7
+            and intent.intent_type not in product_intents
+        ):
             confirm_msg = _build_confirm_message(self.state.pain_gain, intent)
             self.state.is_waiting_confirm = True
             self.state.add_turn("assistant", confirm_msg)
@@ -3171,6 +3114,7 @@ class RootAgentOrchestrator:
             basic_profile=self.basic_profile,
             analyze_if_needed=True,
         )
+        self._apply_skin_product_context(skin_ctx)
         observe_pipeline_stage(
             "root",
             "user_analysis_dispatch",
