@@ -1051,9 +1051,11 @@ function ProductRecommendationIntroduction({
     line === "已自動套用你的資料" ||
     line === "✔️以自動套用你的偏好"
   );
-  const reasonHeadingIndex = normalized.indexOf("適合你的原因");
+  const reasonHeadingIndex = normalized.findIndex((line) =>
+    line === "適合你的原因" || line === "這次怎麼挑"
+  );
 
-  if (profileHeadingIndex < 0 || reasonHeadingIndex < 0) {
+  if (profileHeadingIndex < 0) {
     return (
       <p className="product-recommendation-response__intro">
         {renderMessageContent(lines.join("\n"))}
@@ -1063,7 +1065,10 @@ function ProductRecommendationIntroduction({
 
   const lead = lines.slice(0, profileHeadingIndex).filter(Boolean);
   const profileText = normalized
-    .slice(profileHeadingIndex + 1, reasonHeadingIndex)
+    .slice(
+      profileHeadingIndex + 1,
+      reasonHeadingIndex >= 0 ? reasonHeadingIndex : normalized.length,
+    )
     .filter(Boolean)
     .join("｜")
     .replace(/^[-*]\s*/, "");
@@ -1071,7 +1076,9 @@ function ProductRecommendationIntroduction({
     .split("｜")
     .map((item) => item.trim())
     .filter(Boolean);
-  const reason = lines.slice(reasonHeadingIndex + 1).filter(Boolean).join(" ");
+  const reason = reasonHeadingIndex >= 0
+    ? lines.slice(reasonHeadingIndex + 1).filter(Boolean).join(" ")
+    : "";
 
   return (
     <div className="product-recommendation-response__intro">
@@ -1084,10 +1091,12 @@ function ProductRecommendationIntroduction({
         </div>
       </section>
 
-      <section className="product-recommendation-response__reason">
-        <span>適合你的原因</span>
-        <p>{renderMessageContent(reason)}</p>
-      </section>
+      {reason ? (
+        <section className="product-recommendation-response__reason">
+          <span>適合你的原因</span>
+          <p>{renderMessageContent(reason)}</p>
+        </section>
+      ) : null}
     </div>
   );
 }
