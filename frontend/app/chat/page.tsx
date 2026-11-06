@@ -1,5 +1,7 @@
 "use client";
 
+import "./compact-chat.css";
+
 import {
   Fragment,
   FormEvent,
@@ -703,8 +705,10 @@ const PRODUCT_RECOMMENDATION_FIELD_LABELS = new Set([
   "價格",
   "售價",
   "適合你的原因",
+  "為什麼適合",
   "推薦理由",
   "推薦重點",
+  "重點成分",
   "商品介紹",
   "商品特色",
   "熱門依據",
@@ -907,6 +911,11 @@ function ProductRecommendationCard({
     ? brandField.value
     : legacyBrand;
   const productType = categoryField?.value ?? "";
+  const sourceField = fields.find(
+    (field) =>
+      PRODUCT_RECOMMENDATION_SOURCE_LABELS.has(field.label)
+      && /^https?:\/\/[^\s]+$/.test(field.value),
+  );
   const detailLines = product.lines.filter((line) => {
     const field = splitRecommendationField(line);
 
@@ -946,6 +955,7 @@ function ProductRecommendationCard({
         const field = splitRecommendationField(line);
         const isHighlight =
           field?.label === "適合你的原因" ||
+          field?.label === "為什麼適合" ||
           field?.label === "推薦理由";
         const isSource = Boolean(
           field && PRODUCT_RECOMMENDATION_SOURCE_LABELS.has(field.label),
@@ -1001,6 +1011,7 @@ function ProductRecommendationCard({
               .split(/[、,，]/)
               .map((ingredient) => ingredient.trim())
               .filter(Boolean)
+              .filter((ingredient, index, values) => values.indexOf(ingredient) === index)
               .map((ingredient) => (
                 <small key={ingredient}>{ingredient}</small>
               ))}
@@ -1008,25 +1019,23 @@ function ProductRecommendationCard({
         </section>
       ) : null}
 
-      <footer className="product-recommendation-card__footer">
-        {price ? (
-          <strong className="product-recommendation-card__price">{price}</strong>
-        ) : <span />}
-        {fields
-          .filter((field) => PRODUCT_RECOMMENDATION_SOURCE_LABELS.has(field.label))
-          .slice(0, 1)
-          .map((field) => (
+      {(price || sourceField) ? (
+        <footer className="product-recommendation-card__footer">
+          {price ? (
+            <strong className="product-recommendation-card__price">{price}</strong>
+          ) : <span />}
+          {sourceField ? (
             <a
               className="chat-message-link"
-              href={field.value}
-              key={field.value}
+              href={sourceField.value}
               rel="noopener noreferrer"
               target="_blank"
             >
               查看商品資料 ↗
             </a>
-          ))}
-      </footer>
+          ) : null}
+        </footer>
+      ) : null}
     </article>
   );
 }
@@ -1089,7 +1098,13 @@ function ReadableAssistantMessage({
   const recommendations = parseProductRecommendations(content);
 
   if (!recommendations) {
-    return <>{renderMessageContent(content)}</>;
+    return (
+      <div className="chat-prose">
+        {content.replace(/\r\n?/g, "\n").trim().split(/\n\s*\n/).filter(Boolean).map((paragraph, index) => (
+          <p key={index}>{renderMessageContent(paragraph)}</p>
+        ))}
+      </div>
+    );
   }
 
   return (
@@ -3405,7 +3420,7 @@ JSON.stringify({ version: 1, expiresAt: Date.now() + CHAT_HISTORY_TTL_MS, messag
               className="chat-avatar"
               aria-hidden="true"
             >
-<img src="/blink-ai-avatar.svg" alt="" />
+<img src="/blink-ai-chat-avatar.png" alt="" />
 </div>
 
 
@@ -3510,7 +3525,7 @@ JSON.stringify({ version: 1, expiresAt: Date.now() + CHAT_HISTORY_TTL_MS, messag
                     className="message-avatar"
                     aria-hidden="true"
                   >
-<img src="/blink-ai-avatar.svg" alt="" />
+<img src="/blink-ai-chat-avatar.png" alt="" />
 </div>
 
                 )}
