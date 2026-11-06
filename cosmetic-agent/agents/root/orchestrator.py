@@ -366,7 +366,7 @@ def _build_product_decision_summary(
     intent: IntentParseResult,
     applied_context: list[str],
 ) -> str:
-    """用一小段人話說明這次商品篩選的判斷順序。"""
+    """用個人資料說明「為何這次要這樣篩」，而不是重述查詢條件。"""
     def join_zh(values: list[str]) -> str:
         if len(values) < 2:
             return "".join(values)
@@ -401,25 +401,48 @@ def _build_product_decision_summary(
         value for value in recent_concerns if value not in explicit_concerns
     ]
 
-    usage = "白天用的" if any(token in raw_query for token in ("白天", "日間")) else ""
-    concern_text = "、".join(explicit_concerns[:2])
-    target = f"{usage}{concern_text}{requested_category}".strip()
-    if not target:
-        target = requested_category or "合適的商品"
-
-    first_sentence = f"你要找的是{target}"
-    if secondary_concerns:
-        first_sentence += f"，同時要兼顧{join_zh(secondary_concerns[:2])}"
-    first_sentence += "。"
-
-    priorities: list[str] = []
     avoid = context.get("避開", "")
-    if avoid:
-        priorities.append(f"先排除{avoid}")
-
     texture = context.get("質地偏好", "")
-    if texture:
-        priorities.append(f"優先保留{texture}的質地")
+    skin_type = context.get("膚質", "")
+    all_concerns = list(dict.fromkeys(explicit_concerns + secondary_concerns))
+    daytime = any(token in raw_query for token in ("白天", "日間"))
+
+    # 第一句只講個人資料帶來的取捨，避免把使用者剛說的話換句話說。
+    if "保濕" in all_concerns and any(
+        value in all_concerns for value in ("抗痘", "控油", "毛孔")
+    ):
+        balancing = [
+            value for value in ("抗痘", "控油", "毛孔")
+            if value in all_concerns
+        ]
+        first_sentence = (
+            f"你近期一邊需要補水，一邊也在處理{join_zh(balancing[:2])}；"
+            + (
+                "白天若選得太厚重，可能增加悶黏感。"
+                if daytime
+                else "若只追求滋潤度，可能不符合你想要的清爽使用感。"
+            )
+        )
+    elif any(value in all_concerns for value in ("舒緩", "舒敏")):
+        first_sentence = (
+            "你近期更在意肌膚舒適度，因此這次不能只看熱門度或單一功效，"
+            "配方耐受性也會影響排序。"
+        )
+    elif "保濕" in all_concerns and any(value in skin_type for value in ("乾", "敏感")):
+        first_sentence = (
+            f"你的{skin_type or '近期膚況'}需要補水，但日常使用還要兼顧舒適度；"
+            "因此不會只用滋潤度判斷。"
+        )
+    elif all_concerns:
+        first_sentence = (
+            f"你近期最需要處理的是{join_zh(all_concerns[:2])}，"
+            "所以這次排序會看商品能否同時回應這些需求，而不是只看單一成分。"
+        )
+    else:
+        first_sentence = (
+            "這次會把你的日常使用情境放在熱門度之前，"
+            "避免選到看似符合品類、實際使用感卻不合適的商品。"
+        )
 
     benefit_map = {
         "保濕": "補水",
@@ -435,17 +458,25 @@ def _build_product_decision_summary(
         "緊緻": "彈力照護",
     }
     benefits: list[str] = []
-    for concern in explicit_concerns + secondary_concerns:
+    for concern in all_concerns:
         benefit = benefit_map.get(concern)
         if benefit and benefit not in benefits:
             benefits.append(benefit)
+
+    decision_parts: list[str] = []
+    if texture:
+        decision_parts.append(f"保留{texture}的使用感")
     if benefits:
-        priorities.append(f"兼顧{join_zh(benefits[:3])}")
+        decision_parts.append(f"兼顧{join_zh(benefits[:3])}")
+    if not decision_parts:
+        decision_parts.append("依需求吻合度與可核對的商品資料排序")
 
-    if not priorities:
-        priorities.append("依需求吻合度與商品資料排序")
+    second_sentence = "因此我會優先" + "、".join(decision_parts)
+    if avoid:
+        second_sentence += f"，並先排除{avoid}，避免和你的耐受條件衝突"
+    second_sentence += "。"
 
-    return first_sentence + "我會" + "，再".join(priorities) + "。"
+    return first_sentence + second_sentence
 
 
 
@@ -524,7 +555,7 @@ def _format_ranked_products(
 
     decision_summary = _build_product_decision_summary(intent, applied_context)
     if decision_summary:
-        reply += "\n**這次怎麼挑**\n"
+        reply += "\n**適合你的原因**\n"
         reply += decision_summary + "\n"
 
     # =====================================================
@@ -539,12 +570,6 @@ def _format_ranked_products(
             f"{index + 1}."
         )
 
-        partner_tag = (
-            " 三友獨家"
-            if product.get("is_partner")
-            else ""
-        )
-
         name = str(
             product.get("name")
             or "未提供商品名稱"
@@ -554,11 +579,9 @@ def _format_ranked_products(
             product.get("brand")
             or ""
         ).strip()
-        title = (
-            f"{brand}｜{name}"
-            if brand and brand.casefold() not in name.casefold()
-            else name
-        )
+        title = name
+        if brand and name.casefold().startswith(brand.casefold()):
+            title = name[len(brand):].lstrip(" ｜|—-・") or name
 
         category = str(
             product.get("category")
@@ -593,10 +616,13 @@ def _format_ranked_products(
             else ""
         )
 
-        price_text = ""
-        if price not in {None, ""}:
-            price_text = f" — NT${price}{budget_tag}"
-        reply += f"\n### {label} {title}{partner_tag}{price_text}\n"
+        reply += f"\n### {label} {title}\n"
+        if product.get("is_partner"):
+            reply += "- **通路：** 三友藥妝商品\n"
+        if brand:
+            reply += f"- **品牌：** {brand}\n"
+        if category:
+            reply += f"- **類型：** {category}\n"
 
         # 推薦原因
         if rank_reason:
@@ -612,7 +638,7 @@ def _format_ranked_products(
                 )
             )
 
-            reply += f"- **為什麼適合：** {_trim_to_sentence(natural_reason, 92)}\n"
+            reply += f"- **適合你的原因：** {_trim_to_sentence(natural_reason, 92)}\n"
 
         ingredients = (
             product.get("key_ingredients")
@@ -631,6 +657,9 @@ def _format_ranked_products(
         )
         if ingredient_text:
             reply += f"- **重點成分：** {_trim_to_sentence(ingredient_text, 72)}\n"
+
+        if price not in {None, ""}:
+            reply += f"- **價格：** NT${price}{budget_tag}\n"
 
         sources = product.get("sources") or []
         for source in sources[:1]:

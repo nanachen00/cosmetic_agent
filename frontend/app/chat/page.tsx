@@ -697,6 +697,7 @@ interface ParsedProductRecommendations {
 
 
 const PRODUCT_RECOMMENDATION_FIELD_LABELS = new Set([
+  "通路",
   "品牌",
   "類型",
   "價格",
@@ -879,19 +880,43 @@ function ProductRecommendationCard({
       } => field !== null,
     );
   const brandField = fields.find((field) => field.label === "品牌");
+  const channelField = fields.find((field) => field.label === "通路");
+  const categoryField = fields.find((field) => field.label === "類型");
+  const explicitPriceField = fields.find((field) =>
+    field.label === "價格" || field.label === "售價"
+  );
   const metadata = brandField?.value
     .split(/[，,|｜]/)
     .map((item) => item.trim())
     .filter(Boolean) ?? [];
-  const priceIndex = metadata.findIndex((item) =>
+  const legacyPriceIndex = metadata.findIndex((item) =>
     /NT\$|NTD|售價|價格/.test(item),
   );
-  const price = priceIndex >= 0 ? metadata[priceIndex] : "";
-  const tags = metadata.filter((_, index) => index !== priceIndex);
+  const titlePriceMatch = product.title.match(
+    /\s+[—-]\s*((?:NT\$|NTD)\s*[\d,.]+(?:（[^）]+）)?)\s*$/,
+  );
+  const price = explicitPriceField?.value
+    || (legacyPriceIndex >= 0 ? metadata[legacyPriceIndex] : "")
+    || titlePriceMatch?.[1]
+    || "";
+  const displayTitle = titlePriceMatch
+    ? product.title.slice(0, titlePriceMatch.index).trim()
+    : product.title;
+  const legacyBrand = metadata.filter((_, index) => index !== legacyPriceIndex)[0] ?? "";
+  const brand = brandField?.value && legacyPriceIndex < 0
+    ? brandField.value
+    : legacyBrand;
+  const productType = categoryField?.value ?? "";
   const detailLines = product.lines.filter((line) => {
     const field = splitRecommendationField(line);
 
-    if (field?.label === "品牌") {
+    if (
+      field &&
+      (
+        ["通路", "品牌", "類型", "價格", "售價", "重點成分"].includes(field.label)
+        || PRODUCT_RECOMMENDATION_SOURCE_LABELS.has(field.label)
+      )
+    ) {
       return false;
     }
 
@@ -900,35 +925,21 @@ function ProductRecommendationCard({
 
   return (
     <article className="product-recommendation-card">
+      <div className="product-recommendation-card__eyebrow">
+        {channelField?.value ? <span>{channelField.value}</span> : null}
+        <small>推薦 {product.number}</small>
+      </div>
+
       <header className="product-recommendation-card__header">
-        <span
-          className="product-recommendation-card__number"
-          aria-label={`推薦商品 ${product.number}`}
-        >
-          {product.number}
-        </span>
-
-        <div className="product-recommendation-card__heading">
-          <h3>{renderMessageContent(product.title)}</h3>
-
-          {tags.length > 0 && (
-            <div className="product-recommendation-card__tags">
-              {tags.map((tag, index) => (
-                <span key={`${tag}-${index}`}>
-                  {index === 0 && brandField
-                    ? `${brandField.label}：${tag}`
-                    : tag}
-                </span>
-              ))}
-            </div>
-          )}
-        </div>
-
-        {price && (
-          <strong className="product-recommendation-card__price">
-            {price}
-          </strong>
-        )}
+        {brand ? (
+          <p className="product-recommendation-card__brand">{brand}</p>
+        ) : null}
+        <h3>{renderMessageContent(displayTitle)}</h3>
+        {productType ? (
+          <div className="product-recommendation-card__tags">
+            <span>{productType}</span>
+          </div>
+        ) : null}
       </header>
 
       {detailLines.map((line, index) => {
@@ -979,7 +990,93 @@ function ProductRecommendationCard({
           </section>
         );
       })}
+
+      {fields.find((field) => field.label === "重點成分")?.value ? (
+        <section className="product-recommendation-card__ingredients">
+          <span>重點成分</span>
+          <div>
+            {fields
+              .find((field) => field.label === "重點成分")!
+              .value
+              .split(/[、,，]/)
+              .map((ingredient) => ingredient.trim())
+              .filter(Boolean)
+              .map((ingredient) => (
+                <small key={ingredient}>{ingredient}</small>
+              ))}
+          </div>
+        </section>
+      ) : null}
+
+      <footer className="product-recommendation-card__footer">
+        {price ? (
+          <strong className="product-recommendation-card__price">{price}</strong>
+        ) : <span />}
+        {fields
+          .filter((field) => PRODUCT_RECOMMENDATION_SOURCE_LABELS.has(field.label))
+          .slice(0, 1)
+          .map((field) => (
+            <a
+              className="chat-message-link"
+              href={field.value}
+              key={field.value}
+              rel="noopener noreferrer"
+              target="_blank"
+            >
+              查看商品資料 ↗
+            </a>
+          ))}
+      </footer>
     </article>
+  );
+}
+
+
+function ProductRecommendationIntroduction({
+  lines,
+}: {
+  lines: string[];
+}) {
+  const normalized = lines.map((line) => normalizeRecommendationStructure(line));
+  const profileHeadingIndex = normalized.indexOf("已自動套用你的資料");
+  const reasonHeadingIndex = normalized.indexOf("適合你的原因");
+
+  if (profileHeadingIndex < 0 || reasonHeadingIndex < 0) {
+    return (
+      <p className="product-recommendation-response__intro">
+        {renderMessageContent(lines.join("\n"))}
+      </p>
+    );
+  }
+
+  const lead = lines.slice(0, profileHeadingIndex).filter(Boolean);
+  const profileText = normalized
+    .slice(profileHeadingIndex + 1, reasonHeadingIndex)
+    .filter(Boolean)
+    .join("｜")
+    .replace(/^[-*]\s*/, "");
+  const profileItems = profileText
+    .split("｜")
+    .map((item) => item.trim())
+    .filter(Boolean);
+  const reason = lines.slice(reasonHeadingIndex + 1).filter(Boolean).join(" ");
+
+  return (
+    <div className="product-recommendation-response__intro">
+      {lead.length > 0 ? <p>{renderMessageContent(lead.join("\n"))}</p> : null}
+
+      <section className="product-recommendation-response__profile">
+        <span>已自動套用你的資料</span>
+        <div>
+          {profileItems.map((item) => <small key={item}>{item}</small>)}
+        </div>
+      </section>
+
+      <section className="product-recommendation-response__reason">
+        <span>適合你的原因</span>
+        <p>{renderMessageContent(reason)}</p>
+      </section>
+    </div>
   );
 }
 
@@ -998,9 +1095,7 @@ function ReadableAssistantMessage({
   return (
     <div className="product-recommendation-response">
       {recommendations.introduction.length > 0 && (
-        <p className="product-recommendation-response__intro">
-          {renderMessageContent(recommendations.introduction.join("\n"))}
-        </p>
+        <ProductRecommendationIntroduction lines={recommendations.introduction} />
       )}
 
       <div className="product-recommendation-list">

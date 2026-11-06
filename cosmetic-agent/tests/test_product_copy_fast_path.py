@@ -202,12 +202,17 @@ def test_mobile_product_reply_uses_profile_history_and_only_three_items():
 
     assert "已自動套用你的資料" in reply
     assert "近期膚況：抗痘、保濕、控油" in reply
-    assert "**這次怎麼挑**" in reply
+    assert "**適合你的原因**" in reply
     assert (
-        "你要找的是白天用的保濕乳液，同時要兼顧抗痘與控油。"
-        "我會先排除香料、酒精，再優先保留清爽、不黏的質地，"
-        "再兼顧補水、痘痘照護與油脂調理。"
+        "你近期一邊需要補水，一邊也在處理抗痘與控油；"
+        "白天若選得太厚重，可能增加悶黏感。"
+        "因此我會優先保留清爽、不黏的使用感、兼顧補水、痘痘照護與油脂調理，"
+        "並先排除香料、酒精，避免和你的耐受條件衝突。"
     ) in reply
+    assert "你要找的是" not in reply
+    assert "**品牌：** Demo" in reply
+    assert "**類型：** 乳液" in reply
+    assert "**價格：** NT$301" in reply
     assert "### 3." in reply
     assert "保濕乳液 4" not in reply
     assert "商品特色" not in reply
