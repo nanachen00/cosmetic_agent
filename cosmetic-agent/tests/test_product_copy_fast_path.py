@@ -186,8 +186,8 @@ def test_mobile_product_reply_uses_profile_history_and_only_three_items():
                 "applied": [
                     "膚質：混合肌",
                     "避開：香料、酒精",
-                    "近期膚況：保濕、抗痘",
-                    "質地偏好：清爽",
+                    "近期膚況：抗痘、保濕、控油",
+                    "質地偏好：清爽、不黏",
                     "預算：1000元以內",
                 ]
             },
@@ -201,7 +201,13 @@ def test_mobile_product_reply_uses_profile_history_and_only_three_items():
     )
 
     assert "已自動套用你的資料" in reply
-    assert "近期膚況：保濕、抗痘" in reply
+    assert "近期膚況：抗痘、保濕、控油" in reply
+    assert "**這次怎麼挑**" in reply
+    assert (
+        "你要找的是白天用的保濕乳液，同時要兼顧抗痘與控油。"
+        "我會先排除香料、酒精，再優先保留清爽、不黏的質地，"
+        "再兼顧補水、痘痘照護與油脂調理。"
+    ) in reply
     assert "### 3." in reply
     assert "保濕乳液 4" not in reply
     assert "商品特色" not in reply

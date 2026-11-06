@@ -362,6 +362,92 @@ def _is_bare_rejection(reply: str) -> bool:
     return text == "confirmno" or _consists_of(text, _CONFIRM_REJECT_TOKENS)
 
 
+def _build_product_decision_summary(
+    intent: IntentParseResult,
+    applied_context: list[str],
+) -> str:
+    """用一小段人話說明這次商品篩選的判斷順序。"""
+    def join_zh(values: list[str]) -> str:
+        if len(values) < 2:
+            return "".join(values)
+        return "、".join(values[:-1]) + "與" + values[-1]
+
+    context: dict[str, str] = {}
+    for item in applied_context:
+        label, separator, value = item.partition("：")
+        if not separator:
+            label, separator, value = item.partition(":")
+        if separator and label.strip() and value.strip():
+            context[label.strip()] = value.strip()
+
+    raw_query = str(getattr(intent, "raw_query", "") or "")
+    requested_category = str(
+        getattr(getattr(intent, "product_category", None), "value", "") or ""
+    ).strip()
+    if requested_category == "不明":
+        requested_category = ""
+
+    concern_order = (
+        "保濕", "抗痘", "控油", "舒緩", "舒敏", "毛孔",
+        "亮白", "美白", "淡斑", "抗皺", "緊緻",
+    )
+    explicit_concerns = [value for value in concern_order if value in raw_query]
+    recent_concerns = [
+        value.strip()
+        for value in re.split(r"[、,，/／]", context.get("近期膚況", ""))
+        if value.strip()
+    ]
+    secondary_concerns = [
+        value for value in recent_concerns if value not in explicit_concerns
+    ]
+
+    usage = "白天用的" if any(token in raw_query for token in ("白天", "日間")) else ""
+    concern_text = "、".join(explicit_concerns[:2])
+    target = f"{usage}{concern_text}{requested_category}".strip()
+    if not target:
+        target = requested_category or "合適的商品"
+
+    first_sentence = f"你要找的是{target}"
+    if secondary_concerns:
+        first_sentence += f"，同時要兼顧{join_zh(secondary_concerns[:2])}"
+    first_sentence += "。"
+
+    priorities: list[str] = []
+    avoid = context.get("避開", "")
+    if avoid:
+        priorities.append(f"先排除{avoid}")
+
+    texture = context.get("質地偏好", "")
+    if texture:
+        priorities.append(f"優先保留{texture}的質地")
+
+    benefit_map = {
+        "保濕": "補水",
+        "抗痘": "痘痘照護",
+        "控油": "油脂調理",
+        "舒緩": "穩定膚況",
+        "舒敏": "溫和照護",
+        "毛孔": "毛孔調理",
+        "亮白": "提亮膚色",
+        "美白": "提亮膚色",
+        "淡斑": "改善暗沉斑點",
+        "抗皺": "細紋照護",
+        "緊緻": "彈力照護",
+    }
+    benefits: list[str] = []
+    for concern in explicit_concerns + secondary_concerns:
+        benefit = benefit_map.get(concern)
+        if benefit and benefit not in benefits:
+            benefits.append(benefit)
+    if benefits:
+        priorities.append(f"兼顧{join_zh(benefits[:3])}")
+
+    if not priorities:
+        priorities.append("依需求吻合度與商品資料排序")
+
+    return first_sentence + "我會" + "，再".join(priorities) + "。"
+
+
 
 
 # ──────────────────────────────────────────
@@ -435,6 +521,11 @@ def _format_ranked_products(
     if applied_context:
         reply += "\n**已自動套用你的資料**\n"
         reply += "- " + "｜".join(applied_context[:5]) + "\n"
+
+    decision_summary = _build_product_decision_summary(intent, applied_context)
+    if decision_summary:
+        reply += "\n**這次怎麼挑**\n"
+        reply += decision_summary + "\n"
 
     # =====================================================
     # 商品內容
