@@ -550,7 +550,7 @@ def _format_ranked_products(
         if str(item).strip()
     ]
     if applied_context:
-        reply += "\n**已自動套用你的資料**\n"
+        reply += "\n**✔️以自動套用你的偏好**\n"
         reply += "- " + "｜".join(applied_context[:5]) + "\n"
 
     decision_summary = _build_product_decision_summary(intent, applied_context)

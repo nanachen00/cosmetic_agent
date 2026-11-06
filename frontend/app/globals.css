@@ -4602,13 +4602,16 @@ body::after {
   gap: 8px;
 }
 
-.product-recommendation-response__profile > span,
+.product-recommendation-response__profile > span {
+  color: var(--coffee-800);
+  font-size: 14px;
+  font-weight: 750;
+  line-height: 1.45;
+}
+
 .product-recommendation-response__reason > span {
   width: fit-content;
-  padding: 5px 10px;
-  border-radius: 999px;
-  background: rgba(237, 226, 242, .92);
-  color: #80648f;
+  color: #5f8377;
   font-size: 13px;
   font-weight: 900;
   line-height: 1.35;
@@ -4622,9 +4625,11 @@ body::after {
 
 .product-recommendation-response__profile small {
   padding: 6px 10px;
+  border: .6px solid rgba(94, 151, 134, .42);
   border-radius: 999px;
-  background: rgba(224, 241, 236, .96);
-  color: #5f746c;
+  background: rgba(225, 243, 237, .97);
+  box-shadow: 0 1px 6px rgba(94, 151, 134, .09);
+  color: #58766b;
   font-size: 13px;
   font-weight: 800;
   line-height: 1.35;
@@ -4641,7 +4646,7 @@ body::after {
   padding: 0;
   border-radius: 0;
   background: transparent;
-  color: #80648f;
+  color: #5f8377;
 }
 
 .product-recommendation-response__reason p {
@@ -4657,16 +4662,26 @@ body::after {
 
 .product-recommendation-card {
   padding: 20px 20px 17px;
-  border: 1px solid rgba(137, 111, 151, .18);
+  border: .75px solid rgba(91, 160, 140, .52);
   border-radius: 19px;
-  background: rgba(255, 255, 253, .94);
-  box-shadow: 0 6px 18px rgba(103, 79, 114, .07);
+  background:
+    radial-gradient(
+      circle,
+      rgba(109, 166, 150, .13) 0 1px,
+      transparent 1.35px
+    ) 0 0 / 18px 18px,
+    linear-gradient(
+      145deg,
+      rgba(255, 254, 249, .98),
+      rgba(251, 250, 246, .97)
+    );
+  box-shadow: 0 1px 10px rgba(91, 160, 140, .11);
 }
 
 .product-recommendation-card__eyebrow {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-start;
   gap: 8px;
   margin-bottom: 12px;
 }
@@ -4674,21 +4689,23 @@ body::after {
 .product-recommendation-card__eyebrow > span,
 .product-recommendation-card__eyebrow > small {
   padding: 5px 10px;
+  border: .6px solid rgba(94, 151, 134, .42);
   border-radius: 999px;
+  background: rgba(225, 243, 237, .97);
+  box-shadow: 0 1px 6px rgba(94, 151, 134, .09);
+  color: #58766b;
   font-size: 12px;
   font-weight: 900;
   line-height: 1.3;
 }
 
 .product-recommendation-card__eyebrow > span {
-  background: rgba(237, 226, 242, .92);
-  color: #80648f;
+  background: rgba(225, 243, 237, .97);
+  color: #58766b;
 }
 
 .product-recommendation-card__eyebrow > small {
-  margin-left: auto;
-  background: rgba(244, 240, 236, .95);
-  color: #8c7b70;
+  margin-left: 0;
 }
 
 .product-recommendation-card__header {
@@ -4728,9 +4745,11 @@ body::after {
 
 .product-recommendation-card__tags span {
   padding: 5px 10px;
+  border: .6px solid rgba(94, 151, 134, .42);
   border-radius: 999px;
-  background: rgba(218, 239, 232, .96);
-  color: #627a70;
+  background: rgba(225, 243, 237, .97);
+  box-shadow: 0 1px 6px rgba(94, 151, 134, .09);
+  color: #58766b;
   font-size: 13px;
   font-weight: 900;
   line-height: 1.35;
@@ -4760,7 +4779,7 @@ body::after {
 .product-recommendation-card__source-row > span {
   display: block;
   margin-bottom: 5px;
-  color: #80648f;
+  color: #5f8377;
   font-size: 13px;
   font-weight: 900;
   letter-spacing: .02em;
@@ -4821,7 +4840,7 @@ body::after {
 }
 
 .product-recommendation-card__ingredients > span {
-  color: #80648f;
+  color: #5f8377;
   font-size: 13px;
   font-weight: 900;
 }
@@ -4834,9 +4853,11 @@ body::after {
 
 .product-recommendation-card__ingredients small {
   padding: 5px 9px;
+  border: .6px solid rgba(94, 151, 134, .42);
   border-radius: 999px;
-  background: rgba(244, 237, 247, .94);
-  color: #80648f;
+  background: rgba(225, 243, 237, .97);
+  box-shadow: 0 1px 6px rgba(94, 151, 134, .09);
+  color: #58766b;
   font-size: 12px;
   font-weight: 800;
 }

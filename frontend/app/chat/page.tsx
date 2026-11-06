@@ -935,8 +935,8 @@ function ProductRecommendationCard({
   return (
     <article className="product-recommendation-card">
       <div className="product-recommendation-card__eyebrow">
-        {channelField?.value ? <span>{channelField.value}</span> : null}
         <small>推薦 {product.number}</small>
+        {channelField?.value ? <span>{channelField.value}</span> : null}
       </div>
 
       <header className="product-recommendation-card__header">
@@ -1047,7 +1047,10 @@ function ProductRecommendationIntroduction({
   lines: string[];
 }) {
   const normalized = lines.map((line) => normalizeRecommendationStructure(line));
-  const profileHeadingIndex = normalized.indexOf("已自動套用你的資料");
+  const profileHeadingIndex = normalized.findIndex((line) =>
+    line === "已自動套用你的資料" ||
+    line === "✔️以自動套用你的偏好"
+  );
   const reasonHeadingIndex = normalized.indexOf("適合你的原因");
 
   if (profileHeadingIndex < 0 || reasonHeadingIndex < 0) {
@@ -1075,7 +1078,7 @@ function ProductRecommendationIntroduction({
       {lead.length > 0 ? <p>{renderMessageContent(lead.join("\n"))}</p> : null}
 
       <section className="product-recommendation-response__profile">
-        <span>已自動套用你的資料</span>
+        <span>✔️以自動套用你的偏好</span>
         <div>
           {profileItems.map((item) => <small key={item}>{item}</small>)}
         </div>

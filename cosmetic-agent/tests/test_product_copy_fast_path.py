@@ -200,7 +200,7 @@ def test_mobile_product_reply_uses_profile_history_and_only_three_items():
         ),
     )
 
-    assert "已自動套用你的資料" in reply
+    assert "✔️以自動套用你的偏好" in reply
     assert "近期膚況：抗痘、保濕、控油" in reply
     assert "**適合你的原因**" in reply
     assert (
