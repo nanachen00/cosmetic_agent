@@ -92,6 +92,8 @@ class KnowledgeResponseClient:
         }
         if on_delta is None:
             response = self.sdk_client.responses.create(**response_kwargs)
+            if getattr(response, "status", None) in {"incomplete", "failed", "cancelled"}:
+                raise RuntimeError("Terra response did not complete")
             return (response.output_text or "").strip()
 
         chunks = []
@@ -99,14 +101,36 @@ class KnowledgeResponseClient:
             **response_kwargs,
             stream=True,
         )
-        for event in stream:
-            if getattr(event, "type", "") != "response.output_text.delta":
-                continue
-            delta = getattr(event, "delta", "") or ""
-            if not delta:
-                continue
-            chunks.append(delta)
-            on_delta(delta)
+        completed = False
+        try:
+            for event in stream:
+                event_type = getattr(event, "type", "")
+                if event_type in {"response.incomplete", "response.failed", "response.cancelled",
+                                  "response.error", "error"}:
+                    raise RuntimeError("Terra response did not complete")
+                if event_type == "response.completed":
+                    if getattr(getattr(event, "response", None), "status", None) in {
+                        "incomplete", "failed", "cancelled"
+                    }:
+                        raise RuntimeError("Terra response did not complete")
+                    completed = True
+                if event_type != "response.output_text.delta":
+                    continue
+                delta = getattr(event, "delta", "") or ""
+                if not delta:
+                    continue
+                chunks.append(delta)
+                on_delta(delta)
+            if not completed:
+                raise RuntimeError("Terra stream ended without completion")
+        finally:
+            close = getattr(stream, "close", None)
+            if callable(close):
+                try:
+                    close()
+                except Exception:
+                    # Cleanup cannot replace a generation/callback exception.
+                    pass
         return "".join(chunks).strip()
 
     def _generate_chat(

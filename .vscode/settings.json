@@ -1,0 +1,20 @@
+{
+  "files.watcherExclude": {
+    "**/.runtime/**": true,
+    "**/.next*/**": true,
+    "**/node_modules/**": true,
+    "**/.venv/**": true,
+    "**/__pycache__/**": true,
+    "**/.pytest_cache/**": true,
+    "**/.ruff_cache/**": true
+  },
+  "search.exclude": {
+    "**/.runtime/**": true,
+    "**/.next*/**": true,
+    "**/node_modules/**": true,
+    "**/.venv/**": true,
+    "**/__pycache__/**": true,
+    "**/.pytest_cache/**": true,
+    "**/.ruff_cache/**": true
+  }
+}

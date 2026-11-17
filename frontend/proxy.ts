@@ -3,18 +3,27 @@ import {
   NextResponse,
 } from "next/server";
 
-function buildContentSecurityPolicy(nonce: string): string {
+function buildContentSecurityPolicy(nonce: string, pathname: string): string {
   const isDevelopment = process.env.NODE_ENV === "development";
+  const isFaceWorker = pathname === "/face-capture-v1/face-landmarker-worker.js";
+  const allowPhotoWasm = pathname === "/skin-photo" || isFaceWorker;
+  // The same-origin classic worker uses importScripts. Its own response policy
+  // allows only local scripts/WASM; document pages retain nonce/strict-dynamic.
+  const scriptPolicy = isFaceWorker
+    ? "script-src 'self' 'wasm-unsafe-eval'"
+    : `script-src 'self' 'nonce-${nonce}' 'strict-dynamic'${
+      allowPhotoWasm ? " 'wasm-unsafe-eval'" : ""
+    }${isDevelopment ? " 'unsafe-eval'" : ""}`;
   return [
     "default-src 'self'",
-    `script-src 'self' 'nonce-${nonce}' 'strict-dynamic'${
-      isDevelopment ? " 'unsafe-eval'" : ""
-    }`,
+    scriptPolicy,
     "style-src 'self' 'unsafe-inline'",
     "img-src 'self' blob: data: https:",
     "media-src 'self' blob:",
     "font-src 'self' data:",
-    "connect-src 'self' https://api.blinkai.tw https://api.bigdatacloud.net https://*.sentry.io",
+    isFaceWorker
+      ? "connect-src 'self'"
+      : "connect-src 'self' https://api.blinkai.tw https://api.bigdatacloud.net https://*.sentry.io",
     "frame-src 'self' https://accounts.google.com https://access.line.me",
     "worker-src 'self' blob:",
     "object-src 'none'",
@@ -52,7 +61,7 @@ function applySecurityHeaders(
 
 export function proxy(request: NextRequest) {
   const nonce = btoa(crypto.randomUUID());
-  const contentSecurityPolicy = buildContentSecurityPolicy(nonce);
+  const contentSecurityPolicy = buildContentSecurityPolicy(nonce, request.nextUrl.pathname);
   const requestHeaders = new Headers(request.headers);
   requestHeaders.set("x-nonce", nonce);
   requestHeaders.set("Content-Security-Policy", contentSecurityPolicy);

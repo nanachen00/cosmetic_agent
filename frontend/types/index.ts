@@ -56,10 +56,38 @@ export interface ConversationLimitStatus {
   message: string;
 }
 
+export interface RecommendationProductEvidence {
+  id?: string;
+  name: string;
+  brand?: string;
+  price?: number;
+  currency?: string;
+  product_version?: string;
+  capacity?: string;
+  personalization_policy_version?: string;
+  personalization_reasons?: string[];
+  personalization_missing?: string[];
+  recommendation_limitations?: string;
+  inci_status?: string;
+  ingredient_evidence_level?: string;
+  formula_market?: string;
+  inci_source_url?: string;
+  texture?: string;
+  texture_source_url?: string;
+  texture_verification_status?: string;
+  price_observed_at?: string;
+  price_source_url?: string;
+  source_title?: string;
+  source_url?: string;
+  evidence_status?: string;
+  evidence_updated_at?: string;
+}
+
 export interface RootAgentResponse {
   route: RootRoute;
   reply: string;
   sessionId: string;
+  products?: RecommendationProductEvidence[];
   quick_replies?: QuickReply[];
   cards?: ChatCard[];
   conversation_limit?: ConversationLimitStatus;

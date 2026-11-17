@@ -8,18 +8,21 @@ set -Eeuo pipefail
 source "$(dirname "$0")/../runtime.conf"
 
 PY="$VLLM_ENV/bin/python"
-SRC="${VLLM_SOURCE_DIR:-$("$PY" -c 'import vllm,pathlib;print(pathlib.Path(vllm.__file__).resolve().parents[1])')}"
-BINDINGS="$SRC/csrc/torch_bindings.cpp"
-[[ -f "$BINDINGS" ]] || die "找不到 $BINDINGS（可設定 VLLM_SOURCE_DIR）"
-
 if "$PY" -c "import vllm._C" 2>/dev/null; then
   echo "[OK] vllm._C 已可正常載入，不需修補"; exit 0
 fi
 
+SRC="${VLLM_SOURCE_DIR:-$("$PY" -c 'import vllm,pathlib;print(pathlib.Path(vllm.__file__).resolve().parents[1])')}"
+BINDINGS="$SRC/csrc/torch_bindings.cpp"
+[[ -f "$BINDINGS" ]] || die "找不到 $BINDINGS（可設定 VLLM_SOURCE_DIR）"
+
 log "38. 修補 $BINDINGS"
-"$PY" - "$BINDINGS" <<'PY'
+BACKUP_DIR="$OUTPUT_DIR/build-backups/vllm"
+mkdir -p "$BACKUP_DIR"
+"$PY" - "$BINDINGS" "$BACKUP_DIR" <<'PY'
 import re, sys, pathlib
 path = pathlib.Path(sys.argv[1])
+backup_dir = pathlib.Path(sys.argv[2])
 text = path.read_text()
 if "BLINK_ROCM_MLA_GUARD" in text:
     print("already patched"); sys.exit(0)
@@ -30,9 +33,10 @@ pattern = re.compile(
 new, count = pattern.subn(r"#ifndef USE_ROCM  // BLINK_ROCM_MLA_GUARD\n\1#endif\n", text)
 if count != 1:
     sys.exit("cutlass_mla_decode registration block not found; patch manually")
-path.with_suffix(".cpp.orig").write_text(text)
+backup = backup_dir / "torch_bindings.cpp.before-rocm-mla-guard"
+backup.write_text(text)
 path.write_text(new)
-print("patched (backup: torch_bindings.cpp.orig)")
+print(f"patched (backup: {backup})")
 PY
 
 log "增量重新編譯 vLLM 擴充模組（只重編 torch_bindings 與連結，通常數分鐘）"

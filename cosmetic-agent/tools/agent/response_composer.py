@@ -108,9 +108,7 @@ class ResponseComposer:
             if skip_intents is None
             else frozenset(str(value).strip().lower() for value in skip_intents if str(value).strip())
         )
-        self.model = model or os.getenv(
-            "RESPONSE_COMPOSER_MODEL", os.getenv("TERRA_MODEL", "gpt-5.6-terra")
-        )
+        self.model = model or os.getenv("TERRA_MODEL", "gpt-5.6-terra").strip() or "gpt-5.6-terra"
 
     def _get_client(self) -> Any:
         if self._client is None:
@@ -187,6 +185,8 @@ class ResponseComposer:
                 model=self.model,
                 instructions=INSTRUCTIONS,
                 input=json.dumps(payload, ensure_ascii=False),
+                reasoning={"effort": "none"},
+                max_output_tokens=600,
                 store=False,
             )
             text = getattr(response, "output_text", "") or ""

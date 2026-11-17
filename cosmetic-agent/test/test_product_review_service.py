@@ -37,6 +37,7 @@ def _seed(tmp_path):
     brand_registry = tmp_path / "brand_market_registry.json"
     name_registry = tmp_path / "product_name_registry.json"
     decisions = tmp_path / "decisions.json"
+    verified_enrichments = tmp_path / "product_verified_enrichments.json"
     first.write_text(json.dumps(seed), encoding="utf-8")
     second.write_text(json.dumps({"products": []}), encoding="utf-8")
     manifest.write_text(json.dumps({"sources": []}), encoding="utf-8")
@@ -74,12 +75,14 @@ def _seed(tmp_path):
         ),
         encoding="utf-8",
     )
+    verified_enrichments.write_text(json.dumps({"products": {}}), encoding="utf-8")
     service._DATA_DIR = tmp_path
     service._SEED_FILES = (first, second)
     service._SOURCE_MANIFEST = manifest
     service._BRAND_MARKET_REGISTRY = brand_registry
     service._PRODUCT_NAME_REGISTRY = name_registry
     service._DECISIONS_FILE = decisions
+    service._VERIFIED_ENRICHMENTS_FILE = verified_enrichments
     return decisions
 
 
@@ -97,6 +100,119 @@ def test_groups_and_filters_without_touching_neo4j(tmp_path):
     assert named["ingredients_inci"][:2] == ["Aqua", "Glycerin"]
     assert named["inci_status"] == "full"
     assert named["quality_blockers"] == []
+
+
+def test_loads_only_sourced_reviewed_texture_and_skin_types(tmp_path):
+    _seed(tmp_path)
+    service._VERIFIED_ENRICHMENTS_FILE.write_text(
+        json.dumps(
+            {
+                "products": {
+                    "one": {
+                        "texture": "水感輕盈質地",
+                        "texture_source_url": "https://brand.example.tw/products/one",
+                        "texture_verification_status": "official_product_page",
+                        "skin_types": ["乾性肌膚", "sensitive", "未定義膚質"],
+                        "skin_types_source_url": "https://brand.example.tw/products/one",
+                        "skin_types_verification_status": "verified",
+                    },
+                    "two": {
+                        "texture": "清爽",
+                        "texture_source_url": "https://user:secret@shop.example/product/two",
+                        "texture_verification_status": "verified",
+                        "skin_types": ["油性"],
+                        "skin_types_source_url": "https://shop.example/product/two",
+                        "skin_types_verification_status": "machine_inferred",
+                    },
+                }
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    products = {item["canonical_key"]: item for item in service._load_products()}
+    assert products["one"]["texture"] == "水感輕盈質地"
+    assert products["one"]["texture_source_url"] == "https://brand.example.tw/products/one"
+    assert products["one"]["skin_types"] == ["dry", "sensitive"]
+    assert products["two"]["texture"] == ""
+    assert products["two"]["skin_types"] == []
+
+
+def test_verified_attributes_change_catalog_sync_fingerprint():
+    base = {"taiwan_official_name": "測試精華"}
+    enriched = {
+        **base,
+        "texture": "清爽水感",
+        "texture_source_url": "https://brand.example.tw/product",
+        "texture_verification_status": "verified",
+    }
+    assert service._product_sync_fingerprint(base) != service._product_sync_fingerprint(enriched)
+
+
+def test_import_persists_verified_catalog_attributes(tmp_path, monkeypatch):
+    captured = {}
+
+    class FakeEmbeddingClient:
+        def embed_query(self, _text):
+            return [0.0, 0.0, 0.0]
+
+    class FakeResult:
+        def single(self):
+            return {"neo4j_element_id": "node-verified-evidence"}
+
+    class FakeSession:
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *_args):
+            return False
+
+        def run(self, _query, **parameters):
+            captured.update(parameters["properties"])
+            return FakeResult()
+
+    class FakeDriver:
+        def session(self):
+            return FakeSession()
+
+        def close(self):
+            pass
+
+    monkeypatch.setattr(service.EmbeddingClient, "from_env", lambda: FakeEmbeddingClient())
+    monkeypatch.setattr(service.GraphDatabase, "driver", lambda *_args, **_kwargs: FakeDriver())
+    monkeypatch.setenv("EMBEDDING_DIMENSION", "3")
+    monkeypatch.setenv("NEO4J_URI", "bolt://example.invalid:7687")
+    monkeypatch.setenv("NEO4J_USER", "test")
+    monkeypatch.setenv("NEO4J_PASSWORD", "test")
+    product = {
+        "canonical_key": "verified-evidence",
+        "canonical_brand": "Brand",
+        "brand_origin_confidence": "high",
+        "taiwan_official_name": "水感保濕精華",
+        "name_verification_status": "verified",
+        "ingredients_inci": ["Water", "Glycerin", "Panthenol", "Squalane", "Allantoin"],
+        "ingredient_evidence_level": "full_inci",
+        "inci_status": "full",
+        "inci_source_url": "https://brand.example.tw/products/serum",
+        "formula_market": "tw",
+        "texture": "水感輕盈質地",
+        "texture_source_url": "https://brand.example.tw/products/serum",
+        "texture_verification_status": "official_product_page",
+        "skin_types": ["dry", "sensitive"],
+        "skin_types_source_url": "https://brand.example.tw/products/serum",
+        "skin_types_verification_status": "verified",
+    }
+
+    service._import_product_to_neo4j(
+        product,
+        reviewer_id_hash="reviewer",
+        imported_at="2026-11-17T00:00:00+00:00",
+    )
+
+    assert captured["texture"] == "水感輕盈質地"
+    assert captured["texture_source_url"] == "https://brand.example.tw/products/serum"
+    assert captured["skin_types"] == ["dry", "sensitive"]
+    assert captured["skin_types_source_url"] == "https://brand.example.tw/products/serum"
 
 
 def test_approval_imports_once_and_is_idempotent(tmp_path, monkeypatch):

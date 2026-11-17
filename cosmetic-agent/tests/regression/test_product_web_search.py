@@ -108,6 +108,7 @@ def test_external_search_returns_three_products_with_one_reference_each(monkeypa
 
     assert len(result["products"]) == 3
     assert result["products"][0]["price"] == 320
+    assert result["products"][0]["price_is_estimate"] is True
     assert all(product["currency"] == "TWD" for product in result["products"])
     assert all(len(product["sources"]) == 1 for product in result["products"])
     assert all("|" not in product["copy"] for product in result["products"])

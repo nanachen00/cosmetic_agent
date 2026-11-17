@@ -1,0 +1,13 @@
+{
+  "python": "3.10",
+  "platform": "linux-x86_64",
+  "gpu": "AMD Instinct MI300X",
+  "hip_major_minor": "6.4",
+  "packages": {
+    "pytorch-triton-rocm": "3.4.0",
+    "torch": "2.8.0+rocm6.4",
+    "torchvision": "0.23.0+rocm6.4"
+  },
+  "source": "Existing persistent ROCm environment; exact package versions required before installing the Python hash lock.",
+  "known_security_limit": "Torch 2.8.0, Pillow 12.3.0 and filelock 4.1.0 still have published advisories. This lock records a tested training stack, not a vulnerability-free serving approval."
+}

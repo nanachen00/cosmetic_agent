@@ -1,4 +1,7 @@
 import { withSentryConfig } from "@sentry/nextjs/config";
+import { fileURLToPath } from "node:url";
+
+const frontendRoot = fileURLToPath(new URL(".", import.meta.url));
 
 /** @type {import("next").NextConfig} */
 const localBackendOverride = process.env.LOCAL_BACKEND_OVERRIDE === "1";
@@ -40,6 +43,13 @@ if (
 const nextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
+  // Candidate builds use an ephemeral copy so Next cannot append every dated
+  // distDir to the editor's stable tsconfig.json.
+  typescript: {
+    tsconfigPath: process.env.NEXT_TSCONFIG_PATH ?? "tsconfig.json",
+  },
+  // Do not let an unrelated parent package-lock.json change Turbopack's root.
+  turbopack: { root: frontendRoot },
   // Keep development and production build artifacts isolated.
   distDir:
     process.env.NEXT_DIST_DIR ??

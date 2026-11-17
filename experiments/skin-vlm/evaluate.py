@@ -3,7 +3,6 @@ from __future__ import annotations
 import argparse,json
 from pathlib import Path
 from core import TAGS,load_rows
-from skin_vlm import SkinVLM
 
 def score(rows,predictions):
     if not rows or len(rows)!=len(predictions): raise ValueError('Unequal/empty inputs')
@@ -12,7 +11,7 @@ def score(rows,predictions):
         tp=fp=fn=0
         for row,pred in zip(rows,predictions):
             actual=tag in {x['tag'] for x in row['target']['observations']}
-            found=tag in {x['tag'] for x in pred.get('observation',{}).get('observations',[])}
+            found=pred.get('status') in {'needs_confirmation','needs_retake'} and tag in {x['tag'] for x in pred.get('observation',{}).get('observations',[])}
             tp+=actual and found;fp+=not actual and found;fn+=actual and not found
         result['by_tag'][tag]={'tp':tp,'fp':fp,'fn':fn,'precision':tp/(tp+fp) if tp+fp else None,
             'recall':tp/(tp+fn) if tp+fn else None,'f1':2*tp/(2*tp+fp+fn) if 2*tp+fp+fn else None}
@@ -23,11 +22,16 @@ def score(rows,predictions):
 
 def main():
     p=argparse.ArgumentParser();p.add_argument('manifest');p.add_argument('--model',default='model')
-    p.add_argument('--adapter');p.add_argument('--output',default='results/evaluation.json');a=p.parse_args()
+    p.add_argument('--adapter');p.add_argument('--output',default='results/evaluation.json')
+    p.add_argument('--allow-source-expert',action='store_true');a=p.parse_args()
     rows=load_rows(a.manifest)
-    if any(r['label_origin']!='human_verified' for r in rows): raise ValueError('Independently reviewed labels required')
+    from data_review import require_reviewed_labels
+    require_reviewed_labels(rows,a.allow_source_expert)
+    from skin_vlm import SkinVLM
     engine=SkinVLM(a.model,a.adapter);predictions=[engine.analyze(r['image'],r.get('note','')) for r in rows]
-    report={'metrics':score(rows,predictions),'predictions':[{'id':r['id'],'prediction':p} for r,p in zip(rows,predictions)]}
+    report={'metrics':score(rows,predictions),'source_expert_images':sum(r['label_origin']=='source_expert_derived' for r in rows),
+            'research_only':any(r.get('research_only') for r in rows),
+            'predictions':[{'id':r['id'],'prediction':p} for r,p in zip(rows,predictions)]}
     out=Path(a.output);out.parent.mkdir(parents=True,exist_ok=True);out.write_text(json.dumps(report,ensure_ascii=False,indent=2))
     print(json.dumps(report['metrics'],ensure_ascii=False,indent=2))
 

@@ -5,7 +5,11 @@ import time
 import logging
 import hmac
 import ipaddress
-sys.path.insert(0, '/var/lib/jenkins/tomod/cosmetic-agent')
+from pathlib import Path
+
+BACKEND_ROOT = Path(__file__).resolve().parents[1]
+if str(BACKEND_ROOT) not in sys.path:
+    sys.path.insert(0, str(BACKEND_ROOT))
 import hashlib
 import secrets
 from threading import Lock
@@ -48,6 +52,7 @@ from core.admission import (
     create_chat_admission_controller,
 )
 from core.observability import install_observability
+from core.model_dependencies import model_readiness_checks
 from core.tracing import configure_tracing
 from core.observability import (
     observe_chat_overload,
@@ -98,7 +103,7 @@ try:
     from agents.skin_tracking.composition import build_skin_tracking_from_env
     from agents.skin_tracking import tracking_agent as _skin_ta
     _skin_components = build_skin_tracking_from_env(
-        env_file='/var/lib/jenkins/tomod/cosmetic-agent/.env')
+        env_file=str(BACKEND_ROOT / ".env"))
     _skin_ta.configure(_skin_components.extractor, _skin_components.store)
     print("[INIT] skin_tracking 組裝完成（composition 層）")
 except Exception as _e:
@@ -313,7 +318,12 @@ async def enforce_api_request_limits(request: Request, call_next):
 
     response = await call_next(request)
     if request.url.path.startswith(_SENSITIVE_API_PREFIXES):
-        response.headers["Cache-Control"] = "no-store"
+        media_type = response.headers.get("content-type", "").split(";", 1)[0].strip().lower()
+        # Keep sensitive responses private while preventing downstream gzip
+        # buffers from holding SSE deltas until the complete answer arrives.
+        response.headers["Cache-Control"] = (
+            "no-store, no-transform" if media_type == "text/event-stream" else "no-store"
+        )
         response.headers["Pragma"] = "no-cache"
     if "x-content-type-options" not in response.headers:
         response.headers["X-Content-Type-Options"] = "nosniff"
@@ -375,6 +385,20 @@ def _postgres_ready() -> bool:
 
 
 def _redis_ready() -> bool:
+    redis_required = any(
+        os.getenv(name, "0").strip().lower() in {"1", "true", "yes", "on"}
+        for name in (
+            "API_LIMIT_REQUIRE_REDIS",
+            "CHAT_LIMIT_REQUIRE_REDIS",
+            "CHAT_ADMISSION_REQUIRE_REDIS",
+            "CHAT_JOB_STORE_REQUIRE_REDIS",
+            "CHAT_STATE_REQUIRE_REDIS",
+            "KNOWLEDGE_QUERY_ADMISSION_REQUIRE_REDIS",
+        )
+    )
+    if not redis_required:
+        return True
+
     from redis import Redis
 
     redis_url = os.getenv("REDIS_URL", "").strip()
@@ -445,16 +469,8 @@ _READINESS_CHECKS = {
     "redis_async_state": _redis_async_state_ready,
     "otel": _tracing_ready,
     "release": _release_ready,
-    "taide": lambda: _internal_http_ready(
-        os.getenv("TAIDE_HEALTH_URL", "http://127.0.0.1:8000/healthz")
-    ),
-    "taide_router": lambda: _internal_http_ready(
-        os.getenv("TAIDE_ROUTER_HEALTH_URL", "http://127.0.0.1:8001/healthz")
-    ),
-    "embedding": lambda: _internal_http_ready(
-        os.getenv("EMBEDDING_HEALTH_URL", "http://127.0.0.1:8002/healthz")
-    ),
 }
+_READINESS_CHECKS.update(model_readiness_checks(_internal_http_ready))
 
 
 install_observability(
@@ -1195,9 +1211,17 @@ app.include_router(
 from api.profile_api import (
     create_profile_router,
  )
+from app.api.routes.recommendation_preferences import (
+    create_recommendation_preferences_router,
+)
 
 app.include_router(
     create_profile_router(get_agent, _require_auth_session)
+)
+app.include_router(
+    create_recommendation_preferences_router(
+        require_auth_session=_require_auth_session,
+    )
 )
 
 app.include_router(

@@ -2,8 +2,12 @@
 set -euo pipefail
 
 PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
-STAGING_RUNTIME_ROOT="$(readlink -m "${STAGING_RUNTIME_ROOT:-$PROJECT_ROOT/.runtime/staging}")"
-METRICS_DIR="$(readlink -m "${PROMETHEUS_MULTIPROC_DIR:-$STAGING_RUNTIME_ROOT/prometheus}")"
+canonical_path() {
+  "${PYTHON_BIN:-python3}" -c \
+    'import os, sys; print(os.path.realpath(sys.argv[1]))' "$1"
+}
+STAGING_RUNTIME_ROOT="$(canonical_path "${STAGING_RUNTIME_ROOT:-$PROJECT_ROOT/.runtime/staging}")"
+METRICS_DIR="$(canonical_path "${PROMETHEUS_MULTIPROC_DIR:-$STAGING_RUNTIME_ROOT/prometheus}")"
 
 case "$METRICS_DIR" in
   "$STAGING_RUNTIME_ROOT"/*) ;;

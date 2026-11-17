@@ -1,0 +1,182 @@
+{
+  "version": 1,
+  "created": "2026-11-17",
+  "purpose": "Public functional examples, not training, phenotype gold or independent accuracy evaluation",
+  "examples": [
+    {
+      "file": "portrait.jpg",
+      "title": "正面定位測試",
+      "description": "公開頭像裁切；測試臉部區域，不是膚況標準答案。",
+      "source": "https://scikit-image.org/docs/0.25.x/api/skimage.data.html#skimage.data.astronaut",
+      "license": "Public domain (NASA / scikit-image attribution)",
+      "author": "NASA",
+      "operations": [
+        "head crop 115,20,360,300",
+        "JPEG quality92"
+      ],
+      "localizationBlocked": false,
+      "sha256": "ccd0200ca70b196b0b4b896c1ee1f8b41f6b154c13053c6b6f70e74d3142ff64",
+      "original_sha256": "88431cd9653ccd539741b555fb0a46b61558b301d4110412b5bc28b5e3ea6cb5",
+      "dimensions": [
+        245,
+        280
+      ],
+      "appearance_ground_truth": false,
+      "used_in_training": false
+    },
+    {
+      "file": "portrait-dark.jpg",
+      "title": "低光壓力測試",
+      "description": "同張公開頭像亮度乘0.2，測試重拍提示；不是獨立真實低光樣本。",
+      "source": "https://scikit-image.org/docs/0.25.x/api/skimage.data.html#skimage.data.astronaut",
+      "license": "Public domain (NASA / scikit-image attribution)",
+      "author": "NASA",
+      "operations": [
+        "head crop",
+        "brightness x0.2",
+        "JPEG quality92"
+      ],
+      "localizationBlocked": false,
+      "sha256": "c61ae4a86987f66b3b11f7156d9827e8d7eaae254c9168b6729db6716a5b4c36",
+      "original_sha256": "88431cd9653ccd539741b555fb0a46b61558b301d4110412b5bc28b5e3ea6cb5",
+      "dimensions": [
+        245,
+        280
+      ],
+      "appearance_ground_truth": false,
+      "used_in_training": false
+    },
+    {
+      "file": "portrait-blur.jpg",
+      "title": "模糊壓力測試",
+      "description": "同張公開頭像加入半徑4的高斯模糊；觀察清晰度提示。",
+      "source": "https://scikit-image.org/docs/0.25.x/api/skimage.data.html#skimage.data.astronaut",
+      "license": "Public domain (NASA / scikit-image attribution)",
+      "author": "NASA",
+      "operations": [
+        "head crop",
+        "Gaussian blur radius4",
+        "JPEG quality92"
+      ],
+      "localizationBlocked": false,
+      "sha256": "b85933500d7d62e68db5d73782fe149a096f73a996642751b74e29674e4a0493",
+      "original_sha256": "88431cd9653ccd539741b555fb0a46b61558b301d4110412b5bc28b5e3ea6cb5",
+      "dimensions": [
+        245,
+        280
+      ],
+      "appearance_ground_truth": false,
+      "used_in_training": false
+    },
+    {
+      "file": "portrait-bright.jpg",
+      "title": "過曝壓力測試",
+      "description": "同張公開頭像亮度乘2.8；觀察過曝提示。",
+      "source": "https://scikit-image.org/docs/0.25.x/api/skimage.data.html#skimage.data.astronaut",
+      "license": "Public domain (NASA / scikit-image attribution)",
+      "author": "NASA",
+      "operations": [
+        "head crop",
+        "brightness x2.8",
+        "JPEG quality92"
+      ],
+      "localizationBlocked": false,
+      "sha256": "215fe926a4640cbff9d32a678ba4c91d9d035b57a6f0ec195c85a4f1a8f4d163",
+      "original_sha256": "88431cd9653ccd539741b555fb0a46b61558b301d4110412b5bc28b5e3ea6cb5",
+      "dimensions": [
+        245,
+        280
+      ],
+      "appearance_ground_truth": false,
+      "used_in_training": false
+    },
+    {
+      "file": "memi-1_f.jpg",
+      "title": "遮眼公開照 1",
+      "description": "保留原始隱私遮罩；只測試膚況流程，停用臉部區域定位。",
+      "source": "https://doi.org/10.6084/m9.figshare.29209229.v1",
+      "license": "CC BY 4.0",
+      "author": "Zhenwei Zhai",
+      "operations": [
+        "EXIF transpose",
+        "RGB",
+        "long side <=1280",
+        "JPEG quality92"
+      ],
+      "localizationBlocked": true,
+      "sha256": "525393748c7c70b12634a4becaa0777794cadfd7356de44bc6efa97996950c5f",
+      "original_sha256": "f9efc6ff89ff91c17b54edf800d710d12cf4f8b00e30b128ed527d815663521a",
+      "dimensions": [
+        853,
+        1280
+      ],
+      "appearance_ground_truth": false,
+      "used_in_training": false
+    },
+    {
+      "file": "memi-2_f.jpg",
+      "title": "遮眼公開照 2",
+      "description": "保留原始隱私遮罩；只測試膚況流程，停用臉部區域定位。",
+      "source": "https://doi.org/10.6084/m9.figshare.29209229.v1",
+      "license": "CC BY 4.0",
+      "author": "Zhenwei Zhai",
+      "operations": [
+        "EXIF transpose",
+        "RGB",
+        "long side <=1280",
+        "JPEG quality92"
+      ],
+      "localizationBlocked": true,
+      "sha256": "3c45c8eec94a5163378ce70206335d53b4657ee33a35a6d2c3b614a1f2b751ee",
+      "original_sha256": "836f85161a320cb6df4c854b91c3df335b941e8721d47f6ac1609697a277bf9d",
+      "dimensions": [
+        853,
+        1280
+      ],
+      "appearance_ground_truth": false,
+      "used_in_training": false
+    },
+    {
+      "file": "skin-1.jpg",
+      "title": "局部公開照 1",
+      "description": "原資料已遮眼；沒有這四類的人工答案，停用臉部區域定位。",
+      "source": "https://github.com/google-research-datasets/scin",
+      "license": "SCIN Data Use License",
+      "author": "Google Research / SCIN contributors",
+      "operations": [
+        "previous EXIF transpose,RGB,long side<=1280,JPEG90",
+        "JPEG quality92"
+      ],
+      "localizationBlocked": true,
+      "sha256": "7625d87b4670025fc261e3a91c2032c0bb060b9d0bfac3c5588d49198ccd3ef5",
+      "original_sha256": "7f066e6258949b45a972966301c5c0e78472d146619bdc2559c8c9f94933d491",
+      "dimensions": [
+        810,
+        1080
+      ],
+      "appearance_ground_truth": false,
+      "used_in_training": false
+    },
+    {
+      "file": "skin-2.jpg",
+      "title": "局部公開照 2",
+      "description": "原資料已遮眼；沒有這四類的人工答案，停用臉部區域定位。",
+      "source": "https://github.com/google-research-datasets/scin",
+      "license": "SCIN Data Use License",
+      "author": "Google Research / SCIN contributors",
+      "operations": [
+        "previous EXIF transpose,RGB,long side<=1280,JPEG90",
+        "JPEG quality92"
+      ],
+      "localizationBlocked": true,
+      "sha256": "4dbbc73016dd9b6554086bf0c0988fc6e68bd0a71c833b5449b23eb203dd124a",
+      "original_sha256": "2ad6db4233417a59c516b47df05874f267b26dc3a49ca37880c0df960ee27400",
+      "dimensions": [
+        810,
+        1080
+      ],
+      "appearance_ground_truth": false,
+      "used_in_training": false
+    }
+  ]
+}

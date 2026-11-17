@@ -7,6 +7,8 @@ from neo4j import GraphDatabase
 
 
 def test_neo4j_cloud_connectivity_from_environment() -> None:
+    if os.getenv("RUN_LIVE_NEO4J_TESTS") != "1":
+        pytest.skip("set RUN_LIVE_NEO4J_TESTS=1 for the external integration test")
     uri = os.getenv("NEO4J_URI", "").strip()
     user = os.getenv("NEO4J_USER", "").strip()
     password = os.getenv("NEO4J_PASSWORD", "").strip()

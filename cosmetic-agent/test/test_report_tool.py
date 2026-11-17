@@ -7,14 +7,36 @@ import os
 import sys
 from datetime import date
 
+import pytest
+
 current_dir = os.path.dirname(os.path.abspath(__file__))
 project_root = os.path.abspath(os.path.join(current_dir, "../"))
 if project_root not in sys.path:
     sys.path.insert(0, project_root)
 
-from models.taide_client import TaideClient
 from schemas.tracking_schema import Issue, Zone
 from tools.agent.tracking.skin_report_tool import build_report, render_report_text
+
+
+pytestmark = pytest.mark.skipif(
+    os.getenv("RUN_LIVE_MODEL_TESTS") != "1",
+    reason="requires the explicitly configured TAIDE model API",
+)
+
+
+class _ReportModelClient:
+    def __init__(self):
+        from app.clients.chat_completion_client import ChatCompletionClient
+
+        self._client = ChatCompletionClient.from_env()
+
+    def chat(self, messages):
+        return self._client.complete(
+            messages=messages,
+            model=os.getenv("TAIDE_MODEL", "taide-12b"),
+            max_tokens=600,
+            temperature=0.1,
+        )
 
 
 def test_report_tool_real():
@@ -24,8 +46,8 @@ def test_report_tool_real():
 
     # 1. 初始化 TaideClient (連線至本機服務)
     try:
-        real_llm = TaideClient(base_url="http://localhost:8004")
-        print("✅ 成功初始化 TaideClient\n")
+        real_llm = _ReportModelClient()
+        print("✅ 成功初始化正式 ChatCompletionClient\n")
     except Exception as e:
         print(f"❌ 初始化 TaideClient 失敗: {e}")
         return

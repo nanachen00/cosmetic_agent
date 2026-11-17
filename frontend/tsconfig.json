@@ -36,17 +36,7 @@
     "**/*.tsx",
     ".next-dev/types/**/*.ts",
     ".next/dev/types/**/*.ts",
-    ".next-dev/dev/types/**/*.ts",
-    ".next-dev-3001/types/**/*.ts",
-    ".next-dev-3001/dev/types/**/*.ts",
-    ".next-photo-20261031-052823/types/**/*.ts",
-    ".next-photo-20261031-052823/dev/types/**/*.ts",
-    ".next-photo-20261031-053134/types/**/*.ts",
-    ".next-photo-20261031-053134/dev/types/**/*.ts",
-    ".next-photo-20261031-053225/types/**/*.ts",
-    ".next-photo-20261031-053225/dev/types/**/*.ts",
-    ".next-skin-summary-20261031-062223/types/**/*.ts",
-    ".next-skin-summary-20261031-062223/dev/types/**/*.ts"
+    ".next-dev/dev/types/**/*.ts"
   ],
   "exclude": [
     "node_modules"

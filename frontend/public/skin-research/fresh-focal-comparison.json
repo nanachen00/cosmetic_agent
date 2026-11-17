@@ -1,0 +1,153 @@
+{
+  "protocol_fingerprint": "c276d2205503f21970450608c0e4d434925f68638bd1c2ff493ee168863d48ec",
+  "validation_manifest_sha256": "805710681e72f749165271c962bcd255eb9bba40cd88a71f0d1dad18b9decd6b",
+  "paired_bootstrap": {
+    "method": "Paired source-image-cluster bootstrap; not verified patients",
+    "seed": 20261117,
+    "requested_resamples": 2000,
+    "accepted_resamples": 2000,
+    "excluded_resamples": 0,
+    "coverage_rule": "Require true and false support for each tag and skin/non-skin; exclude without redrawing",
+    "source_image_clusters": 80,
+    "point_difference": -0.0024414340067789864,
+    "percentile_95": [
+      -0.02718988853250319,
+      0.02368969406132417
+    ],
+    "quantile_method": "Linear interpolation at (n-1)*p",
+    "exploratory_reused_validation": true,
+    "training_seed_variance_measured": false,
+    "clinical_or_phone_generalization_proven": false
+  },
+  "limitations": [
+    "Single training seed and reused validation; interval is source-image sampling uncertainty, not seed variance.",
+    "No diagnosis, localization, verified-patient or phone-photo generalization claim."
+  ],
+  "production_probe_samples": 98,
+  "production_probe_failures": 0,
+  "candidates": [
+    {
+      "name": "B-fresh-ce-r8",
+      "metrics": {
+        "images": 80,
+        "valid_json_rate": 1.0,
+        "by_tag": {
+          "acne_like_bumps": {
+            "tp": 27,
+            "fp": 8,
+            "fn": 10,
+            "precision": 0.7714285714285715,
+            "recall": 0.7297297297297297,
+            "f1": 0.75
+          },
+          "redness": {
+            "tp": 41,
+            "fp": 13,
+            "fn": 3,
+            "precision": 0.7592592592592593,
+            "recall": 0.9318181818181818,
+            "f1": 0.8367346938775511
+          },
+          "dark_marks": {
+            "tp": 5,
+            "fp": 2,
+            "fn": 11,
+            "precision": 0.7142857142857143,
+            "recall": 0.3125,
+            "f1": 0.43478260869565216
+          },
+          "flaking": {
+            "tp": 5,
+            "fp": 1,
+            "fn": 9,
+            "precision": 0.8333333333333334,
+            "recall": 0.35714285714285715,
+            "f1": 0.5
+          }
+        },
+        "non_skin_correct_rejection_rate": 1.0,
+        "macro_f1": 0.6303793256433008
+      },
+      "gate": {
+        "eligible": false,
+        "failures": [
+          "acne_like_bumps:precision_below_0.80",
+          "acne_like_bumps:recall_below_0.80",
+          "redness:precision_below_0.80",
+          "dark_marks:precision_below_0.80",
+          "dark_marks:recall_below_0.80",
+          "flaking:recall_below_0.80",
+          "macro_f1_below_0.80"
+        ]
+      },
+      "training_seconds": 937.482,
+      "validation_inference_seconds_sum": 482.159,
+      "validation_inference_seconds_max": 8.452
+    },
+    {
+      "name": "F-fresh-asym-focal-r8",
+      "metrics": {
+        "images": 80,
+        "valid_json_rate": 1.0,
+        "by_tag": {
+          "acne_like_bumps": {
+            "tp": 26,
+            "fp": 10,
+            "fn": 11,
+            "precision": 0.7222222222222222,
+            "recall": 0.7027027027027027,
+            "f1": 0.7123287671232876
+          },
+          "redness": {
+            "tp": 43,
+            "fp": 12,
+            "fn": 1,
+            "precision": 0.7818181818181819,
+            "recall": 0.9772727272727273,
+            "f1": 0.8686868686868687
+          },
+          "dark_marks": {
+            "tp": 5,
+            "fp": 1,
+            "fn": 11,
+            "precision": 0.8333333333333334,
+            "recall": 0.3125,
+            "f1": 0.45454545454545453
+          },
+          "flaking": {
+            "tp": 5,
+            "fp": 2,
+            "fn": 9,
+            "precision": 0.7142857142857143,
+            "recall": 0.35714285714285715,
+            "f1": 0.47619047619047616
+          }
+        },
+        "non_skin_correct_rejection_rate": 1.0,
+        "macro_f1": 0.6279378916365218
+      },
+      "gate": {
+        "eligible": false,
+        "failures": [
+          "acne_like_bumps:precision_below_0.80",
+          "acne_like_bumps:recall_below_0.80",
+          "redness:precision_below_0.80",
+          "dark_marks:recall_below_0.80",
+          "flaking:precision_below_0.80",
+          "flaking:recall_below_0.80",
+          "macro_f1_below_0.80"
+        ]
+      },
+      "training_seconds": 961.669,
+      "validation_inference_seconds_sum": 504.429,
+      "validation_inference_seconds_max": 10.427
+    }
+  ],
+  "gold_train_images": 559,
+  "validation_images": 80,
+  "additional_seeds": false,
+  "selected_adapter": null,
+  "test_evaluated": false,
+  "checkpoint_NFS_backup_verified": true,
+  "Mac_weights_transferred": false
+}

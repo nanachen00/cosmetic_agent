@@ -3,8 +3,8 @@ import requests
 import json
 import os
 
-CHAT_URL = "http://localhost:8000"
-EMBED_URL = "http://localhost:8002"
+CHAT_URL = os.getenv("TAIDE_CHAT_URL", "http://127.0.0.1:8000").rstrip("/")
+EMBED_URL = os.getenv("TAIDE_EMBED_URL", "http://127.0.0.1:8002").rstrip("/")
 
 class Handler(BaseHTTPRequestHandler):
     def log_message(self, *args):
@@ -15,11 +15,11 @@ class Handler(BaseHTTPRequestHandler):
         body = self.rfile.read(length)
 
         if self.path == "/v1/chat/completions":
-            r = requests.post(CHAT_URL + self.path, data=body)
+            r = requests.post(CHAT_URL + self.path, data=body, timeout=180)
             self._reply(r)
 
         elif self.path == "/v1/embeddings":
-            r = requests.post(EMBED_URL + self.path, data=body)
+            r = requests.post(EMBED_URL + self.path, data=body, timeout=30)
             self._reply(r)
 
         else:
@@ -52,6 +52,12 @@ class Handler(BaseHTTPRequestHandler):
 
 
 if __name__ == "__main__":
-    server = ThreadingHTTPServer((os.getenv("TAIDE_ROUTER_BIND_HOST", "127.0.0.1"), 8001), Handler)
-    print("🚀 Router running on 8001 → chat:8000 / embed:8002")
+    server = ThreadingHTTPServer(
+        (
+            os.getenv("TAIDE_ROUTER_BIND_HOST", "127.0.0.1"),
+            int(os.getenv("TAIDE_ROUTER_PORT", "8001")),
+        ),
+        Handler,
+    )
+    print(f"Router running → chat:{CHAT_URL} / embed:{EMBED_URL}")
     server.serve_forever()

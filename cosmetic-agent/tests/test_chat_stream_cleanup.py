@@ -33,11 +33,13 @@ async def test_disconnected_stream_releases_ticket_and_security(monkeypatch) -> 
     )
 
     started_at = time.perf_counter()
+    async def release_resources() -> None:
+        await ticket.release()
+        await finish("guard-1")
+
     await chat._release_stream_resources_when_done(
         producer,
-        ticket,
-        "guard-1",
-        finish,
+        release_resources,
         release_started_at=started_at,
     )
 

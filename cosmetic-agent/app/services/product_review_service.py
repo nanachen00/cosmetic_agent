@@ -17,6 +17,7 @@ from collections import Counter
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
+from urllib.parse import urlsplit
 
 from neo4j import GraphDatabase
 
@@ -41,6 +42,24 @@ _PRODUCT_NAME_REGISTRY = _DATA_DIR / "product_name_registry.json"
 _DECISIONS_FILE = _DATA_DIR / "product_review_decisions.json"
 _VERIFIED_ENRICHMENTS_FILE = _DATA_DIR / "product_verified_enrichments.json"
 _WRITE_LOCK = threading.Lock()
+
+_VERIFIED_ATTRIBUTE_STATES = {
+    "verified",
+    "official_product_label",
+    "official_product_page",
+    "authorized_retailer_product_page",
+}
+_SKIN_TYPE_ALIASES = {
+    "dry": "dry", "dry skin": "dry", "乾性": "dry", "乾性肌": "dry", "乾性肌膚": "dry",
+    "oily": "oily", "oily skin": "oily", "油性": "oily", "油性肌": "oily", "油性肌膚": "oily",
+    "combination": "combination", "combination skin": "combination", "混合性": "combination",
+    "混合肌": "combination", "混合性肌膚": "combination",
+    "sensitive": "sensitive", "sensitive skin": "sensitive", "敏感": "sensitive",
+    "敏感肌": "sensitive", "敏感性肌膚": "sensitive",
+    "normal": "normal", "normal skin": "normal", "中性": "normal", "中性肌": "normal",
+    "中性肌膚": "normal", "all": "all", "all skin types": "all", "所有膚質": "all",
+    "全膚質": "all",
+}
 
 REVIEW_STATUSES = {
     "pending_review",
@@ -156,6 +175,71 @@ def _canonical_family_key(product: dict[str, Any]) -> str:
     return f"{brand.casefold()}::{_family_name(name)}"
 
 
+def _evidence_url(value: Any) -> str:
+    """Return a safe HTTP(S) evidence URL or an empty string."""
+    text = str(value or "").strip()
+    try:
+        if not text or any(ord(char) <= 32 or ord(char) == 127 for char in text):
+            return ""
+        parsed = urlsplit(text)
+        parsed.port
+        if (
+            parsed.scheme not in {"https", "http"}
+            or not parsed.hostname
+            or parsed.username is not None
+            or parsed.password is not None
+        ):
+            return ""
+    except ValueError:
+        return ""
+    return text
+
+
+def _verified_catalog_attributes(enrichment: dict[str, Any]) -> dict[str, Any]:
+    """Accept explicit reviewed attributes; never infer them from marketing copy."""
+    result: dict[str, Any] = {
+        "texture": "",
+        "texture_source_url": "",
+        "texture_verification_status": "",
+        "skin_types": [],
+        "skin_types_source_url": "",
+        "skin_types_verification_status": "",
+    }
+    texture_status = str(enrichment.get("texture_verification_status") or "").strip()
+    texture_source_url = _evidence_url(enrichment.get("texture_source_url"))
+    texture = str(enrichment.get("texture") or "").strip()
+    if (
+        texture_status in _VERIFIED_ATTRIBUTE_STATES
+        and texture_source_url
+        and texture
+        and len(texture) <= 160
+    ):
+        result.update(
+            texture=texture,
+            texture_source_url=texture_source_url,
+            texture_verification_status=texture_status,
+        )
+
+    skin_status = str(enrichment.get("skin_types_verification_status") or "").strip()
+    skin_source_url = _evidence_url(enrichment.get("skin_types_source_url"))
+    skin_types = enrichment.get("skin_types")
+    normalized_skin_types = _clean_string_list(
+        [
+            _SKIN_TYPE_ALIASES.get(str(value).strip().casefold(), "")
+            for value in skin_types
+        ]
+        if isinstance(skin_types, list)
+        else []
+    )
+    if skin_status in _VERIFIED_ATTRIBUTE_STATES and skin_source_url and normalized_skin_types:
+        result.update(
+            skin_types=normalized_skin_types,
+            skin_types_source_url=skin_source_url,
+            skin_types_verification_status=skin_status,
+        )
+    return result
+
+
 def _catalog_quality_blockers(product: dict[str, Any]) -> list[str]:
     blockers = _clean_string_list(product.get("review_blockers", []))
     display_name = str(product.get("taiwan_official_name") or "").strip()
@@ -268,6 +352,8 @@ def _product_search_text(product: dict[str, Any]) -> str:
         " ".join(product.get("ingredients_inci", [])),
         " ".join(product.get("ingredient_tags", [])),
         " ".join(product.get("unmapped_official_highlights", [])),
+        product.get("texture"),
+        " ".join(product.get("skin_types", [])),
     ]
     return " ".join(str(value).strip() for value in values if str(value or "").strip())
 
@@ -291,6 +377,12 @@ def _product_sync_fingerprint(product: dict[str, Any]) -> str:
             "safety_notes",
             "formula_market",
             "inci_source_url",
+            "texture",
+            "texture_source_url",
+            "texture_verification_status",
+            "skin_types",
+            "skin_types_source_url",
+            "skin_types_verification_status",
         )
     }
     encoded = json.dumps(fields, ensure_ascii=False, sort_keys=True, default=str).encode("utf-8")
@@ -338,6 +430,7 @@ def _import_product_to_neo4j(
         "full_formula" if ingredient_evidence_level == "full_inci"
         else "official_featured_ingredients_only"
     )
+    verified_attributes = _verified_catalog_attributes(product)
     properties: dict[str, Any] = {
         "name": name,
         "official_name": str(product.get("official_name") or "").strip(),
@@ -365,6 +458,16 @@ def _import_product_to_neo4j(
         "safety_source_urls": _clean_string_list([note.get("source_url") for note in safety_notes]),
         "inci_source_url": str(product.get("inci_source_url") or "").strip(),
         "formula_market": str(product.get("formula_market") or "").strip(),
+        "texture": verified_attributes["texture"] or None,
+        "texture_source_url": verified_attributes["texture_source_url"] or None,
+        "texture_verification_status": (
+            verified_attributes["texture_verification_status"] or None
+        ),
+        "skin_types": verified_attributes["skin_types"] or None,
+        "skin_types_source_url": verified_attributes["skin_types_source_url"] or None,
+        "skin_types_verification_status": (
+            verified_attributes["skin_types_verification_status"] or None
+        ),
         "common_names": _clean_string_list(product.get("common_names", [])),
         "search_aliases": _clean_string_list(product.get("search_aliases", [])),
         "concerns": _clean_string_list(product.get("concerns", [])),
@@ -759,6 +862,7 @@ def _load_products() -> list[dict[str, Any]]:
                 continue
             seen.add(key)
             enrichment = enrichments.get(key, {})
+            verified_attributes = _verified_catalog_attributes(enrichment)
             if enrichment:
                 raw = {
                     **raw,
@@ -1017,6 +1121,7 @@ def _load_products() -> list[dict[str, Any]]:
                     "neo4j_element_id": decision.get("neo4j_element_id"),
                     "sync_fingerprint": decision.get("sync_fingerprint"),
                     "recommendable": bool(decision.get("recommendable", False)),
+                    **verified_attributes,
                 }
             loaded_product["canonical_family_key"] = _canonical_family_key(loaded_product)
             loaded_product["quality_blockers"] = _catalog_quality_blockers(loaded_product)

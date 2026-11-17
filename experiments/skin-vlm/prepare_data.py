@@ -14,10 +14,15 @@ def assert_no_leakage(*groups):
 
 def main():
     p=argparse.ArgumentParser();p.add_argument('manifest');p.add_argument('--out',default='data/splits')
-    p.add_argument('--seed',type=int,default=42);a=p.parse_args();rows=load_rows(a.manifest)
-    if any(r['label_origin']!='human_verified' for r in rows): raise ValueError('Reviewed labels required')
+    p.add_argument('--seed',type=int,default=42)
+    p.add_argument('--allow-source-expert',action='store_true',help='Validated original expert-derived research labels only')
+    a=p.parse_args();rows=load_rows(a.manifest)
+    from data_review import require_reviewed_labels,group_source_images
+    require_reviewed_labels(rows,a.allow_source_expert)
+    expert=[row for row in rows if row['label_origin']=='source_expert_derived']
+    if expert:group_source_images(expert)
     subjects=sorted({r['subject_id'] for r in rows})
-    if len(subjects)<3: raise ValueError('Need at least three independent subjects')
+    if len(subjects)<3: raise ValueError('Need at least three independent declared groups')
     random.Random(a.seed).shuffle(subjects);n=max(1,round(len(subjects)*.15))
     sets={'test':set(subjects[:n]),'val':set(subjects[n:2*n]),'train':set(subjects[2*n:])}
     splits={k:[r for r in rows if r['subject_id'] in s] for k,s in sets.items()}
@@ -25,7 +30,12 @@ def main():
     if out.exists() and any(out.iterdir()): raise ValueError('Preserve frozen splits; use empty output folder')
     out.mkdir(parents=True,exist_ok=True)
     for k,v in splits.items(): (out/(k+'.jsonl')).write_text('\n'.join(json.dumps(r,ensure_ascii=False) for r in v)+'\n')
-    (out/'split_info.json').write_text(json.dumps({'seed':a.seed,'counts':{k:len(v) for k,v in splits.items()}},indent=2))
+    (out/'split_info.json').write_text(json.dumps({'seed':a.seed,'counts':{k:len(v) for k,v in splits.items()},
+        'group_counts':{k:len({r['subject_id'] for r in v}) for k,v in splits.items()},
+        'manifest_sha256':{k:hashlib.sha256((out/(k+'.jsonl')).read_bytes()).hexdigest() for k in splits},
+        'subject_disjoint':all(r.get('subject_id_verified') is True for r in rows),
+        'source_expert_images':len(expert),'research_only':bool(expert),
+        'limitation':'Unverified source-image groups are not proven independent people.' if expert else 'Subject identities are declared by the supplied manifest.'},indent=2))
     print({k:len(v) for k,v in splits.items()})
 
 if __name__=='__main__': main()

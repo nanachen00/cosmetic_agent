@@ -16161,30 +16161,11 @@ body:has(.report-ios-diary)::after {
 
 /* BLINK AI — restrained mobile states + rounded typography (2026-10-11) */
 @font-face {
-  font-family: "GenSen Rounded TW";
-  src: url("/fonts/gensen-rounded/GenSenRounded2TW-R.woff2") format("woff2");
-  font-style: normal;
-  font-weight: 400;
-  font-display: swap;
-}
-
-@font-face {
   font-family: "Fredoka BLINK";
   src: url("/fonts/fredoka-600.woff2") format("woff2");
   font-style: normal;
   font-weight: 600;
   font-display: swap;
-}
-
-html,
-body,
-body :where(*) {
-  font-family:
-    "GenSen Rounded TW",
-    "Arial Rounded MT Bold",
-    "PingFang TC",
-    system-ui,
-    sans-serif !important;
 }
 
 .brand-main,
@@ -16202,7 +16183,6 @@ body :where(*) {
 .provider-name {
   font-family:
     "Fredoka BLINK",
-    "GenSen Rounded TW",
     "Arial Rounded MT Bold",
     sans-serif !important;
 }

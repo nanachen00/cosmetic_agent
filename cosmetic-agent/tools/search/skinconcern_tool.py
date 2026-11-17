@@ -1,8 +1,18 @@
 # tools/search/skinconcern_tool.py
-import requests
+import math
 import os
 import sys
 from neo4j import GraphDatabase
+from app.clients.embedding_client import EmbeddingClient
+
+
+class _SkinEmbeddingClient(EmbeddingClient):
+    """Preserve the legacy explicit full endpoint while reusing client IO."""
+    explicit_endpoint = None
+
+    @property
+    def endpoint(self):
+        return self.explicit_endpoint or super().endpoint
 
 # 確保引用路徑
 base_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../'))
@@ -21,43 +31,22 @@ class SkinConcernTool:
             auth=(self.neo4j_user, self.neo4j_password),
             keep_alive=True,
         )
-        self.embedding_api_url = os.getenv(
-            "EMBEDDING_API_URL",
-            "http://localhost:8002/v1/embeddings",
-        ).strip()
-        self.embedding_model = os.getenv(
-            "EMBEDDING_MODEL",
-            "taide-12b",
-        ).strip()
-        self.embedding_timeout = float(
-            os.getenv("EMBEDDING_TIMEOUT_SECONDS", "10")
-        )
+        self.embedding_client = _SkinEmbeddingClient.from_env()
+        self.embedding_client.explicit_endpoint = os.getenv("EMBEDDING_API_URL", "").strip() or None
+        self.embedding_api_url = self.embedding_client.endpoint
+        self.embedding_model = self.embedding_client.model
+        self.embedding_timeout = self.embedding_client.timeout_seconds
         print("📡 [Skin Concern Tool] 雲端圖譜向量檢索器已成功就緒。")
 
     def _get_embedding(self, text):
-        """呼叫 8002 埠將用戶白話文症狀描述轉換為高維度語意向量"""
-        
-        # 🚀 規格對齊：將文字包進 List 陣列格式中，100% 滿足 8002 埠 `user_input[0]` 的提取期待
-        payload = {
-            "model": self.embedding_model,
-            "input": [text]  # 👈 修正點 1：改成陣列型態！
-        }
-        
+        """Use the pooled, bounded-time client; never cache personal queries."""
         try:
-            # 🚀 修正點 2：給地端 CPU 模型多一點點運算包容時間（從 20 改為 60 秒）
-            response = requests.post(
-                self.embedding_api_url,
-                json=payload,
-                timeout=self.embedding_timeout,
-            )
-            
-            if response.status_code == 200:
-                return response.json()["data"][0]["embedding"]
-            else:
-                print(f"❌ [Embedding API Error] 狀態碼: {response.status_code} | 回應內容: {response.text[:200]}")
-                return None
+            vector = self.embedding_client.embed_query(text)
+            if not all(math.isfinite(value) for value in vector):
+                raise ValueError("Nonfinite embedding")
+            return vector
         except Exception as e:
-            print(f"❌ 膚況向量轉換連線失敗 (請確認 port 8002 是否開啟): {e}")
+            print(f"❌ 膚況向量轉換失敗: {type(e).__name__}")
             return None
 
     def search_concern(self, user_query):

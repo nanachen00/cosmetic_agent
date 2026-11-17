@@ -42,8 +42,9 @@ load_dotenv()
 # 請把新建立的 API Key 貼在這裡
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "").strip()
 
-# 固定使用 Terra
-OPENAI_MODEL = os.getenv("OPENAI_INTENT_MODEL", "gpt-5.6-terra").strip()
+# All production text agents share the Terra selection.  The old
+# OPENAI_INTENT_MODEL override is intentionally no longer used.
+OPENAI_MODEL = os.getenv("TERRA_MODEL", "gpt-5.6-terra").strip() or "gpt-5.6-terra"
 
 # 全域固定使用 none；只有保守 fallback 才可單次升為 low
 OPENAI_REASONING_EFFORT = os.getenv("OPENAI_REASONING_EFFORT", "none").strip()

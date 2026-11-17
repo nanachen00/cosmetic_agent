@@ -1,0 +1,8 @@
+.metrics { margin-top: 24px; border-top: 1px solid #e7ddd2; padding-top: 16px; color: #5b5042; }
+.metrics summary { font-size: 13px; font-weight: 600; cursor: pointer; }
+.metrics p { font-size: 12px; line-height: 1.8; }
+.scroll { max-width: 100%; overflow-x: auto; }
+.metrics table { border-collapse: collapse; width: 100%; font-size: 11px; white-space: nowrap; }
+.metrics caption { text-align: left; padding: 8px 0; color: #897b68; }
+.metrics th, .metrics td { padding: 8px 6px; text-align: left; border-bottom: 1px solid #eee6dd; }
+.metrics a { color: #795c31; text-decoration: underline; }

@@ -2326,7 +2326,7 @@ html {
 .home-page .home-brand-primary {
   display: block;
   color: #60483d;
-  font-family: "Fredoka BLINK", "GenSen Rounded TW", "Arial Rounded MT Bold", sans-serif !important;
+  font-family: "Fredoka BLINK", "Arial Rounded MT Bold", sans-serif !important;
   font-size: clamp(52px, 5vw, 76px);
   font-weight: 700;
   line-height: 0.88;

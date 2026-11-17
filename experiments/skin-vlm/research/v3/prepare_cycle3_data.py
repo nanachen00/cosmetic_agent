@@ -35,9 +35,16 @@ def read_jsonl(path: Path) -> List[Dict[str,Any]]:
 def prior_groups(manifests: Sequence[Path]) -> set:
     groups=set()
     for path in manifests:
-        if path.is_file(): groups.update(x["group_id"] for x in read_jsonl(path))
+        if not path.is_file(): raise FileNotFoundError("historical manifest missing: "+str(path))
+        groups.update(x["group_id"] for x in read_jsonl(path))
     if not groups: raise ValueError("no historical groups loaded; refusal prevents accidental reuse")
     return groups
+
+
+def prior_source_files(manifests: Sequence[Path]) -> set:
+    # Decoded RGB hashes may change with image-library versions; retain source
+    # filenames as another exclusion key in the pinned ACNE04 release.
+    return {row["source_file"] for path in manifests for row in read_jsonl(path) if row.get("source_file")}
 
 
 def load_rows(raw: Path) -> Tuple[List[Dict[str,Any]],List[Dict[str,str]]]:
@@ -111,22 +118,27 @@ def crop_pair(row: Mapping[str,Any],group_id: str,split: str,output: Path) -> Li
 def main() -> None:
     p=argparse.ArgumentParser();p.add_argument("--raw",type=Path,required=True);p.add_argument("--output",type=Path,required=True)
     p.add_argument("--exclude-manifest",type=Path,action="append",required=True)
-    p.add_argument("--train-parents",type=int,default=160);p.add_argument("--validation-parents",type=int,default=32)
+    p.add_argument("--train-parents",type=int,default=160,help="0 uses all remaining eligible groups")
+    p.add_argument("--validation-parents",type=int,default=32)
     p.add_argument("--test-parents",type=int,default=64);a=p.parse_args()
-    if (a.output/"dataset.json").exists():
-        raise FileExistsError("frozen dataset already exists; use a new versioned output directory")
-    forbidden=prior_groups(a.exclude_manifest);rows,rejected=load_rows(a.raw);groups=cluster(rows)
+    if a.train_parents<0 or a.validation_parents<1 or a.test_parents<1:
+        raise ValueError("invalid split sizes")
+    if a.output.exists() and any(a.output.iterdir()):
+        raise FileExistsError("output is not empty; use a new versioned output directory")
+    forbidden=prior_groups(a.exclude_manifest);forbidden_files=prior_source_files(a.exclude_manifest)
+    rows,rejected=load_rows(a.raw);groups=cluster(rows)
     eligible=[]
     for group in groups.values():
         group_id=min(x["_hash"] for x in group)
-        if group_id not in forbidden:eligible.append((digest((str(SEED)+group_id).encode()),group_id,sorted(group,key=lambda x:x["file_name"])[0]))
+        if group_id not in forbidden and not any(x["file_name"] in forbidden_files for x in group):
+            eligible.append((digest((str(SEED)+group_id).encode()),group_id,sorted(group,key=lambda x:x["file_name"])[0]))
     eligible.sort();limits={"test":a.test_parents,"validation":a.validation_parents,"train":a.train_parents};offset=0;counts={}
     for split in ("test","validation","train"):
         out=[];parents=0
-        while parents<limits[split] and offset<len(eligible):
+        while (parents<limits[split] or (split=="train" and limits[split]==0)) and offset<len(eligible):
             _,group_id,row=eligible[offset];offset+=1;pair=crop_pair(row,group_id,split,a.output)
             if pair:out.extend(pair);parents+=1
-        if parents<limits[split]:raise RuntimeError("insufficient eligible parents for "+split)
+        if not parents or parents<limits[split]:raise RuntimeError("insufficient eligible parents for "+split)
         manifest=a.output/("validation.jsonl" if split=="validation" else split+".jsonl")
         manifest.parent.mkdir(parents=True,exist_ok=True);manifest.write_text("".join(json.dumps(x,ensure_ascii=False)+"\n" for x in out),encoding="utf-8")
         counts[split]={"parents":parents,"patches":len(out),"positive":sum(x["lesion_present"] for x in out),
@@ -136,6 +148,8 @@ def main() -> None:
           "forbidden_locked_test_groups":sorted(forbidden),"dedup":"decoded RGB SHA256 + dHash distance <=3",
           "subject_disjoint":False,"subject_limitation":"ACNE04 has no reliable subject IDs; group isolation is by source image and near-duplicate cluster.",
           "test_policy":"test.jsonl is frozen here but train_cycle3.py has no test input and cannot read it for selection.",
+          "historical_manifest_sha256":{str(path):digest(path.read_bytes()) for path in a.exclude_manifest},
+          "historical_source_files_excluded":len(forbidden_files),
           "license":"academic/research use only; no automatic production deployment"}
     write_json(a.output/"dataset.json",meta);print(json.dumps(meta,ensure_ascii=False,indent=2))
 

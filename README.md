@@ -3,7 +3,7 @@
 This repository stores the sanitized BLINK AI platform source used by the mobile/web frontend, backend agents, authentication, persistence, knowledge map, tests and deployment tooling.
 
 - Platform operations: [`PLATFORM_README.md`](PLATFORM_README.md)
-- Recovery architecture: [`RESTORE_README.md`](RESTORE_README.md)
+- Recovery architecture: [`cosmetic-agent/docs/architecture/CONTAINER_RESET_RECOVERY.md`](cosmetic-agent/docs/architecture/CONTAINER_RESET_RECOVERY.md)
 - Backup scope and exclusions: [`BACKUP_MANIFEST.md`](BACKUP_MANIFEST.md)
 
 ## Verified on 2026-11-03

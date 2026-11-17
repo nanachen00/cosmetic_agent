@@ -2,7 +2,10 @@
 
 from __future__ import annotations
 
+import time
 from app.clients.terra_completion_client import TerraCompletionClient
+from core.observability import observe_pipeline_stage
+from tools.search.ingredient_alias_matcher import match_single_ingredient
 
 
 _SYSTEM_PROMPT = """你是一個專業的化妝品與化學成分標籤提取器。
@@ -37,6 +40,11 @@ class TerraIngredientExtractor:
 
     def extract_ingredient(self, text: str) -> str | None:
         """Extract only the ingredient name, preserving the legacy output rules."""
+        started = time.perf_counter()
+        local = match_single_ingredient(text)
+        if local is not None:
+            observe_pipeline_stage("knowledge", "ingredient_extract_local", started)
+            return local
         messages = [
             {"role": "system", "content": _SYSTEM_PROMPT},
             {
@@ -59,9 +67,11 @@ class TerraIngredientExtractor:
                 .replace("'", "")
                 .replace('"', "")
             )
+            observe_pipeline_stage("knowledge", "ingredient_extract_terra", started)
             return None if cleaned.upper() == "NONE" else cleaned
         except Exception as exc:
-            print(f"[WARNING] Terra 成分提取器呼叫失敗: {exc}")
+            observe_pipeline_stage("knowledge", "ingredient_extract_terra", started, status="error")
+            print(f"[WARNING] Terra 成分提取器呼叫失敗: {type(exc).__name__}")
             return None
 
 

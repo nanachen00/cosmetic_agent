@@ -1,0 +1,14 @@
+{
+  "checked_on":"2026-11-16 Asia/Taipei",
+  "purpose":"Appearance research and non-skin rejection; no clinical diagnosis or automatic deployment",
+  "sources":[
+    {"name":"SkinCon / original Atlas images","source":"https://skincon-dataset.github.io/","image_host":"https://atlasdermatologico.com.br/","metadata_source":"https://github.com/mattgroh/fitzpatrick17k","rights":"Fitzpatrick17k CC BY-NC-SA 3.0 plus original Atlas non-commercial use with attribution","status":"400 new source images acquired, excluding all 320 previously acquired source MD5s","labels":"Original expert concepts mapped to appearance tags; not locally re-adjudicated","training":"Research only; source-image groups, not verified independent people"},
+    {"name":"SCIN","source":"https://github.com/google-research-datasets/scin","rights":"Original SCIN Data Use License, retained with snapshot","status":"128 additional cases acquired; earlier 128 entries visually reviewed by the assistant","labels":"Appearance review remains AI/non-expert; uncertainty is explicit null","training":"No pending or AI-reviewed entries used in this expert comparison"},
+    {"name":"COCO 2017 object controls","source":"https://cocodataset.org/","rights":"Only images whose original annotation metadata identifies CC BY or CC BY-SA; retain license URL and original Flickr URL","status":"96 downloaded; one ambiguous person/doll image visually excluded","labels":"Source-object-derived non-skin controls, not dermatologist labels","training":"Rejection controls only"},
+    {"name":"AcneSCU","source":"https://github.com/pingguokiller/acnedetection/blob/main/README.md","status":"Not acquired","reason":"Current original-author README directs access requests to the author; no messages sent; mirror CC claims do not replace the original non-commercial restriction"},
+    {"name":"ACNE-DET","source":"https://github.com/INno-Vation/Decoupled-Sequential-Detection-Head","status":"Not acquired","reason":"Original distribution is a Baidu share; dataset permission and reliable automated access not verified"},
+    {"name":"DermaBench / DDI","source":"https://arxiv.org/abs/2601.14084","status":"Not acquired","reason":"DermaBench is metadata-only; underlying DDI images have separate access terms"},
+    {"name":"Commercial facial defect vendors","source":"https://github.com/Nexdata-AI/26090-Images-Human-Facial-Skin-Defects-Data","status":"Excluded","reason":"Commercial-license offering and public samples are not a freely licensed full training dataset"}
+  ],
+  "image_privacy":"No re-identification, no removal of original privacy masks, no redistribution of image files through Git"
+}

@@ -324,6 +324,7 @@ import type {
   ChatCard,
   ConversationLimitStatus,
   ProfileForm,
+  RecommendationProductEvidence,
   QuickReply,
   RootAgentResponse,
   RootRoute,
@@ -349,6 +350,7 @@ export type ChatHistoryMessage = {
   quick_replies?: QuickReply[];
   quickReplies?: QuickReply[];
   cards?: ChatCard[];
+  products?: RecommendationProductEvidence[];
 };
 
 

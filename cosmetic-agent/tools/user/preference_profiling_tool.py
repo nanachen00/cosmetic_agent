@@ -1,6 +1,7 @@
 import json
+import os
 
-from models.taide_client import TaideClient
+from app.clients.chat_completion_client import ChatCompletionClient
 
 from schemas.user_analysis import (
     PreferenceProfile
@@ -638,9 +639,9 @@ def generate_preference_profile(
 
     try:
 
-        client = TaideClient()
+        client = ChatCompletionClient.from_env()
 
-        raw_result = client.chat(
+        raw_result = client.complete(
             messages=[
                 {
                     "role": "system",
@@ -651,6 +652,7 @@ def generate_preference_profile(
                     "content": user_content
                 }
             ],
+            model=os.getenv("TAIDE_MODEL", "taide-12b"),
             max_tokens=900,
             temperature=0.1
         )

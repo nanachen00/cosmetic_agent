@@ -1,0 +1,6 @@
+# CPython 3.11 / Linux x86_64 / ROCm 7.1, official PyTorch wheels.
+# Torch index supplies no upstream SHA; its hash is a local measurement over the HTTPS download.
+# torchvision and triton-rocm hashes are supplied by the official index.
+https://download-r2.pytorch.org/whl/rocm7.1/torch-2.13.0%2Brocm7.1-cp311-cp311-manylinux_2_28_x86_64.whl --hash=sha256:d9ec32f234eb993d30b6ab06980a83aab838919c10ca1a40e2003f201f4153bf
+https://download-r2.pytorch.org/whl/rocm7.1/torchvision-0.28.0%2Brocm7.1-cp311-cp311-manylinux_2_28_x86_64.whl --hash=sha256:83fd4219cef2408dcc961e0c4ef49f04482b7f559c42f0a48345b8a887626a41
+https://download-r2.pytorch.org/whl/triton_rocm-3.7.1-cp311-cp311-linux_x86_64.whl --hash=sha256:bdbebb676e09dd50cdb3acba46c702de434baadd1b9eaca5ace9f9a038b9e37b

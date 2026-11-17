@@ -64,6 +64,31 @@ def test_product_copy_explains_incomplete_ingredients_in_plain_language(monkeypa
     )
 
 
+def test_product_name_never_becomes_unverified_texture_evidence(monkeypatch):
+    monkeypatch.delenv("PRODUCT_COPY_USE_LLM", raising=False)
+    products = [{
+        "name": "水感清爽輕盈凝乳",
+        "category": "保養商品",
+        "ingredients": [],
+        "concern_hits": 0,
+        "over_budget": False,
+        "is_partner": False,
+    }]
+
+    result = product_agent._batch_generate_rank_content(
+        products,
+        skin_type="unknown",
+        concerns=[],
+        warnings=[],
+        memory_context="",
+    )
+
+    reason = result[0]["recommendation_reason"]
+    assert reason == "目前缺少足夠成分功效證據，僅列為次要比較候選"
+    assert "清爽度" not in reason
+    assert "質地" not in reason
+
+
 def test_recommendation_reason_is_chinese_first_and_specific():
     reason = product_agent._ingredient_support_reason("vitamin c", "美白")
     assert reason == "維他命 C提供抗氧化與提亮支持"
@@ -200,7 +225,7 @@ def test_mobile_product_reply_uses_profile_history_and_only_three_items():
         ),
     )
 
-    assert "✔️以自動套用你的偏好" in reply
+    assert "本次需求摘要（請確認）" in reply
     assert "近期膚況：抗痘、保濕、控油" in reply
     assert "**適合你的原因**" in reply
     assert (

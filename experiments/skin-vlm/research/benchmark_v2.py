@@ -130,9 +130,11 @@ def encode(processor,row,training=False):
     if training and row.get('_flip'):image=image.transpose(Image.Transpose.FLIP_LEFT_RIGHT)
     prompt=messages(image)
     prefix=processor.apply_chat_template(prompt,tokenize=True,add_generation_prompt=True,return_dict=True,return_tensors='pt')
+    prefix.pop('token_type_ids',None)
     if not training:return prefix
     full=prompt+[{'role':'assistant','content':[{'type':'text','text':json.dumps({'lesion_present':row['lesion_present']},separators=(',',':'))}]}]
     batch=processor.apply_chat_template(full,tokenize=True,add_generation_prompt=False,return_dict=True,return_tensors='pt')
+    batch.pop('token_type_ids',None)
     n=prefix['input_ids'].shape[1]
     if not torch.equal(prefix['input_ids'],batch['input_ids'][:,:n]):raise ValueError('prefix mismatch')
     labels=batch['input_ids'].clone();labels[:,:n]=-100;labels[batch['attention_mask']==0]=-100

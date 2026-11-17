@@ -1,0 +1,77 @@
+{
+  "checked_at": "2026-11-16T18:19:00.999220+00:00",
+  "package": {
+    "name": "@mediapipe/tasks-vision",
+    "version": "1.2.3",
+    "license": "Apache-2.0",
+    "source": "https://registry.npmjs.org/@mediapipe/tasks-vision/1.2.3",
+    "upstream_tarball_integrity": "sha512-sxJyfhbN+EamexhaaCmUlw7v8vWWMum7VDsORe6d4c8Dk/xlI4qiIgoSw9cE9hpvYhVRRVLIA8y605FbqWkNeQ==",
+    "publisher": {
+      "npm_user": "tejaswin432",
+      "publisher_email_domain": "google.com",
+      "author_domain": "google.com",
+      "homepage": "http://mediapipe.dev"
+    },
+    "dependencies": {}
+  },
+  "models_downloaded": 1,
+  "local_processing_only": true,
+  "note": "Local SHA256 receipts are not claimed to be upstream-published SHA256 values. Registry SRI and available GCS MD5 are recorded separately.",
+  "official_docs": [
+    "https://developers.google.com/edge/mediapipe/solutions/vision/face_landmarker?tab=Web"
+  ],
+  "assets": [
+    {
+      "path": "face-capture-v1/tasks-vision-1.2.3/vision_bundle.js",
+      "bytes": 156016,
+      "local_sha256": "9c2d4373d0f50dfcc91b07b6a884a74c42e163e067757b40fcf24b0edf800f3d",
+      "source": "npm @mediapipe/tasks-vision@1.2.3",
+      "upstream_per_file_sha256": null
+    },
+    {
+      "path": "face-capture-v1/tasks-vision-1.2.3/wasm/vision_wasm_internal.js",
+      "bytes": 336624,
+      "local_sha256": "2aa5fd3fdd3d8208cd7587df0bb19fb6925c4ea16a76dd025aedc1f64d6a6309",
+      "source": "npm @mediapipe/tasks-vision@1.2.3",
+      "upstream_per_file_sha256": null
+    },
+    {
+      "path": "face-capture-v1/tasks-vision-1.2.3/wasm/vision_wasm_internal.wasm",
+      "bytes": 14665716,
+      "local_sha256": "225bc06c0f51a9cf31fea0e9e0b0243e9e01fb5ef332cc1a7fa6656dbdfdaabf",
+      "source": "npm @mediapipe/tasks-vision@1.2.3",
+      "upstream_per_file_sha256": null
+    },
+    {
+      "path": "face-capture-v1/face_landmarker-float16-v1.task",
+      "bytes": 3758596,
+      "local_sha256": "64184e229b263107bc2b804c6625db1341ff2bb731874b0bcc2fe6544e0bc9ff",
+      "source": "https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task",
+      "version": "float16/1",
+      "upstream_sha256": null,
+      "upstream_x_goog_hash": {
+        "crc32c": "2FSEdQ=="
+      },
+      "upstream_md5_verified": false,
+      "gcs_generation": "1683136941916318"
+    },
+    {
+      "path": "face-capture-v1/LICENSE-APACHE-2.0.txt",
+      "bytes": 12331,
+      "local_sha256": "8707eef0533987efc5b155d64761eeb6e20793f50b9bd1a68dad1cf4719d0ed8",
+      "source": "https://raw.githubusercontent.com/google-ai-edge/mediapipe/master/LICENSE",
+      "scope": "MediaPipe runtime package license copy"
+    }
+  ],
+  "security_checks": {
+    "checked_at": "2026-11-16T18:26:56.597153+00:00",
+    "npm_audit_omit_dev_known_vulnerabilities": 0,
+    "osv_package_version_known_advisories": 0,
+    "osv_query": {
+      "package": "@mediapipe/tasks-vision",
+      "ecosystem": "npm",
+      "version": "1.2.3"
+    },
+    "limitation": "No known advisory is not a guarantee; actual browser/CSP/model compatibility must be tested with public images."
+  }
+}

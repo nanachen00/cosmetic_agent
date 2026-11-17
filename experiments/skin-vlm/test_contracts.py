@@ -21,6 +21,9 @@ class Contracts(unittest.TestCase):
     def test_invalid_output_counts_as_missed_positive(self):
         m=score([{'target':observation()}],[{'status':'invalid_model_output'}])
         self.assertEqual(m['by_tag']['redness']['fn'],1);self.assertEqual(m['valid_json_rate'],0)
+    def test_invalid_status_cannot_receive_credit_from_attached_observations(self):
+        m=score([{'target':observation()}],[{'status':'invalid_model_output','observation':observation()}])
+        self.assertEqual(m['by_tag']['redness']['tp'],0);self.assertEqual(m['by_tag']['redness']['fn'],1)
     def test_leakage_by_subject_and_image(self):
         with tempfile.TemporaryDirectory() as d:
             a=Path(d)/'a';b=Path(d)/'b';a.write_bytes(b'a');b.write_bytes(b'a')

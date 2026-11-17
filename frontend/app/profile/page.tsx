@@ -24,6 +24,10 @@ import {
 } from "@/components/AccountSecurityPanel";
 
 import {
+  RecommendationPreferencesCard,
+} from "@/components/RecommendationPreferencesCard";
+
+import {
   getProfile,
   saveProfile,
 } from "@/lib/api";
@@ -77,6 +81,7 @@ const skinTypes = [
   "乾性肌",
   "中性肌",
   "混合肌",
+  "敏感肌",
 ];
 
 
@@ -519,6 +524,15 @@ export default function ProfilePage() {
   const [
     hasEditedThisVisit,
     setHasEditedThisVisit,
+  ] =
+    useState(
+      false,
+    );
+
+
+  const [
+    recommendationPreferencesDirty,
+    setRecommendationPreferencesDirty,
   ] =
     useState(
       false,
@@ -1182,9 +1196,13 @@ export default function ProfilePage() {
 
 
   const shouldBlockNavigation =
-    isDirty
-    &&
-    hasEditedThisVisit;
+    (
+      isDirty
+      &&
+      hasEditedThisVisit
+    )
+    ||
+    recommendationPreferencesDirty;
 
 
   useEffect(() => {
@@ -2009,6 +2027,24 @@ export default function ProfilePage() {
 
           <div className="choice-list">
 
+            <button
+              type="button"
+              aria-pressed={!profile.skinType}
+              className={
+                !profile.skinType
+                  ? "selected"
+                  : ""
+              }
+              onClick={() =>
+                update(
+                  "skinType",
+                  "",
+                )
+              }
+            >
+              未設定
+            </button>
+
             {skinTypes.map(
               (
                 item,
@@ -2019,6 +2055,11 @@ export default function ProfilePage() {
                     item
                   }
                   type="button"
+                  aria-pressed={
+                    profile.skinType
+                    ===
+                    item
+                  }
                   className={
                     profile.skinType
                     ===
@@ -2410,6 +2451,13 @@ export default function ProfilePage() {
       </section>
 
 
+      <RecommendationPreferencesCard
+        onDirtyChange={
+          setRecommendationPreferencesDirty
+        }
+      />
+
+
       {/* =========================
           消費人格
       ========================== */}
@@ -2569,7 +2617,9 @@ export default function ProfilePage() {
 
 
             <p id="profile-leave-description">
-              這次的修改會保留成草稿。你要繼續編輯，還是先離開這一頁？
+              {recommendationPreferencesDirty
+                ? "推薦偏好尚未儲存，離開後不會套用；基本資料草稿仍會保留。你要繼續編輯，還是先離開？"
+                : "這次的修改會保留成草稿。你要繼續編輯，還是先離開這一頁？"}
             </p>
 
 
@@ -2595,7 +2645,9 @@ export default function ProfilePage() {
                   confirmNavigation
                 }
               >
-                保留草稿並離開
+                {recommendationPreferencesDirty
+                  ? "放棄未儲存偏好並離開"
+                  : "保留草稿並離開"}
               </button>
 
             </div>

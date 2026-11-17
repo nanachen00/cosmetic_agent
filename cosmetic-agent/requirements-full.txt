@@ -1,12 +1,13 @@
-# BLINK AI backend — full runtime requirements (reconstructed 2026-10-21)
+# BLINK AI Mac backend — dependency input for the generated Python 3.12 lock.
 # Derived from every third-party import in cosmetic-agent/ plus requirements-backend.txt.
 # The backend itself needs no GPU / torch; models run in separate vLLM and embedding envs.
 
-# Web framework. Pinned below Starlette 1.0 because core/observability.py uses
-# app.add_event_handler(), which Starlette 1.x removed.
-fastapi>=0.115.0,<0.116
-uvicorn[standard]>=0.30,<0.36
-pydantic>=2.7,<3
+# Web framework. FastAPI 0.163 supports Starlette 1.x; lifecycle hooks were
+# migrated to lifespan composition before this upgrade.
+fastapi==0.163.0
+uvicorn[standard]==0.54.0
+pydantic>=2.9,<3
+email-validator==2.4.0
 
 # Model / data clients
 openai>=1.99,<3            # responses.parse (Structured Outputs) for Terra + local vLLM

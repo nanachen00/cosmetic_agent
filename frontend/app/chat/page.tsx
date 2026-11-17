@@ -6,6 +6,7 @@ import {
   Fragment,
   FormEvent,
   Suspense,
+  memo,
   useEffect,
   useMemo,
   useRef,
@@ -38,12 +39,14 @@ import type {
   ChatCard,
   ConversationLimitStatus,
   QuickReply,
+  RecommendationProductEvidence,
 } from "@/types";
 
 import {
   readSession,
 } from "@/lib/storage";
 import { resolveCurrentUserId } from "@/lib/auth-client";
+import { ChatHistoryPersistence } from "@/lib/chat-history-persistence";
 
 import CustomerQuiz from "@/components/CustomerQuiz";
 
@@ -296,6 +299,7 @@ interface ChatMessage {
   quickReplies?: QuickReply[];
 
   cards?: ChatCard[];
+  products?: RecommendationProductEvidence[];
 }
 
 
@@ -479,7 +483,7 @@ function normalizeInternalActionMessage(
   message: ChatMessage,
 ): ChatMessage {
   if (message.role !== "user") {
-    return message;
+    return { ...message, products: sanitizeRecommendationProducts(message.products) };
   }
 
   const action = message.content.trim();
@@ -868,10 +872,80 @@ function splitRecommendationField(line: string): {
 }
 
 
+// Keep only bounded backend evidence. Text headings and scalar model scores are not proof of fit.
+function sanitizeRecommendationProducts(value: unknown): RecommendationProductEvidence[] {
+  if (!Array.isArray(value)) return [];
+  const text = (item: unknown, limit = 400): string => typeof item === "string"
+    ? item.trim().slice(0, limit) : "";
+  const strings = (item: unknown, limit: number): string[] => Array.isArray(item)
+    ? [...new Set(item.slice(0, 20).map(entry => text(entry)).filter(Boolean))].slice(0, limit)
+    : [];
+  const amount = (item: unknown): number | undefined => (
+    typeof item === "number" && Number.isFinite(item) && item >= 0
+      ? item
+      : undefined
+  );
+  return value.slice(0, 20).flatMap(item => {
+    if (!item || typeof item !== "object" || Array.isArray(item)) return [];
+    const row = item as Record<string, unknown>;
+    const name = text(row.name, 200);
+    if (!name) return [];
+    return [{
+      id: text(row.id, 150), name, brand: text(row.brand, 150),
+      price: amount(row.price), currency: text(row.currency, 12),
+      product_version: text(row.product_version, 120), capacity: text(row.capacity, 80),
+      personalization_policy_version: text(row.personalization_policy_version, 50),
+      personalization_reasons: strings(row.personalization_reasons, 2),
+      personalization_missing: strings(row.personalization_missing, 1),
+      recommendation_limitations: text(row.recommendation_limitations),
+      inci_status: text(row.inci_status, 80),
+      ingredient_evidence_level: text(row.ingredient_evidence_level, 80),
+      formula_market: text(row.formula_market, 40),
+      inci_source_url: text(row.inci_source_url, 1000),
+      texture: text(row.texture, 120),
+      texture_source_url: text(row.texture_source_url, 1000),
+      texture_verification_status: text(row.texture_verification_status, 50),
+      price_observed_at: text(row.price_observed_at, 80),
+      price_source_url: text(row.price_source_url, 1000),
+      source_title: text(row.source_title, 200),
+      source_url: text(row.source_url, 1000),
+      evidence_status: text(row.evidence_status, 50),
+      evidence_updated_at: text(row.evidence_updated_at, 80),
+    }];
+  });
+}
+
+function findRecommendationEvidence(
+  title: string,
+  brand: string,
+  products: RecommendationProductEvidence[] | undefined,
+): RecommendationProductEvidence | undefined {
+  const key = (value: string) => value.normalize("NFKC").replace(/\*\*/g, "")
+    .replace(/\s+[—-]\s*(?:NT\$|NTD).*$/, "").replace(/\s+/g, " ").trim().toLocaleLowerCase();
+  const titleKey = key(title);
+  const matches = (products ?? []).filter(product => {
+    if (!product || typeof product.name !== "string") return false;
+    if (brand && (!product.brand || key(brand) !== key(product.brand))) return false;
+    const name = product.name.trim();
+    // Match the same optional brand-prefix removal as the backend formatter.
+    const shortName = product.brand && name.toLocaleLowerCase().startsWith(product.brand.toLocaleLowerCase())
+      ? name.slice(product.brand.length).replace(/^[ ｜|—\-・]+/, "").trim() || name : name;
+    return titleKey === key(name) || titleKey === key(shortName);
+  });
+  // Never attach another item's evidence by position or an ambiguous display name.
+  return matches.length === 1 ? matches[0] : undefined;
+}
+
+function neutralizeUnverifiedAppliedHeadings(content: string): string {
+  return content.replace(/(?:✔️?\s*)?(?:已自動套用你的資料|以自動套用你的偏好|已套用你的偏好)/g, "本次需求摘要（請確認）");
+}
+
 function ProductRecommendationCard({
   product,
+  evidenceProducts,
 }: {
   product: ProductRecommendationBlock;
+  evidenceProducts?: RecommendationProductEvidence[];
 }) {
   const fields = product.lines
     .map(splitRecommendationField)
@@ -911,6 +985,24 @@ function ProductRecommendationCard({
     ? brandField.value
     : legacyBrand;
   const productType = categoryField?.value ?? "";
+  const evidence = findRecommendationEvidence(displayTitle, brand, evidenceProducts);
+  const verifiedPersonalization = evidence?.personalization_policy_version === "personal-v3";
+  const preferenceReasons = verifiedPersonalization ? evidence.personalization_reasons ?? [] : [];
+  const missing = verifiedPersonalization ? evidence.personalization_missing?.[0] ?? "" : "";
+  const limitation = evidence?.recommendation_limitations || (
+    evidence && evidence.inci_status !== "full" && evidence.ingredient_evidence_level !== "full_inci"
+      ? "尚未取得完整配方資料，無法確認已排除所有禁忌成分。" : ""
+  );
+  let priceSourceUrl = "";
+  try {
+    const candidate = new URL(evidence?.price_source_url ?? "");
+    if (["https:", "http:"].includes(candidate.protocol) && !candidate.username && !candidate.password) {
+      priceSourceUrl = candidate.href;
+    }
+  } catch { /* Missing or invalid sources stay absent. */ }
+  const observedAt = evidence?.price_observed_at;
+  const observedDate = observedAt && /^\d{4}-\d{2}-\d{2}(?:T|$)/.test(observedAt)
+    && Number.isFinite(Date.parse(observedAt)) ? observedAt.slice(0, 10) : "";
   const sourceField = fields.find(
     (field) =>
       PRODUCT_RECOMMENDATION_SOURCE_LABELS.has(field.label)
@@ -929,6 +1021,9 @@ function ProductRecommendationCard({
       return false;
     }
 
+    if (verifiedPersonalization && field && ["適合你的原因", "為什麼適合", "推薦理由"].includes(field.label)) {
+      return false;
+    }
     return !field || field.value.trim().length > 0;
   });
 
@@ -1001,6 +1096,19 @@ function ProductRecommendationCard({
         );
       })}
 
+      {preferenceReasons.length > 0 ? (
+        <section className="product-recommendation-card__highlight">
+          <span>依你偏好</span>
+          {preferenceReasons.map(reason => <p key={reason}>{reason}</p>)}
+        </section>
+      ) : null}
+      {missing || limitation ? (
+        <section className="product-recommendation-card__description">
+          <span>資料待確認</span>
+          <p>{[missing, limitation].filter(Boolean).join("；")}</p>
+        </section>
+      ) : null}
+
       {fields.find((field) => field.label === "重點成分")?.value ? (
         <section className="product-recommendation-card__ingredients">
           <span>重點成分</span>
@@ -1016,6 +1124,14 @@ function ProductRecommendationCard({
                 <small key={ingredient}>{ingredient}</small>
               ))}
           </div>
+        </section>
+      ) : null}
+
+      {price ? (
+        <section className="product-recommendation-card__description">
+          <span>參考價格</span>
+          <p>{observedDate ? `價格觀察：${observedDate}；實際價格以通路為準。` : "未提供價格更新時間，實際價格以通路為準。"}</p>
+          {priceSourceUrl ? <a className="chat-message-link" href={priceSourceUrl} target="_blank" rel="noopener noreferrer">價格來源 ↗</a> : null}
         </section>
       ) : null}
 
@@ -1049,7 +1165,7 @@ function ProductRecommendationIntroduction({
   const normalized = lines.map((line) => normalizeRecommendationStructure(line));
   const profileHeadingIndex = normalized.findIndex((line) =>
     line === "已自動套用你的資料" ||
-    line === "✔️以自動套用你的偏好"
+    line === "✔️以自動套用你的偏好" || line === "已套用你的偏好" || line === "本次需求摘要（請確認）"
   );
   const reasonHeadingIndex = normalized.findIndex((line) =>
     line === "適合你的原因" || line === "這次怎麼挑"
@@ -1058,7 +1174,7 @@ function ProductRecommendationIntroduction({
   if (profileHeadingIndex < 0) {
     return (
       <p className="product-recommendation-response__intro">
-        {renderMessageContent(lines.join("\n"))}
+        {renderMessageContent(neutralizeUnverifiedAppliedHeadings(lines.join("\n")))}
       </p>
     );
   }
@@ -1082,10 +1198,10 @@ function ProductRecommendationIntroduction({
 
   return (
     <div className="product-recommendation-response__intro">
-      {lead.length > 0 ? <p>{renderMessageContent(lead.join("\n"))}</p> : null}
+      {lead.length > 0 ? <p>{renderMessageContent(neutralizeUnverifiedAppliedHeadings(lead.join("\n")))}</p> : null}
 
       <section className="product-recommendation-response__profile">
-        <span>✔️以自動套用你的偏好</span>
+        <span>本次需求摘要（請確認）</span>
         <div>
           {profileItems.map((item) => <small key={item}>{item}</small>)}
         </div>
@@ -1102,17 +1218,19 @@ function ProductRecommendationIntroduction({
 }
 
 
-function ReadableAssistantMessage({
+const ReadableAssistantMessage = memo(function ReadableAssistantMessage({
   content,
+  products,
 }: {
   content: string;
+  products?: RecommendationProductEvidence[];
 }) {
   const recommendations = parseProductRecommendations(content);
 
   if (!recommendations) {
     return (
       <div className="chat-prose">
-        {content.replace(/\r\n?/g, "\n").trim().split(/\n\s*\n/).filter(Boolean).map((paragraph, index) => (
+        {neutralizeUnverifiedAppliedHeadings(content).replace(/\r\n?/g, "\n").trim().split(/\n\s*\n/).filter(Boolean).map((paragraph, index) => (
           <p key={index}>{renderMessageContent(paragraph)}</p>
         ))}
       </div>
@@ -1130,6 +1248,7 @@ function ReadableAssistantMessage({
           <ProductRecommendationCard
             key={`${product.number}-${product.title}`}
             product={product}
+            evidenceProducts={products}
           />
         ))}
       </div>
@@ -1149,7 +1268,7 @@ function ReadableAssistantMessage({
       )}
     </div>
   );
-}
+});
 
 
 function dedupeConsecutiveMessages(
@@ -1661,6 +1780,9 @@ function ChatPageContent() {
       "",
     );
 
+  // Include the member id as well as the conversation when authorizing cache writes.
+  const [loadedHistoryKey, setLoadedHistoryKey] = useState("");
+
 
   const [
     input,
@@ -1821,6 +1943,10 @@ const [userId, setUserId] = useState(""); useEffect(() => { let cancelled = fals
   const activeGenerationControllerRef = useRef<AbortController | null>(null);
   const streamUpdateFrameRef = useRef<number | null>(null);
   const pendingStreamContentRef = useRef("");
+  const historyPersistenceRef = useRef<ChatHistoryPersistence<ChatMessage> | null>(null);
+  if (historyPersistenceRef.current === null) {
+    historyPersistenceRef.current = new ChatHistoryPersistence<ChatMessage>();
+  }
 
   function cancelScheduledStreamUpdate(): void {
     if (streamUpdateFrameRef.current !== null) {
@@ -1983,6 +2109,7 @@ const [userId, setUserId] = useState(""); useEffect(() => { let cancelled = fals
     setLoadedConversationId(
       "",
     );
+    setLoadedHistoryKey("");
 
     setMessages([
       {
@@ -2021,6 +2148,7 @@ const [userId, setUserId] = useState(""); useEffect(() => { let cancelled = fals
       if (
         !userId || !conversationId || isDraftConversation
       ) {
+        setLoadedHistoryKey(chatHistoryKey);
         setLoadedConversationId(
           conversationId,
         );
@@ -2133,7 +2261,8 @@ const parsed = saved ? (JSON.parse(saved) as CachedChatHistory) : null; if (pars
         }
 
 
-      setLoadedConversationId(conversationId);
+        setLoadedHistoryKey(chatHistoryKey);
+        setLoadedConversationId(conversationId);
         setHistoryLoaded(
           true,
         );
@@ -2277,6 +2406,7 @@ const parsed = saved ? (JSON.parse(saved) as CachedChatHistory) : null; if (pars
                 id: crypto.randomUUID(),
                 role: "assistant",
                 content: res.reply,
+                products: sanitizeRecommendationProducts(res.products),
                 created_at: new Date().toISOString(),
                 quickReplies: res.cards?.length ? [] : (res.quick_replies ?? []),
                 cards: res.cards ?? [],
@@ -2366,8 +2496,8 @@ const parsed = saved ? (JSON.parse(saved) as CachedChatHistory) : null; if (pars
   /* =======================================================
      Save Chat History
 
-     messages 每次改變，
-     自動保存到 sessionStorage。
+     已完成的 messages 改變時保存；
+     串流占位訊息更新不重寫相同的歷史。
   ======================================================= */
 
   useEffect(() => {
@@ -2382,6 +2512,7 @@ const parsed = saved ? (JSON.parse(saved) as CachedChatHistory) : null; if (pars
     if (
       !historyLoaded ||
       !userId ||
+      loadedHistoryKey !== chatHistoryKey ||
       loadedConversationId !==
         conversationId
     ) {
@@ -2403,10 +2534,12 @@ const parsed = saved ? (JSON.parse(saved) as CachedChatHistory) : null; if (pars
         );
 
 
-      sessionStorage.setItem(
+      historyPersistenceRef.current!.persist(
+        sessionStorage,
         chatHistoryKey,
-JSON.stringify({ version: 1, expiresAt: Date.now() + CHAT_HISTORY_TTL_MS, messages: messagesToSave } satisfies CachedChatHistory),
-);
+        messagesToSave,
+        Date.now() + CHAT_HISTORY_TTL_MS,
+      );
     } catch (
       error
     ) {
@@ -2422,6 +2555,7 @@ JSON.stringify({ version: 1, expiresAt: Date.now() + CHAT_HISTORY_TTL_MS, messag
     userId,
     conversationId,
     loadedConversationId,
+    loadedHistoryKey,
   ]);
 
 
@@ -2559,6 +2693,8 @@ JSON.stringify({ version: 1, expiresAt: Date.now() + CHAT_HISTORY_TTL_MS, messag
 
             content:
               res.reply,
+
+            products: sanitizeRecommendationProducts(res.products),
 
             created_at: new Date().toISOString(),
 
@@ -2748,6 +2884,8 @@ JSON.stringify({ version: 1, expiresAt: Date.now() + CHAT_HISTORY_TTL_MS, messag
 
             content:
               res.reply,
+
+            products: sanitizeRecommendationProducts(res.products),
 
             created_at: new Date().toISOString(),
 
@@ -3570,7 +3708,7 @@ JSON.stringify({ version: 1, expiresAt: Date.now() + CHAT_HISTORY_TTL_MS, messag
                       </span>
                     </span>
                   ) : message.role === "assistant" ? (
-                    <ReadableAssistantMessage content={message.content} />
+                    <ReadableAssistantMessage content={message.content} products={message.products} />
                   ) : (
                     renderMessageContent(message.content)
                   )}

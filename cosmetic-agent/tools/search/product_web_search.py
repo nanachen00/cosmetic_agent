@@ -836,6 +836,9 @@ def search_named_product(
                 "category": str(item.get("category") or "其他").strip(),
                 "price": price,
                 "currency": "TWD",
+                # Model-extracted prices have not been independently checked
+                # against a current local offer; never satisfy a hard budget.
+                "price_is_estimate": price is not None,
                 "copy": summary[:90].rstrip("，、；： ") + ("" if summary[:90].endswith(("。", "！", "？")) else "。"),
                 "recommendation_reason": "本地商品庫沒有符合項目，改查最新網頁資料",
                 "is_partner": False,

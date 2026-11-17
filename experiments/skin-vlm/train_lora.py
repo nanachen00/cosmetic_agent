@@ -12,6 +12,7 @@ def encode_example(processor,row):
     full=prompt+[{'role':'assistant','content':[{'type':'text','text':json.dumps(row['target'],ensure_ascii=False,separators=(',',':'))}]}]
     prefix=processor.apply_chat_template(prompt,tokenize=True,add_generation_prompt=True,return_dict=True,return_tensors='pt')
     batch=processor.apply_chat_template(full,tokenize=True,add_generation_prompt=False,return_dict=True,return_tensors='pt')
+    batch.pop('token_type_ids',None)
     n=prefix['input_ids'].shape[1]
     if not torch.equal(prefix['input_ids'],batch['input_ids'][:,:n]): raise ValueError('Chat template prefix mismatch')
     if batch['input_ids'].shape[1]>4096: raise ValueError('Example too long; do not truncate image tokens')
@@ -30,6 +31,9 @@ def main():
     p.add_argument('--rank',type=int,default=8)
     p.add_argument('--alpha',type=int,default=None,help='Defaults to twice the rank')
     p.add_argument('--dropout',type=float,default=.05)
+    p.add_argument('--allow-source-expert',action='store_true')
+    p.add_argument('--modules',choices=('language_attention','language_attention_mlp','language_attention_mlp_visual_merger'),default='language_attention')
+    p.add_argument('--backup-root',type=Path,default=Path('/mnt/goodagents/checkpoint-backups/skin-app-sft'))
     p.add_argument('--epochs',type=float,help='Optional full-data passes; overrides --steps')
     p.add_argument('--smoke',action='store_true');a=p.parse_args();rows=load_rows(a.train)
     val=load_rows(a.val) if a.val else []
@@ -42,20 +46,24 @@ def main():
     if a.smoke:
         if a.steps!=1 or any(r['label_origin']!='synthetic_control' for r in rows): raise ValueError('Smoke needs one step and synthetic controls')
     else:
-        if not val or any(r['label_origin']!='human_verified' for r in rows+val): raise ValueError('Reviewed train/validation data required')
+        from data_review import require_reviewed_labels
+        if not val:raise ValueError('Reviewed train/validation data required')
+        require_reviewed_labels(rows+val,a.allow_source_expert)
         assert_no_leakage(rows,val)
     out=Path(a.out)
+    from research.v3.train_cycle3 import backup_checkpoint,lora_targets,require_persistent_mount
+    require_persistent_mount([Path(a.model),Path(a.train),out,a.backup_root])
     if out.exists() and any(out.iterdir()): raise ValueError('Choose a fresh adapter directory')
     import torch
     from peft import LoraConfig,get_peft_model
     torch.manual_seed(a.seed);random.seed(a.seed);engine=SkinVLM(a.model)
-    names=[n for n,_ in engine.model.named_modules() if 'language_model' in n and n.endswith(('q_proj','k_proj','v_proj','o_proj'))]
-    if not names: raise ValueError('Language-attention modules not found')
+    names=lora_targets([n for n,_ in engine.model.named_modules()],a.modules)
     model=get_peft_model(engine.model,LoraConfig(r=a.rank,lora_alpha=a.alpha,lora_dropout=a.dropout,target_modules=names,bias='none',task_type='CAUSAL_LM'))
     model.config.use_cache=False
     model.gradient_checkpointing_enable(gradient_checkpointing_kwargs={'use_reentrant':False})
     model.enable_input_require_grads();params=[(n,v) for n,v in model.named_parameters() if v.requires_grad]
-    if any('visual' in n for n,_ in params): raise ValueError('Visual encoder unexpectedly trainable')
+    if any('visual' in n and (not a.modules.endswith('visual_merger') or 'merger' not in n or 'lora_' not in n) for n,_ in params):
+        raise ValueError('Visual parameters outside the approved merger adapter became trainable')
     optimizer=torch.optim.AdamW([v for _,v in params],lr=a.lr);model.train();log=[]
     rng=random.Random(a.seed);order=[]
     def next_row():
@@ -88,7 +96,11 @@ def main():
              'sample_exposures':a.steps*a.accumulation,'learning_rate':a.lr,'seed':a.seed,'train_images':len(rows),'validation_images':len(val),
              'trainable_parameters':sum(v.numel() for _,v in params),'metrics':log,
              'train_manifest_sha256':hashlib.sha256(Path(a.train).read_bytes()).hexdigest(),
-             'base_model':str(Path(a.model).resolve()),'warning':'Successful training/lower loss is not skin-recognition accuracy.'}
+             'base_model':str(Path(a.model).resolve()),'runtime':engine.runtime,'modules':a.modules,
+             'source_expert_images':sum(row['label_origin']=='source_expert_derived' for row in rows),
+             'research_only':any(row.get('research_only') for row in rows+val),
+             'warning':'Successful training/lower loss is not skin-recognition accuracy.'}
     (out/'training_summary.json').write_text(json.dumps(summary,indent=2));print('ADAPTER_SAVED',out)
+    if not a.smoke:backup_checkpoint(out,a.backup_root/out.name,summary)
 
 if __name__=='__main__': main()

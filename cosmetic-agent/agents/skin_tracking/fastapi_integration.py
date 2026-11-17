@@ -12,6 +12,7 @@ from agents.skin_tracking.bootstrap import (
     shutdown_skin_tracking,
 )
 from agents.skin_tracking.composition import SkinTrackingConfigurationError
+from core.lifespan import register_lifespan
 
 INSTALLATION_STATE_KEY = "skin_tracking_installed"
 
@@ -40,10 +41,11 @@ def install_skin_tracking(
         SkinTrackingConfigurationError,
         _skin_tracking_unavailable,
     )
-    # AI Stack 目前的 FastAPI 版本沒有 app.add_event_handler()；
-    # router event list 在新舊版本都可用，也不會改寫既有 lifespan。
-    app.router.on_startup.append(_start_skin_tracking)
-    app.router.on_shutdown.append(shutdown_skin_tracking)
+    register_lifespan(
+        app,
+        startup=_start_skin_tracking,
+        shutdown=shutdown_skin_tracking,
+    )
     setattr(app.state, INSTALLATION_STATE_KEY, True)
 
 

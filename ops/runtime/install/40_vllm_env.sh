@@ -1,14 +1,16 @@
 #!/usr/bin/env bash
 # Verify the already-compiled inference env (vLLM + SGLang in $VLLM_ENV) instead of rebuilding.
-# It only adds the two small packages the gateway / downloader need if they are missing.
+# Read-only legacy verification; never changes the shared restored environment.
 set -Eeuo pipefail
 source "$(dirname "$0")/../runtime.conf"
+[[ "$ENABLE_TAIDE" == "1" ]] || die "vLLM 驗證需要明確指定 ENABLE_TAIDE=1"
 
-log "40. 檢查已編譯的推論環境 $VLLM_ENV（不重新編譯）"
+log "40. 檢查已編譯的推論環境 ${VLLM_ENV}（不重新編譯）"
 PY="$VLLM_ENV/bin/python"
-[[ -x "$PY" ]] || die "找不到 $PY；若環境在別處，請設定 VLLM_ENV=<路徑> 再執行"
+[[ -x "$PY" ]] || die "找不到 ${PY}；若環境在別處，請設定 VLLM_ENV=<路徑> 再執行"
 
-"$PY" -c "import httpx, huggingface_hub" 2>/dev/null || "$PY" -m pip install "httpx>=0.27" "huggingface_hub>=0.24"
+"$PY" -c "import httpx, huggingface_hub" 2>/dev/null \
+  || die "舊 vLLM 環境缺少依賴；停止驗證，不自動 pip 修改共用環境"
 
 "$PY" - <<'PY'
 import importlib, torch

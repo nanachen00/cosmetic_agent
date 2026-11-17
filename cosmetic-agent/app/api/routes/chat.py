@@ -8,6 +8,7 @@ from typing import Any
 
 from fastapi import APIRouter, HTTPException, Request
 from fastapi.responses import StreamingResponse
+from starlette.background import BackgroundTask
 from starlette.concurrency import run_in_threadpool
 
 from app.schemas.chat import ChatRequest, normalize_conversation_id
@@ -33,9 +34,7 @@ class ChatRouteDependencies:
 
 async def _release_stream_resources_when_done(
     producer,
-    ticket,
-    guard_ticket,
-    finish_chat_security,
+    release_resources,
     *,
     release_started_at: float,
 ) -> None:
@@ -45,8 +44,7 @@ async def _release_stream_resources_when_done(
     except BaseException:
         pass
     finally:
-        await ticket.release()
-        await finish_chat_security(guard_ticket)
+        await release_resources()
         observe_pipeline_stage("chat", "cancel_release", release_started_at)
 
 def create_chat_router(deps: ChatRouteDependencies) -> APIRouter:
@@ -350,11 +348,15 @@ def create_chat_router(deps: ChatRouteDependencies) -> APIRouter:
 
         guard_ticket = await deps.begin_chat_security(request, req, user_id)
         if request_id is not None:
-            created = await chat_job_store.start(
-                request_id,
-                user_id=user_id,
-                conversation_id=conversation_id,
-            )
+            try:
+                created = await chat_job_store.start(
+                    request_id,
+                    user_id=user_id,
+                    conversation_id=conversation_id,
+                )
+            except BaseException:
+                await deps.finish_chat_security(guard_ticket)
+                raise
             if not created:
                 await deps.finish_chat_security(guard_ticket)
                 return _streaming_response(
@@ -364,113 +366,58 @@ def create_chat_router(deps: ChatRouteDependencies) -> APIRouter:
                         last_event_id=last_event_id,
                     )
                 )
+        ticket = None
         try:
             queue_started_at = time.perf_counter()
             ticket = await deps.reserve_chat_ticket()
             queue_wait_ms = (time.perf_counter() - queue_started_at) * 1000
-            agent = await run_in_threadpool(
-                deps.get_agent_with_profile,
-                user_id=user_id,
-                conversation_id=conversation_id,
-            )
-            history_for_limit = await deps.enforce_conversation_limit(
-                agent=agent,
-                request=request,
-                user_id=user_id,
-                incoming_message=req.message,
-            )
-            if not history_for_limit:
-                await deps.guard_conversation_creation(request, user_id)
         except BaseException:
+            if ticket is not None:
+                await ticket.release()
             await deps.finish_chat_security(guard_ticket)
+            if request_id is not None:
+                await chat_job_store.fail(
+                    request_id,
+                    user_id=user_id,
+                    message="目前暫時無法接受回覆工作，請稍後再試。",
+                )
             raise
+
+        resource_lock = asyncio.Lock()
+        resources_released = False
+        release_task = None
+        producer_holder = {"task": None}
+
+        async def release_resources() -> None:
+            nonlocal resources_released
+            async with resource_lock:
+                if resources_released:
+                    return
+                resources_released = True
+            try:
+                await ticket.release()
+            finally:
+                await deps.finish_chat_security(guard_ticket)
+
+        async def cleanup_stream() -> None:
+            nonlocal release_task
+            producer = producer_holder["task"]
+            if producer is not None and not producer.done():
+                if release_task is None:
+                    release_task = asyncio.create_task(
+                        _release_stream_resources_when_done(
+                            producer,
+                            release_resources,
+                            release_started_at=time.perf_counter(),
+                        )
+                    )
+                return
+            await release_resources()
 
         async def event_stream():
             loop = asyncio.get_running_loop()
-            producer = None
             events = asyncio.Queue()
             state = {"has_delta": False, "first_token_observed": False}
-
-
-            async def queue_event(event: str, payload: dict[str, Any]) -> None:
-                if event == "delta" and not state["first_token_observed"]:
-                    state["first_token_observed"] = True
-                    observe_pipeline_stage("chat", "first_token", stream_started_at)
-                event_id = None
-                if request_id is not None:
-                    event_id = await chat_job_store.append_event(
-                        request_id,
-                        user_id=user_id,
-                        event=event,
-                        payload=payload,
-                    )
-                await events.put((event, payload, event_id))
-
-            def on_delta(delta: str) -> None:
-                if not delta:
-                    return
-                state["has_delta"] = True
-                loop.call_soon_threadsafe(
-                    asyncio.create_task,
-                    queue_event("delta", {"text": delta}),
-                )
-
-            def run_agent(freshness_context=None) -> dict:
-                process_input = (
-                    f"__knowledge_consult__:{req.message}"
-                    if req.flow == "skin_consult"
-                    else req.message
-                )
-                return agent.process(
-                    process_input,
-                    conversation_flow=req.flow,
-                    action=req.action,
-                    on_delta=on_delta if req.flow == "skin_consult" else None,
-                    freshness_context=freshness_context,
-                )
-
-            async def produce() -> None:
-                try:
-                    freshness_context = await _load_freshness_context(req.message)
-                    result = await run_in_threadpool(run_agent, freshness_context)
-                    if isinstance(result, dict):
-                        result["conversation_limit"] = deps.completed_conversation_limit(
-                            history_for_limit, req.message, result
-                        )
-                        if isinstance(result.get("reply"), str):
-                            result["reply"] = result["reply"].replace("**", "")
-                        result["route"] = (
-                            req.flow
-                            if req.flow in {
-                                "product_search",
-                                "skin_record",
-                                "skin_consult",
-                            }
-                            else result.get("route")
-                            or deps.stage_to_route(result.get("stage", ""))
-                        )
-                        result["sessionId"] = conversation_id
-                        result["conversationId"] = conversation_id
-                        reply = str(result.get("reply") or "")
-                        if not state["has_delta"] and reply:
-                            state["has_delta"] = True
-                            await queue_event("delta", {"text": reply})
-                        await queue_event("done", result)
-                        if request_id is not None:
-                            await chat_job_store.complete(
-                                request_id,
-                                user_id=user_id,
-                                result=result,
-                            )
-                except Exception:
-                    payload = {"message": "目前暫時無法完成回覆，請稍後再試。"}
-                    await queue_event("error", payload)
-                    if request_id is not None:
-                        await chat_job_store.fail(
-                            request_id,
-                            user_id=user_id,
-                            message=payload["message"],
-                        )
 
             try:
                 try:
@@ -481,11 +428,125 @@ def create_chat_router(deps: ChatRouteDependencies) -> APIRouter:
                         )
                     queue_seconds = await deps.wait_for_chat_ticket(ticket)
                 except HTTPException as error:
+                    if request_id is not None:
+                        await chat_job_store.fail(
+                            request_id,
+                            user_id=user_id,
+                            message=str(error.detail),
+                        )
                     yield _encode_sse(
                         "error",
                         {"message": str(error.detail), "retry_after": 5},
                     )
                     return
+
+                # Admission must be acquired before remote profile/history work.
+                # Otherwise queued requests consume external resources and an
+                # exception can strand the admission reservation.
+                try:
+                    agent = await run_in_threadpool(
+                        deps.get_agent_with_profile,
+                        user_id=user_id,
+                        conversation_id=conversation_id,
+                    )
+                    history_for_limit = await deps.enforce_conversation_limit(
+                        agent=agent,
+                        request=request,
+                        user_id=user_id,
+                        incoming_message=req.message,
+                    )
+                    if not history_for_limit:
+                        await deps.guard_conversation_creation(request, user_id)
+                except Exception:
+                    payload = {"message": "目前暫時無法載入對話，請稍後再試。"}
+                    if request_id is not None:
+                        await chat_job_store.fail(
+                            request_id,
+                            user_id=user_id,
+                            message=payload["message"],
+                        )
+                    yield _encode_sse("error", payload)
+                    return
+
+                async def queue_event(event: str, payload: dict[str, Any]) -> None:
+                    if event == "delta" and not state["first_token_observed"]:
+                        state["first_token_observed"] = True
+                        observe_pipeline_stage("chat", "first_token", stream_started_at)
+                    event_id = None
+                    if request_id is not None:
+                        event_id = await chat_job_store.append_event(
+                            request_id,
+                            user_id=user_id,
+                            event=event,
+                            payload=payload,
+                        )
+                    await events.put((event, payload, event_id))
+
+                def on_delta(delta: str) -> None:
+                    if not delta:
+                        return
+                    state["has_delta"] = True
+                    loop.call_soon_threadsafe(
+                        asyncio.create_task,
+                        queue_event("delta", {"text": delta}),
+                    )
+
+                def run_agent(freshness_context=None) -> dict:
+                    process_input = (
+                        f"__knowledge_consult__:{req.message}"
+                        if req.flow == "skin_consult"
+                        else req.message
+                    )
+                    return agent.process(
+                        process_input,
+                        conversation_flow=req.flow,
+                        action=req.action,
+                        on_delta=on_delta,
+                        freshness_context=freshness_context,
+                    )
+
+                async def produce() -> None:
+                    try:
+                        freshness_context = await _load_freshness_context(req.message)
+                        result = await run_in_threadpool(run_agent, freshness_context)
+                        if isinstance(result, dict):
+                            result["conversation_limit"] = deps.completed_conversation_limit(
+                                history_for_limit, req.message, result
+                            )
+                            if isinstance(result.get("reply"), str):
+                                result["reply"] = result["reply"].replace("**", "")
+                            result["route"] = (
+                                req.flow
+                                if req.flow in {
+                                    "product_search",
+                                    "skin_record",
+                                    "skin_consult",
+                                }
+                                else result.get("route")
+                                or deps.stage_to_route(result.get("stage", ""))
+                            )
+                            result["sessionId"] = conversation_id
+                            result["conversationId"] = conversation_id
+                            reply = str(result.get("reply") or "")
+                            if not state["has_delta"] and reply:
+                                state["has_delta"] = True
+                                await queue_event("delta", {"text": reply})
+                            await queue_event("done", result)
+                            if request_id is not None:
+                                await chat_job_store.complete(
+                                    request_id,
+                                    user_id=user_id,
+                                    result=result,
+                                )
+                    except Exception:
+                        payload = {"message": "目前暫時無法完成回覆，請稍後再試。"}
+                        await queue_event("error", payload)
+                        if request_id is not None:
+                            await chat_job_store.fail(
+                                request_id,
+                                user_id=user_id,
+                                message=payload["message"],
+                            )
 
                 yield _encode_sse(
                     "status",
@@ -496,6 +557,7 @@ def create_chat_router(deps: ChatRouteDependencies) -> APIRouter:
                     },
                 )
                 producer = asyncio.create_task(produce())
+                producer_holder["task"] = producer
                 while True:
                     try:
                         event, payload, event_id = await asyncio.wait_for(events.get(), timeout=15.0)
@@ -512,22 +574,7 @@ def create_chat_router(deps: ChatRouteDependencies) -> APIRouter:
                     if event in {"done", "error"}:
                         break
             finally:
-                    if producer is not None and not producer.done():
-                        # run_in_threadpool cannot reliably cancel an already-running
-                        # sync SDK call.  Keep both admission and account locks until
-                        # it really exits instead of allowing a cost-amplifying retry.
-                        asyncio.create_task(
-                            _release_stream_resources_when_done(
-                            producer,
-                            ticket,
-                            guard_ticket,
-                            deps.finish_chat_security,
-                            release_started_at=time.perf_counter(),
-                        )
-                        )
-                    else:
-                        await ticket.release()
-                        await deps.finish_chat_security(guard_ticket)
+                await cleanup_stream()
 
         return StreamingResponse(
             event_stream(),
@@ -538,6 +585,8 @@ def create_chat_router(deps: ChatRouteDependencies) -> APIRouter:
                 "Connection": "keep-alive",
                 "Server-Timing": f"queue;dur={queue_wait_ms:.3f}",
             },
+            # Covers a response abandoned before the generator is iterated.
+            background=BackgroundTask(cleanup_stream),
         )
 
 
@@ -582,6 +631,9 @@ def create_chat_router(deps: ChatRouteDependencies) -> APIRouter:
             )
 
         agent.state.reset()
+        shared_state = getattr(agent, "_conversation_state_store", None)
+        if shared_state is not None:
+            shared_state.delete(user_id, normalized_conversation_id)
 
         return {
             "ok": True,

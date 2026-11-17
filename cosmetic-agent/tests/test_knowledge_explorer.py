@@ -168,6 +168,7 @@ async def test_explain_personalizes_prompt_focus_and_cache_key(monkeypatch):
 async def test_explain_can_use_explicit_experimental_taide(monkeypatch):
     monkeypatch.setenv("KNOWLEDGE_EXPLAINER_PROVIDER", "taide")
     monkeypatch.setenv("KNOWLEDGE_TAIDE_ENABLED", "1")
+    monkeypatch.setenv("KNOWLEDGE_TAIDE_BASE_URL", "http://127.0.0.1:8200/v1")
     service = build_service(client_factory=FakeTaideClient)
     result = await service.explain("n1")
     assert result["fallback"] is False

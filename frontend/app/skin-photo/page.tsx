@@ -4,6 +4,10 @@ import Link from "next/link";
 import { useEffect, useRef, useState, type ChangeEvent } from "react";
 import styles from "./SkinPhoto.module.css";
 import { groupFindings, uniqueStatements } from "./reportSummary";
+import { createPhotoAvailabilityMonitor, type PhotoAvailability } from "./photoAvailability";
+import LocalPhotoGuide from "@/components/skin-photo/LocalPhotoGuide";
+import PublicPhotoExamples from "@/components/skin-photo/PublicPhotoExamples";
+import PhotoModelMetrics from "@/components/skin-photo/PhotoModelMetrics";
 
 type Finding = { tag: string; region: string; evidence: string };
 type Report = {
@@ -52,9 +56,12 @@ export default function SkinPhotoPage() {
   const fileInput = useRef<HTMLInputElement>(null);
   const nativeCamera = useRef<HTMLInputElement>(null);
   const video = useRef<HTMLVideoElement>(null);
+  const previewImage = useRef<HTMLImageElement>(null);
   const stream = useRef<MediaStream | null>(null);
   const attempt = useRef(0);
+  const preparationAttempt = useRef(0);
   const request = useRef<AbortController | null>(null);
+  const availabilityMonitor = useRef<ReturnType<typeof createPhotoAvailabilityMonitor> | null>(null);
   const mounted = useRef(true);
   const [cameraOpen, setCameraOpen] = useState(false);
   const [cameraPending, setCameraPending] = useState(false);
@@ -62,32 +69,41 @@ export default function SkinPhotoPage() {
   const [preview, setPreview] = useState("");
   const [isSample, setIsSample] = useState(false);
   const [busy, setBusy] = useState(false);
-  const [preparing, setPreparing] = useState(false);
+  const [preparingPhoto, setPreparing] = useState(false);
+  const [exampleLoading, setExampleLoading] = useState(false);
+  const preparing = preparingPhoto || exampleLoading;
   const [note, setNote] = useState("");
   const [error, setError] = useState("");
   const [cameraMessage, setCameraMessage] = useState("");
   const [report, setReport] = useState<Report | null>(null);
-  const [ready, setReady] = useState<boolean | null>(null);
+  const [availability, setAvailability] = useState<PhotoAvailability>({ status: "unknown", checking: true });
+  const canAnalyze = availability.status === "ready" && !availability.checking;
+  const [fillLight, setFillLight] = useState(false);
+  const [fillIntensity, setFillIntensity] = useState(75);
+  const [localizationBlocked, setLocalizationBlocked] = useState(false);
 
   function stopCamera() {
     attempt.current += 1;
     stream.current?.getTracks().forEach(track => track.stop()); stream.current = null;
     if (video.current) video.current.srcObject = null;
-    setCameraOpen(false); setCameraPending(false);
+    setCameraOpen(false); setCameraPending(false); setFillLight(false);
   }
 
   useEffect(() => {
     mounted.current = true;
-    const controller = new AbortController();
-    void fetch("/api/skin-photo", { cache: "no-store", signal: controller.signal })
-      .then(response => response.json()).then(result => { if (mounted.current) setReady(Boolean(result.ready)); })
-      .catch(() => { if (mounted.current) setReady(false); });
-    const hide = () => { if (document.hidden) stopCamera(); };
+    const monitor = createPhotoAvailabilityMonitor(state => { if (mounted.current) setAvailability(state); });
+    availabilityMonitor.current = monitor;
+    void monitor.check();
+    const hide = () => { if (document.hidden) { monitor.pause(); stopCamera(); } else void monitor.check(); };
+    const offline = () => { monitor.setStatus("unavailable"); request.current?.abort(); };
+    const online = () => { void monitor.check(); };
     document.addEventListener("visibilitychange", hide);
+    window.addEventListener("offline", offline); window.addEventListener("online", online);
     return () => {
-      mounted.current = false; controller.abort(); request.current?.abort(); attempt.current += 1;
+      mounted.current = false; monitor.dispose(); availabilityMonitor.current = null; request.current?.abort(); attempt.current += 1; preparationAttempt.current += 1;
       stream.current?.getTracks().forEach(track => track.stop()); stream.current = null;
       document.removeEventListener("visibilitychange", hide);
+      window.removeEventListener("offline", offline); window.removeEventListener("online", online);
     };
   }, []);
 
@@ -97,7 +113,10 @@ export default function SkinPhotoPage() {
     void video.current.play().catch(() => { stopCamera(); setCameraMessage("無法顯示相機預覽，請改用選擇照片。"); });
   }, [cameraOpen]);
 
+  useEffect(() => { if (exampleLoading) stopCamera(); }, [exampleLoading]);
+
   async function openCamera() {
+    if (busy || preparing) return;
     setError(""); setCameraMessage("");
     if (!window.isSecureContext || !navigator.mediaDevices?.getUserMedia) {
       setCameraMessage("這個網址無法開啟網頁相機。請使用 HTTPS 或這台電腦的 localhost 網址；也可以直接選擇照片。"); return;
@@ -118,51 +137,72 @@ export default function SkinPhotoPage() {
     }
   }
 
-  async function chooseFile(event: ChangeEvent<HTMLInputElement>) {
-    const file = event.target.files?.[0]; event.target.value = "";
-    if (!file) return;
+  async function handlePreparedFile(file: File, context?: { localizationBlocked?: boolean }) {
+    const token = ++preparationAttempt.current;
     stopCamera(); setError(""); setReport(null); setPreparing(true);
     try {
       const result = await preparePhoto(file);
-      if (mounted.current) { setImage(result.image); setPreview(result.preview); setIsSample(false); }
-    } catch (reason) { setError(reason instanceof Error ? reason.message : "無法讀取照片。"); }
-    finally { if (mounted.current) setPreparing(false); }
+      if (mounted.current && token === preparationAttempt.current) { setImage(result.image); setPreview(result.preview); setIsSample(false); setLocalizationBlocked(Boolean(context?.localizationBlocked)); }
+    } catch (reason) { if (mounted.current && token === preparationAttempt.current) setError(reason instanceof Error ? reason.message : "無法讀取照片。"); }
+    finally { if (mounted.current && token === preparationAttempt.current) setPreparing(false); }
+  }
+
+  async function chooseFile(event: ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0]; event.target.value = "";
+    if (busy || preparing) return;
+    if (file) await handlePreparedFile(file);
   }
 
   async function takePhoto() {
+    if (busy || preparing) return;
     const current = video.current;
     if (!current?.videoWidth) { setCameraMessage("相機還在準備，請稍候。"); return; }
+    const token = attempt.current;
     const canvas = document.createElement("canvas"); canvas.width = current.videoWidth; canvas.height = current.videoHeight;
     const context = canvas.getContext("2d"); if (!context) return;
     context.translate(canvas.width, 0); context.scale(-1, 1); context.drawImage(current, 0, 0);
     const blob = await new Promise<Blob | null>(resolve => canvas.toBlob(resolve, "image/jpeg", .92));
-    stopCamera();
+    if (!mounted.current || token !== attempt.current) return;
     if (!blob) { setError("拍攝未完成，請再試一次。"); return; }
-    try { const photo = await preparePhoto(new File([blob], "camera.jpg", { type: "image/jpeg" })); setImage(photo.image); setPreview(photo.preview); setIsSample(false); setReport(null); }
-    catch (reason) { setError(reason instanceof Error ? reason.message : "無法處理照片。"); }
+    await handlePreparedFile(new File([blob], "camera.jpg", { type: "image/jpeg" }));
   }
 
   async function analyze(sample = false) {
-    if (busy || (!sample && !image)) return;
-    stopCamera(); setBusy(true); setError(""); setReport(null);
-    if (sample) { setPreview("/skin-photo-demo.jpg"); setImage(""); setIsSample(true); }
+    if (busy || preparing || !canAnalyze || request.current || (!sample && !image)) return;
     const controller = new AbortController(); request.current = controller;
-    const timer = window.setTimeout(() => controller.abort(), 95000);
+    setBusy(true); setError("");
+    let timer: number | undefined;
     try {
+      // Recheck before sending pixels: the tunnel may have disappeared since page load.
+      const health = await availabilityMonitor.current?.check();
+      if (!mounted.current || controller.signal.aborted || health?.status !== "ready") return;
+      stopCamera(); setReport(null);
+      if (sample) { setPreview("/skin-photo-demo.jpg"); setImage(""); setIsSample(true); setLocalizationBlocked(true); }
+      timer = window.setTimeout(() => controller.abort(), 95000);
       const response = await fetch("/api/skin-photo", { method: "POST", headers: { "Content-Type": "application/json" },
         body: JSON.stringify(sample ? { sample: true } : { image_base64: image, note }), signal: controller.signal });
-      const result = await response.json();
-      if (!response.ok) throw new Error(messages[result.error] || "這次分析未完成，請稍後再試。");
-      if (mounted.current) { setReport(result as Report); setReady(true); }
+      const result = await response.json().catch(() => null);
+      if (!response.ok) {
+        if (result?.error === "login_required" || response.status === 401 || response.status === 403) availabilityMonitor.current?.setStatus("login_required");
+        else if (result?.error === "auth_unavailable") availabilityMonitor.current?.setStatus("auth_unavailable");
+        else if (response.status >= 500 || result?.error === "inference_unavailable" || result?.error === "model_starting") availabilityMonitor.current?.setStatus("unavailable");
+        throw new Error(messages[result?.error] || (response.status === 401 || response.status === 403 ? messages.login_required : "這次分析未完成，請稍後再試。"));
+      }
+      if (!result || typeof result !== "object") { availabilityMonitor.current?.setStatus("unavailable"); throw new Error("照片分析連線未完成，請確認連線後再試。"); }
+      if (mounted.current) { setReport(result as Report); availabilityMonitor.current?.setStatus("ready"); }
     } catch (reason) {
-      if (mounted.current) setError(reason instanceof Error && reason.name === "AbortError" ? "分析等待較久，已停止等待；請稍後再試。" : reason instanceof Error ? reason.message : "這次分析未完成。");
-    } finally { window.clearTimeout(timer); if (mounted.current) setBusy(false); request.current = null; }
+      if (mounted.current) {
+        if (reason instanceof TypeError || (reason instanceof Error && reason.name === "AbortError")) availabilityMonitor.current?.setStatus("unavailable");
+        setError(reason instanceof Error && reason.name === "AbortError" ? navigator.onLine === false ? "裝置目前已離線；照片仍保留，連線恢復後可再試。" : "分析等待較久，已停止等待；照片仍保留，可確認連線後再試。" : reason instanceof TypeError ? messages.inference_unavailable : reason instanceof Error ? reason.message : "這次分析未完成。");
+      }
+    } finally { if (timer !== undefined) window.clearTimeout(timer); if (mounted.current) setBusy(false); if (request.current === controller) request.current = null; }
   }
 
-  function clearPhoto() { stopCamera(); setImage(""); setPreview(""); setReport(null); setError(""); setIsSample(false); }
+  function clearPhoto() { if (busy || preparing) return; preparationAttempt.current += 1; stopCamera(); setPreparing(false); setImage(""); setPreview(""); setReport(null); setError(""); setIsSample(false); setLocalizationBlocked(false); }
 
   const findingGroups = groupFindings(report?.observation?.observations || []);
   const limitations = uniqueStatements(report?.observation?.limitations || []);
+  const availabilityLabel = availability.checking ? "確認連線中" : availability.status === "ready" ? "可開始分析" : availability.status === "login_required" ? "請先登入" : availability.status === "auth_unavailable" ? "登入狀態待確認" : "分析暫不可用";
 
   return <div className={`${styles.page} skin-photo-page`}>
     <Link className={styles.back} href="/skin-report">← 返回膚況日記</Link>
@@ -170,31 +210,46 @@ export default function SkinPhotoPage() {
       <h1>用照片，記下今天的膚況。</h1><p>拍一張，或選一張照片，先整理看得到的特徵，再由你確認。</p></header>
     <div className={styles.columns}>
       <section className={styles.card} aria-label="提供膚況照片">
-        <div className={styles.cardTitle}><h2>01 <span>提供照片</span></h2><span className={styles.status}>{ready === null ? "確認服務中" : ready ? "可開始測試" : "服務準備中"}</span></div>
+        <div className={styles.cardTitle}><h2>01 <span>提供照片</span></h2><span className={styles.status}>{availabilityLabel}</span></div>
+        {availability.status !== "ready" && <div className={styles.availability} role="status">
+          <p>{availability.checking ? "正在確認照片分析連線，尚未傳送任何照片。" : availability.status === "login_required" ? "請先登入再送出照片。已選照片與備註會留在這個頁面。" : availability.status === "auth_unavailable" ? "暫時無法確認登入狀態；這不代表照片模型故障。請稍後重試。" : availability.status === "unknown" ? "分析連線尚未確認。你可以先選圖與檢查拍攝條件，確認連線後再分析。" : "目前無法連上照片分析。你可以先選圖、檢查光線與部位；照片和備註會留在這個頁面，恢復後再按分析。"}</p>
+          {availability.status === "login_required" && <Link href="/login?next=%2Fskin-photo" target="_blank" rel="noopener noreferrer">另開分頁登入 →</Link>}
+          <button className={styles.textButton} type="button" disabled={availability.checking || busy} onClick={() => void availabilityMonitor.current?.check()}>重新確認連線</button>
+        </div>}
         <input ref={fileInput} type="file" accept="image/jpeg,image/png,image/webp" onChange={chooseFile} hidden aria-label="選擇膚況照片檔案" />
         <input ref={nativeCamera} type="file" accept="image/*" capture="user" onChange={chooseFile} hidden aria-label="手機相機照片檔案" />
         {cameraOpen ? <div className={styles.camera}>
-          <video ref={video} autoPlay playsInline muted aria-label="相機預覽" />
-          <div className={styles.cameraActions}><button type="button" onClick={() => void takePhoto()}>拍下這張</button><button type="button" onClick={stopCamera}>關閉相機</button></div>
-        </div> : preview ? <div className={styles.preview}><img src={preview} alt={isSample ? "公開授權的皮膚例圖，不是你的照片" : "已選取、尚待確認的膚況照片"} /><span>{isSample ? "公開例圖・非你的膚況" : "你的照片・只在按下分析後傳送"}</span></div> :
+          <div className={`${styles.fillLightFrame} ${fillLight ? styles.fillLightOn : ""}`} style={fillLight ? { backgroundColor: `rgb(${Math.round(fillIntensity * 2.55)},${Math.round(fillIntensity * 2.55)},${Math.round(fillIntensity * 2.55)})` } : undefined}>
+            <LocalPhotoGuide mediaRef={video} kind="video" sourceKey="camera" mirrored>
+              <video ref={video} autoPlay playsInline muted aria-label="相機預覽" />
+            </LocalPhotoGuide>
+          </div>
+          <div className={styles.lightControls}><label><input type="checkbox" checked={fillLight} onChange={event => setFillLight(event.target.checked)} />螢幕補光</label>
+            {fillLight && <label htmlFor="photo-fill-intensity">面板強度<input id="photo-fill-intensity" type="range" min="30" max="100" value={fillIntensity} onChange={event => setFillIntensity(Number(event.target.value))} /><span>{fillIntensity}%</span></label>}
+            <p>只讓預覽外圍的螢幕面板變亮，無法控制裝置硬體亮度。拍攝不套用美白、銳化或對比增強。</p></div>
+          <div className={styles.cameraActions}><button type="button" disabled={busy || preparing} onClick={() => void takePhoto()}>拍下這張</button><button type="button" onClick={stopCamera}>關閉相機</button></div>
+        </div> : preview ? <div className={styles.preview}><LocalPhotoGuide mediaRef={previewImage} kind="image" sourceKey={preview} localizationBlocked={localizationBlocked}>
+          <img ref={previewImage} src={preview} alt={isSample ? "公開授權的皮膚例圖，不是你的照片" : "已選取、尚待確認的膚況照片"} />
+        </LocalPhotoGuide><span>{isSample ? "公開例圖・非你的膚況" : "已選照片・只在按下分析後傳送"}</span></div> :
           <div className={styles.empty}><CameraIcon/><strong>從一張清楚的照片開始</strong><p>均勻光線、關閉美肌與濾鏡，<br/>讓想觀察的部位清楚入鏡。</p></div>}
         <div className={styles.actions}><button className={styles.primary} type="button" disabled={busy || preparing || cameraPending} onClick={() => fileInput.current?.click()}>選擇照片</button>
           <button className={styles.secondary} type="button" disabled={busy || preparing || cameraPending} onClick={() => void openCamera()}><CameraIcon/>開啟相機</button></div>
         {cameraPending && <button className={styles.textButton} type="button" onClick={stopCamera}>取消等候相機權限</button>}
-        {cameraMessage && <div className={styles.notice} role="status"><p>{cameraMessage}</p><button className={styles.textButton} type="button" disabled={busy} onClick={() => nativeCamera.current?.click()}>使用手機相機或選取照片</button></div>}
-        <button className={styles.sample} type="button" disabled={busy || preparing} onClick={() => void analyze(true)}>先用公開例圖，實際測試一次 <span>↗</span></button>
+        {cameraMessage && <div className={styles.notice} role="status"><p>{cameraMessage}</p><button className={styles.textButton} type="button" disabled={busy || preparing} onClick={() => nativeCamera.current?.click()}>使用手機相機或選取照片</button></div>}
+        <PublicPhotoExamples onSelect={handlePreparedFile} disabled={busy || preparing || cameraPending} onLoadingChange={setExampleLoading} />
+        <button className={styles.sample} type="button" disabled={busy || preparing || !canAnalyze} onClick={() => void analyze(true)}>先用公開例圖，實際測試一次 <span>↗</span></button>
         {isSample && <p className={styles.attribution}>例圖：Dr.Gandikota Raghurama Rao，<a href="https://commons.wikimedia.org/wiki/File:0601_Acne_Vulgaris.jpg" target="_blank" rel="noreferrer">CC BY 4.0</a>。此處只作測試。</p>}
         {preparing && <p role="status">正在處理照片…</p>}
         {image && <div className={styles.analyzeForm}><label htmlFor="photo-note">想補充的感受 <span>選填</span></label>
           <textarea id="photo-note" maxLength={500} disabled={busy} value={note} onChange={event => setNote(event.target.value)} placeholder="例如：這幾天有點刺，洗臉後比較明顯。" />
           <p>按下分析後，照片會傳至 BLINK AI 伺服器處理。原圖不留存，也不會用於訓練。</p>
-          <button className={styles.primary} disabled={busy} type="button" onClick={() => void analyze(false)}>{busy ? "正在觀察照片…" : "開始分析這張照片"}</button>
-          <button className={styles.textButton} disabled={busy} type="button" onClick={clearPhoto}>移除這張照片</button></div>}
+          <button className={styles.primary} disabled={busy || preparing || !canAnalyze} type="button" onClick={() => void analyze(false)}>{busy ? availability.checking ? "確認分析連線…" : "正在觀察照片…" : "開始分析這張照片"}</button>
+          <button className={styles.textButton} disabled={busy || preparing} type="button" onClick={clearPhoto}>移除這張照片</button></div>}
       </section>
       <section className={styles.card} aria-label="照片分析結果" aria-live="polite" aria-busy={busy}>
         <div className={styles.cardTitle}><h2>02 <span>一起看結果</span></h2></div>
-        {error ? <div className={styles.error} role="alert"><strong>這次尚未完成</strong><p>{error}</p>{error.includes("登入") && <Link href="/login?next=%2Fskin-photo">前往登入 →</Link>}</div> : busy ?
-          <div className={styles.wait}><span className={styles.pulse}/><h3>正在觀察這張照片</h3><p>正在整理可見特徵與照片限制，請稍候。</p></div> : !report ?
+        {error ? <div className={styles.error} role="alert"><strong>這次尚未完成</strong><p>{error}</p>{error.includes("登入") && <Link href="/login?next=%2Fskin-photo" target="_blank" rel="noopener noreferrer">另開分頁登入 →</Link>}</div> : busy ?
+          <div className={styles.wait}><span className={styles.pulse}/><h3>{availability.checking ? "正在確認分析連線" : "正在觀察這張照片"}</h3><p>{availability.checking ? "連線確認後才會傳送照片。" : "正在整理可見特徵與照片限制，請稍候。"}</p></div> : !report ?
           <div className={styles.explain}><span className={styles.smallLabel}>可以先觀察什麼？</span><h3>看得到的，先整理。<br/>不確定的，留待確認。</h3><div className={styles.tags}>{Object.values(labels).map(label => <span key={label}>{label}</span>)}</div><p>結果會包含可能的部位、可見描述與補充問題。照片無法取代你實際的感受，也不是疾病診斷。</p><div className={styles.hint}>還沒準備照片？左側的「公開例圖」會實際呼叫分析，讓你先看流程。</div></div> :
           <div className={styles.result}>
             <span className={styles.smallLabel}>{report.input_source === "public_sample" ? "公開例圖的分析結果" : "這張照片的觀察"}</span>
@@ -218,6 +273,7 @@ export default function SkinPhotoPage() {
             <Link className={styles.diary} href="/skin-record">確認後，前往填寫膚況紀錄 →</Link>
             <a className={styles.researchLink} href="/skin-research/index.html" target="_blank" rel="noreferrer">查看模型訓練與比較紀錄 ↗</a>
           </div>}
+        <PhotoModelMetrics />
       </section>
     </div>
   </div>;

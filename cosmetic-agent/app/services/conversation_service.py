@@ -115,6 +115,9 @@ class ConversationService:
         normalized_id = self._normalize_conversation_id(conversation_id)
         agent = self._agent_provider(user_id=user_id, conversation_id=normalized_id)
         agent.memory.delete_conversation(normalized_id)
+        shared_state = getattr(agent, "_conversation_state_store", None)
+        if shared_state is not None:
+            shared_state.delete(user_id, normalized_id)
         self._sessions.pop((user_id, normalized_id), None)
         if os.getenv("AUTH_STORAGE_BACKEND", "postgres").strip().lower() == "postgres":
             from database.postgres.repositories.conversation import (

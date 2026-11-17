@@ -7,20 +7,24 @@ Root Agent Orchestrator v2
 5. 排序不符時繼續對話了解原因
 6. Cycle Loop + Global Memory
 """
-import sys
-sys.path.insert(0, '/var/lib/jenkins/tomod/cosmetic-agent')
-
-
 import os
 import json
 import re
+import sys
 import time
-from core.observability import observe_pipeline_stage
+from contextvars import ContextVar
+from functools import wraps
+from pathlib import Path
+
+BACKEND_ROOT = Path(__file__).resolve().parents[2]
+if str(BACKEND_ROOT) not in sys.path:
+    sys.path.insert(0, str(BACKEND_ROOT))
+from core.observability import log_event, observe_pipeline_stage
+from core.conversation_state import conversation_state_store_from_env, shared_conversation_state
 from typing import Optional
 from dotenv import load_dotenv
-from openai import OpenAI
 from app.clients.terra_completion_client import TerraCompletionClient
-from tools.agent.intent_parser import OPENAI_API_KEY, OPENAI_MODEL, parse_intent
+from tools.agent.intent_parser import parse_intent
 from tools.agent.response_composer import ResponseComposer
 from tools.agent.experience_parser import (
     looks_like_experience,
@@ -108,6 +112,34 @@ except Exception as _e:
 load_dotenv()
 
 
+_knowledge_delta_callback = ContextVar("knowledge_delta_callback", default=None)
+
+
+def _with_knowledge_stream(process):
+    """Keep callbacks isolated when pooled worker threads process different users."""
+    @wraps(process)
+    def wrapped(self, user_input, conversation_flow=None, action=None,
+                on_delta=None, freshness_context=None):
+        token = _knowledge_delta_callback.set(on_delta)
+        try:
+            return process(self, user_input, conversation_flow=conversation_flow,
+                action=action, on_delta=on_delta, freshness_context=freshness_context)
+        finally:
+            _knowledge_delta_callback.reset(token)
+    return wrapped
+
+
+def _needs_summary_confirmation(user_input, intent):
+    return (
+        len(user_input) > 40
+        and intent.routing_confidence >= .5
+        and intent.ambiguity_score < .7
+        and intent.intent_type not in {
+            IntentType.FIND_PRODUCT, IntentType.RECOMMENDATION, IntentType.PRICE_COMPARISON,
+        }
+    )
+
+
 def _explicit_skin_consult_intent(query: str) -> IntentParseResult:
     # The API already chose skin consultation, so a second model classification is redundant.
     return IntentParseResult(
@@ -119,11 +151,6 @@ def _explicit_skin_consult_intent(query: str) -> IntentParseResult:
     )
 
 
-OPENAI_CLIENT = OpenAI(
-    api_key=OPENAI_API_KEY,
-    timeout=max(10.0, float(os.getenv("OPENAI_REQUEST_TIMEOUT_SECONDS", "60"))),
-    max_retries=max(0, min(2, int(os.getenv("OPENAI_MAX_RETRIES", "1")))),
-)
 TERRA_MODEL = os.getenv("TERRA_MODEL", "gpt-5.6-terra")
 _terra_client = TerraCompletionClient.from_env()
 
@@ -253,17 +280,15 @@ def _analyze_pain_gain(user_input: str) -> dict:
 
 
     try:
-        response = OPENAI_CLIENT.chat.completions.create(
-            model=OPENAI_MODEL,
+        text = _terra_client.complete(
+            model=TERRA_MODEL,
             messages=[
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": user_input},
             ],
-            reasoning_effort="none",
-            max_completion_tokens=300,
-            response_format={"type": "json_object"},
+            max_tokens=300,
+            timeout_seconds=20,
         )
-        text = (response.choices[0].message.content or "").strip()
 
         start = text.find('{')
         end   = text.rfind('}') + 1
@@ -550,7 +575,7 @@ def _format_ranked_products(
         if str(item).strip()
     ]
     if applied_context:
-        reply += "\n**✔️以自動套用你的偏好**\n"
+        reply += "\n**本次需求摘要（請確認）**\n"
         reply += "- " + "｜".join(applied_context[:5]) + "\n"
 
     decision_summary = _build_product_decision_summary(intent, applied_context)
@@ -896,6 +921,7 @@ class RootAgentOrchestrator:
             self.conversation_id = "default"
 
         self.state = ConversationState()
+        self._conversation_state_store = conversation_state_store_from_env()
 
         self.memory = ZepMemoryAdapter(
             user_id=self.user_id,
@@ -1286,7 +1312,10 @@ class RootAgentOrchestrator:
             self.user_analysis_context["budget_max"] = skin_context["budget_max_hint"]
 
     def _log(self, stage: str, message: str):
-        print(f"[{stage}] {message}")
+        # Call sites include user text, profiles and memory summaries. Preserve
+        # stage telemetry without publishing those payloads to application logs.
+        log_event(event="agent_stage", message="Root Agent stage", stage=stage,
+                  detail_length=len(message))
 
 
     def _skin_label(self, skin: str) -> str:
@@ -2095,6 +2124,7 @@ class RootAgentOrchestrator:
                     memory_context=self._memory_prompt(),
                     parsed_intent=intent,
                     external_evidence=evidence_packet,
+                    on_delta=_knowledge_delta_callback.get(),
                 )
                 return result.get(
                     "reply",
@@ -2106,6 +2136,7 @@ class RootAgentOrchestrator:
                 session_id=f"{self.user_id}:{self.conversation_id}",
                 memory_context=self._memory_prompt(),
                 parsed_intent=intent,
+                on_delta=_knowledge_delta_callback.get(),
             )
             return result.get("reply", "抱歉，查詢知識庫時發生錯誤。")
         else:
@@ -2141,6 +2172,7 @@ class RootAgentOrchestrator:
             session_id=f"{self.user_id}:{self.conversation_id}",
             memory_context=self._memory_prompt(),
             parsed_intent=intent,
+            on_delta=_knowledge_delta_callback.get(),
         )
         return result.get("reply", "目前無法取得相關膚況知識，請稍後再試。")
 
@@ -2256,6 +2288,8 @@ class RootAgentOrchestrator:
                 "intent": {}, "stage": "welcome"}
 
 
+    @shared_conversation_state
+    @_with_knowledge_stream
     @monitor_agent_turn
     def process(
         self,
@@ -2279,7 +2313,7 @@ class RootAgentOrchestrator:
         # 先讀取既有分析，讓本輪 intent parser 與其他 Agent 都能看到
         # 消費人格背景。此步驟不會觸發重新分析，也不改變 Root 路由。
         user_analysis_started = time.perf_counter()
-        self.user_analysis_context = self.user_analysis_bridge.refresh(
+        self.user_analysis_context = self.user_analysis_bridge.load(
             basic_profile=self.basic_profile,
         )
         observe_pipeline_stage(
@@ -3013,7 +3047,7 @@ class RootAgentOrchestrator:
                 "PAIN_GAIN_FAST_PATH",
                 json.dumps(self.state.pain_gain, ensure_ascii=False),
             )
-        elif len(user_input) > 20:
+        elif _needs_summary_confirmation(user_input, intent):
             pain_gain_started = time.perf_counter()
             self.state.pain_gain = _analyze_pain_gain(user_input)
             observe_pipeline_stage("root", "pain_gain_analysis", pain_gain_started)
@@ -3038,16 +3072,7 @@ class RootAgentOrchestrator:
 
 
         # 商品複合需求要能一次執行，不得只因文字較長就要求再確認。
-        product_intents = {
-            IntentType.FIND_PRODUCT,
-            IntentType.RECOMMENDATION,
-            IntentType.PRICE_COMPARISON,
-        }
-        if (
-            len(user_input) > 40
-            and intent.ambiguity_score < 0.7
-            and intent.intent_type not in product_intents
-        ):
+        if _needs_summary_confirmation(user_input, intent):
             confirm_msg = _build_confirm_message(self.state.pain_gain, intent)
             self.state.is_waiting_confirm = True
             self.state.add_turn("assistant", confirm_msg)
@@ -3128,15 +3153,22 @@ class RootAgentOrchestrator:
     def _handle_rank_feedback_reply(self, user_input: str) -> dict:
         """使用者對排序的回饋"""
         self.state.is_waiting_rank_feedback = False
-        self.user_analysis_bridge.record_rank_feedback(
+        feedback_recorded = self.user_analysis_bridge.record_rank_feedback(
             user_input,
             self.state.last_products,
         )
-        self.user_analysis_context = self.user_analysis_bridge.refresh(
-            basic_profile=self.basic_profile,
-            analyze_if_needed=True,
-            force=True,
-        )
+        if not self.user_analysis_context:
+            self.user_analysis_context = self.user_analysis_bridge.load(
+                basic_profile=self.basic_profile,
+            )
+        if feedback_recorded:
+            # Rank feedback is an explicit learning boundary.  Persist one
+            # snapshot here; normal intent dispatch remains read-only.
+            self.user_analysis_context = (
+                self.user_analysis_bridge.persist_snapshot(
+                    self.user_analysis_context,
+                )
+            )
         reply = _handle_rank_feedback(
             user_input,
             self.state.last_products,
@@ -3160,6 +3192,12 @@ class RootAgentOrchestrator:
         intent: IntentParseResult,
         raw_reply: str,
     ) -> str:
+        if _knowledge_delta_callback.get() is not None and intent.intent_type in {
+            IntentType.KNOWLEDGE_QUERY, IntentType.SYMPTOM_SOLVING,
+        }:
+            # The final grounded answer has already reached the client. A second
+            # rewrite would add latency and make the streamed and final text differ.
+            return raw_reply
         protected_terms: list[str] = []
         for product in self.state.last_products[:10]:
             if not isinstance(product, dict):
@@ -3230,10 +3268,10 @@ class RootAgentOrchestrator:
             intent,
             source_text=intent.raw_query,
         )
-        self.user_analysis_context = self.user_analysis_bridge.refresh(
-            basic_profile=self.basic_profile,
-            analyze_if_needed=True,
-        )
+        if not self.user_analysis_context:
+            self.user_analysis_context = self.user_analysis_bridge.load(
+                basic_profile=self.basic_profile,
+            )
         self._apply_skin_product_context(skin_ctx)
         observe_pipeline_stage(
             "root",

@@ -56,17 +56,22 @@ class TerraCompletionClient:
         max_tokens: int = 600,
         temperature: float | None = None,
         timeout_seconds: float | None = None,
+        response_format: dict[str, Any] | None = None,
+        reasoning_effort: str | None = None,
     ) -> str:
         # Keep temperature for call-site compatibility; Responses does not need it.
         del temperature
         client = self.client
         if timeout_seconds is not None:
             client = client.with_options(timeout=timeout_seconds, max_retries=0)
+        text_config: dict[str, Any] = {"verbosity": "low"}
+        if response_format is not None:
+            text_config["format"] = response_format
         response = client.responses.create(
             model=model or self.model,
             input=list(messages),
-            reasoning={"effort": os.getenv("TERRA_REASONING_EFFORT", "none")},
-            text={"verbosity": "low"},
+            reasoning={"effort": reasoning_effort or os.getenv("TERRA_REASONING_EFFORT", "none")},
+            text=text_config,
             max_output_tokens=max_tokens,
             store=False,
         )

@@ -42,7 +42,7 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
     <html lang="zh-Hant">
       <body>
         <AppShell>{children}</AppShell>
-        <SpeedInsights />
+        {process.env.VERCEL === "1" && <SpeedInsights />}
       </body>
     </html>
   );

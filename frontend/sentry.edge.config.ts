@@ -12,10 +12,22 @@ if (dsn) {
     dsn,
     environment: process.env.APP_ENV || process.env.NEXT_PUBLIC_APP_ENV || process.env.NODE_ENV || 'development',
     release: process.env.APP_RELEASE || process.env.NEXT_PUBLIC_APP_RELEASE,
-    sendDefaultPii: false,
+    dataCollection: {
+      userInfo: false,
+      cookies: false,
+      httpHeaders: false,
+      httpBodies: [],
+      urlQueryParams: false,
+      graphQL: { document: false, variables: false },
+      genAI: { inputs: false, outputs: false },
+      mcp: { inputs: false, outputs: false },
+      databaseQueryData: false,
+      queues: false,
+      stackFrameVariables: false,
+      frameContextLines: 0,
+    },
     tracesSampleRate: 0,
     maxBreadcrumbs: 10,
-    enableLogs: false,
     beforeBreadcrumb(breadcrumb) {
       if (breadcrumb.category === 'console' || breadcrumb.category === 'fetch') {
         return null;

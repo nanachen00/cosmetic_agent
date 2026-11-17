@@ -1,0 +1,8 @@
+# Secure BGE-M3 service adds these to the photo pure-Python runtime.
+cloudpickle==3.1.2
+joblib==1.6.0
+narwhals==2.28.0
+scikit-learn==1.9.1
+scipy==1.17.1
+sentence-transformers==5.7.0
+threadpoolctl==3.8.0

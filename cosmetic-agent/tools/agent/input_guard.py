@@ -6,11 +6,9 @@ Input Guard — 使用者輸入防護層
 """
 import re
 
-from openai import OpenAI
+from app.clients.terra_completion_client import TerraCompletionClient
 
-from tools.agent.intent_parser import OPENAI_API_KEY, OPENAI_MODEL
-
-client = OpenAI(api_key=OPENAI_API_KEY)
+client = TerraCompletionClient.from_env()
 
 # ── Rule-based 黑名單 ──
 INJECTION_PATTERNS = [
@@ -84,16 +82,15 @@ def _rule_check(text: str) -> dict:
 def _terra_check(text: str) -> dict:
     """第二段：Terra 分類模糊案例"""
     try:
-        response = client.chat.completions.create(
-            model=OPENAI_MODEL,
+        answer = client.complete(
             messages=[
                 {"role": "system", "content": '你是輸入分類器。判斷使用者輸入是否與「保養品、膚況、藥妝、美容」相關，或是正常的對話回應（如確認、選擇、補充說明）。只輸出一個詞：RELEVANT 或 IRRELEVANT'},
                 {"role": "user", "content": text},
             ],
-            reasoning_effort="none",
-            max_completion_tokens=10,
+            max_tokens=32,
+            timeout_seconds=8,
         )
-        answer = (response.choices[0].message.content or "").strip().upper()
+        answer = answer.strip().upper()
         if "IRRELEVANT" in answer:
             return {"allowed": False, "reason": "terra_offtopic", "reply": '這個話題我不太擅長耶！我是您的藥妝保養顧問，歡迎問我保養品推薦、成分知識或記錄膚況 💄'}
         return {"allowed": True, "reason": "terra_relevant"}

@@ -8,6 +8,14 @@ assert.doesNotMatch(home, /navigator\.geolocation/, "首頁不得要求定位權
 assert.match(home, /latitude: "25\.0330"/, "首頁天氣應固定使用臺北預設座標");
 assert.match(home, /location: "臺北市"/, "首頁天氣應明確顯示臺北市");
 
+const globalCss = read("app/globals.css");
+const mobileCss = read("app/mobile-overrides.css");
+assert.doesNotMatch(
+  globalCss + mobileCss,
+  /GenSenRounded2TW-R\.woff2|GenSen Rounded TW/,
+  "Global UI must not download the 7.2 MB CJK trial font; use the system CJK stack",
+);
+
 const quizPage = read("app/personality-quiz/page.tsx");
 assert.match(quizPage, /登入會員即可同步到基本資料/, "人格測驗說明須區分訪客結果");
 assert.match(quizPage, /← 返回首頁/, "訪客可直接返回首頁");
@@ -54,7 +62,7 @@ assert.match(
 );
 assert.match(
   knowledgeMapPage,
-  /\{selectedNode \|\| selectedEdge \? \(\s*<aside className=\{styles\.graphPopover\}/,
+  /\{selectedNode \|\| selectedEdge \? \(\s*<aside[\s\S]{0,240}?className=\{styles\.graphPopover\}/,
   "knowledge relationship summary must render inside the graph only after selection",
 );
 assert.doesNotMatch(
@@ -144,7 +152,7 @@ assert.match(
 );
 assert.match(
   knowledgeMapPage,
-  /className=\{styles\.quickSuggestions\}[\s\S]*?categoryConfig\.examples\.map[\s\S]*?runQuery\(example\.query\)/,
+  /const personalizedExamples = useMemo[\s\S]*?\.\.\.categoryConfig\.examples[\s\S]*?className=\{styles\.quickSuggestions\}[\s\S]*?personalizedExamples\.map[\s\S]*?runQuery\(example\.query\)/,
   "knowledge-map must keep visible, actionable suggestion tags",
 );
 assert.match(
@@ -231,6 +239,49 @@ assert.match(
   knowledgeMapCss,
   /\.graphPopover\s*\{[\s\S]*?position:\s*absolute;[\s\S]*?width:\s*min\(340px,[\s\S]*?backdrop-filter:\s*blur\(16px\);/,
   "knowledge-map relationship summary must be a compact on-canvas popover",
+);
+
+const profilePage = read("app/profile/page.tsx");
+const preferencesCard = read("components/RecommendationPreferencesCard.tsx");
+const preferencesApi = read("lib/preferences-api.ts");
+assert.match(
+  profilePage,
+  /import[\s\S]{0,120}RecommendationPreferencesCard[\s\S]*?<RecommendationPreferencesCard[\s\S]{0,180}?onDirtyChange=\{[\s\S]{0,80}?setRecommendationPreferencesDirty[\s\S]{0,40}?\/>/,
+  "profile must compose recommendation preferences as an isolated card",
+);
+assert.match(
+  profilePage,
+  /shouldBlockNavigation[\s\S]{0,180}?recommendationPreferencesDirty/,
+  "unsaved recommendation preferences must participate in in-app navigation protection",
+);
+assert.match(profilePage, /"敏感肌"/, "profile must expose the supported sensitive-skin choice");
+assert.match(
+  profilePage,
+  /aria-pressed=\{!profile\.skinType\}[\s\S]{0,240}?update\(\s*"skinType",\s*""/,
+  "profile must let the member explicitly clear a saved skin type",
+);
+assert.match(preferencesApi, /\/api\/user\/preferences/, "preferences must use its dedicated API");
+assert.match(preferencesApi, /credentials:\s*"include"/, "preferences requests must use the signed-in session");
+assert.match(preferencesApi, /AbortSignal\.timeout\(REQUEST_TIMEOUT_MS\)/, "preferences requests must be bounded");
+assert.match(preferencesApi, /method:\s*"PATCH"/, "preferences must support explicit replacement patches");
+assert.match(preferencesApi, /method:\s*"DELETE"/, "preferences must support full revocation");
+assert.doesNotMatch(preferencesApi, /user_id/, "the browser must not choose the preference owner");
+assert.match(
+  preferencesCard,
+  /<fieldset[\s\S]*?<legend>偏好質地<\/legend>[\s\S]*?aria-pressed=/,
+  "texture choices must use an accessible grouped toggle contract",
+);
+assert.match(preferencesCard, /role="alert"/, "preference failures must be announced");
+assert.match(preferencesCard, /role="status"/, "preference save and dirty states must be announced");
+assert.match(
+  preferencesCard,
+  /點擊商品不會自動改變它/,
+  "the preferences UI must distinguish explicit settings from click behavior",
+);
+assert.match(
+  preferencesCard,
+  /aria-label=\{`移除\$\{label\}：\$\{brand\}`\}/,
+  "brand chips must expose a keyboard-readable removal action",
 );
 
 console.log("Frontend source contracts passed");

@@ -7,13 +7,15 @@
     "build": "next build",
     "start": "next start",
     "typecheck": "tsc --noEmit",
-    "test:contracts": "node tests/source-contracts.mjs"
+    "test:contracts": "node tests/source-contracts.mjs && node tests/photo-request-limits.mjs && node tests/photo-route.mjs && node tests/photo-csp.mjs && node tests/face-regions.mjs && node tests/photo-capture-quality.mjs && node tests/photo-camera-lifecycle.mjs && node tests/photo-public-examples.mjs && node tests/photo-availability.mjs && node tests/runtime-health.mjs && node tests/recommendation-truthfulness.mjs",
+    "test:smoke": "node tests/http-smoke.mjs"
   },
   "dependencies": {
-    "@sentry/nextjs": "^10.75.0",
+    "@mediapipe/tasks-vision": "1.2.3",
+    "@sentry/nextjs": "11.12.0",
     "@vercel/speed-insights": "^2.0.0",
     "date-fns": "^4.4.0",
-    "next": "^16.3.5",
+    "next": "16.4.6",
     "react": "18.3.1",
     "react-day-picker": "^10.0.1",
     "react-dom": "18.3.1"

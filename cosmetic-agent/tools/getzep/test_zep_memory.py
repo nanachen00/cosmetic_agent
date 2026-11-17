@@ -2,12 +2,20 @@ import os
 import sys
 import uuid
 
+import pytest
+
 base_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../'))
 if base_path not in sys.path:
     sys.path.insert(0, base_path)
 
 from tools.getzep.zep_connection import get_zep_client
 from zep_cloud.types import Message
+
+
+pytestmark = pytest.mark.skipif(
+    os.getenv("RUN_LIVE_ZEP_TESTS") != "1",
+    reason="set RUN_LIVE_ZEP_TESTS=1 for the external write test",
+)
 
 
 def test_zep_ingest_sdk():

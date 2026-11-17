@@ -5,8 +5,8 @@ RECONSTRUCTED 2026-10-21 from agents/root/orchestrator.py. Contract:
 It must run before the turn is written, never block chat on failure and never
 overwrite a manual title.
 
-Model path: the OpenAI-compatible endpoint in TITLE_MODEL_BASE_URL (defaults
-to the local vLLM/TAIDE server). Short messages use a fast path without a model call.
+Titles are deterministic by default and do not make a model request. The
+legacy local title model requires both CONVERSATION_TITLE_LLM=1 and ENABLE_TAIDE=1.
 """
 
 from __future__ import annotations
@@ -45,7 +45,10 @@ class ConversationTitleService:
     def __init__(self, *, client: Any | None = None, enabled: bool | None = None) -> None:
         self._client = client
         self.enabled = (
-            os.getenv("CONVERSATION_TITLE_LLM", "1").strip().lower() in {"1", "true", "yes", "on"}
+            (
+                os.getenv("CONVERSATION_TITLE_LLM", "0").strip().lower() in {"1", "true", "yes", "on"}
+                and os.getenv("ENABLE_TAIDE", "0").strip() == "1"
+            )
             if enabled is None
             else enabled
         )

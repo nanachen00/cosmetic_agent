@@ -147,6 +147,7 @@ local max_running = tonumber(ARGV[3])
 local max_queued = tonumber(ARGV[4])
 local lease_until = tonumber(ARGV[5])
 redis.call('ZREMRANGEBYSCORE', KEYS[2], '-inf', now)
+redis.call('ZREMRANGEBYSCORE', KEYS[1], '-inf', now - tonumber(ARGV[6]))
 local active = redis.call('ZCARD', KEYS[2])
 local queued = redis.call('ZCARD', KEYS[1])
 if active < max_running and queued == 0 then
@@ -167,6 +168,7 @@ local ticket = ARGV[2]
 local max_running = tonumber(ARGV[3])
 local lease_until = tonumber(ARGV[4])
 redis.call('ZREMRANGEBYSCORE', KEYS[2], '-inf', now)
+redis.call('ZREMRANGEBYSCORE', KEYS[1], '-inf', now - tonumber(ARGV[5]))
 if redis.call('ZSCORE', KEYS[2], ticket) then
   return {1, redis.call('ZCARD', KEYS[1]), redis.call('ZCARD', KEYS[2])}
 end
@@ -196,7 +198,10 @@ return {0, redis.call('ZCARD', KEYS[1]), active}
         if redis_client is None:
             from redis.asyncio import Redis
 
-            redis_client = Redis.from_url(redis_url, decode_responses=True)
+            redis_client = Redis.from_url(
+                redis_url, decode_responses=True,
+                socket_connect_timeout=2, socket_timeout=2,
+            )
         self._redis = redis_client
         self.max_running = max(1, int(max_running))
         self.max_queued = max(0, int(max_queued))
@@ -241,6 +246,7 @@ return {0, redis.call('ZCARD', KEYS[1]), active}
             self.max_running,
             self.max_queued,
             now + self._lease_seconds,
+            self._lease_seconds,
         )
         self._publish_state(int(queued), int(active))
         if int(acquired) < 0:
@@ -270,6 +276,7 @@ return {0, redis.call('ZCARD', KEYS[1]), active}
                 ticket_id,
                 self.max_running,
                 now + self._lease_seconds,
+                self._lease_seconds,
             )
             self._publish_state(int(queued), int(active))
             if int(acquired) == 1:

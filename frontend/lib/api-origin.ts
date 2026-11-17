@@ -44,6 +44,13 @@ export const API_ORIGIN = trimTrailingSlash(
 /** Server-side origin used only by the same-origin /member-auth proxy. */
 export function serverMemberAuthOrigin(): string {
   const developmentServerOrigin = "http://127.0.0.1:8010";
+  if (process.env.LOCAL_BACKEND_OVERRIDE === "1") {
+    const localOrigin = process.env.BACKEND_API_URL || developmentServerOrigin;
+    if (!/^http:\/\/(127\.0\.0\.1|localhost)(:\d+)?$/.test(localOrigin)) {
+      throw new Error("Local member auth requires a loopback backend URL");
+    }
+    return localOrigin;
+  }
   if (process.env.NODE_ENV !== "production") {
     return trimTrailingSlash(
       process.env.DEV_MEMBER_AUTH_API_BASE_URL || developmentServerOrigin,

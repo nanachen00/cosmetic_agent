@@ -34,6 +34,8 @@ from typing import Any, Callable, Mapping, Optional
 from starlette.requests import Request
 from starlette.responses import JSONResponse, Response
 
+from core.lifespan import register_lifespan
+
 
 try:
     from prometheus_client import (
@@ -812,8 +814,7 @@ def _install_event_loop_lag_monitor(app: Any) -> None:
         except asyncio.CancelledError:
             pass
 
-    app.add_event_handler("startup", start_monitor)
-    app.add_event_handler("shutdown", stop_monitor)
+    register_lifespan(app, startup=start_monitor, shutdown=stop_monitor)
 
 
 def _metrics_authorized(request: Request) -> bool:
@@ -867,10 +868,7 @@ def install_observability(
     async def mark_prometheus_process_dead() -> None:
         _mark_prometheus_process_dead()
 
-    app.add_event_handler(
-        "shutdown",
-        mark_prometheus_process_dead,
-    )
+    register_lifespan(app, shutdown=mark_prometheus_process_dead)
 
     @app.middleware("http")
     async def observability_middleware(

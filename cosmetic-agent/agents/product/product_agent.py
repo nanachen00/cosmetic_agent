@@ -10,13 +10,18 @@
 6. copywriting_tool 生成合規文案
 7. 回傳結構化推薦列表
 """
-import sys
-sys.path.insert(0, '/var/lib/jenkins/tomod/cosmetic-agent')
-
 import os
+import math
 import re
+import sys
 import time
 import warnings
+from pathlib import Path
+
+BACKEND_ROOT = Path(__file__).resolve().parents[2]
+if str(BACKEND_ROOT) not in sys.path:
+    sys.path.insert(0, str(BACKEND_ROOT))
+
 warnings.filterwarnings("ignore")
 
 from core.observability import observe_pipeline_stage
@@ -31,7 +36,6 @@ from schemas.intent import IntentParseResult
 from tools.search.graph_search import graph_search, format_graph_result
 from tools.search.product_web_search import is_trending_product_query
 from tools.agent.copywriting_tool import generate_copy
-from chatgpt.terra_client import generate_product_intro
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -46,11 +50,14 @@ EMBEDDING_BASE_URL = _embedding_client.base_url
 EMBEDDING_MODEL = _embedding_client.model
 EMBEDDING_TIMEOUT_SECONDS = _embedding_client.timeout_seconds
 
-# The imported Olive Young catalogue uses USD, while the Taiwan catalogues use
-# TWD.  Keep the conversion configurable, but use the latest Bank of Taiwan
-# spot selling rate available when this change was made (2026-09-18).
+# Legacy source currencies apply only to identified catalogues. A configured
+# reference FX rate is an estimate, never a verified local selling price.
 _CATALOG_SOURCE_CURRENCIES = {
     "oliveyoung": "USD",
+    "watsons": "TWD",
+    "cosmed": "TWD",
+    "tomods": "TWD",
+    "tomods_official": "TWD",
 }
 _TWD_EXCHANGE_RATES = {
     "TWD": 1.0,
@@ -211,20 +218,38 @@ def _parse_budget(budget) -> float:
 def _normalize_catalog_price(product: dict) -> dict:
     """Return a catalogue row whose public price is always in New Taiwan dollars."""
     source = str(product.get("source") or "").strip().casefold()
-    original_currency = _CATALOG_SOURCE_CURRENCIES.get(source, "TWD")
+    explicit_currency = str(product.get("currency") or "").strip().upper()
+    if explicit_currency in {"NTD", "NT$", "NT＄"}:
+        explicit_currency = "TWD"
+    original_currency = explicit_currency or _CATALOG_SOURCE_CURRENCIES.get(source)
     original_price = product.get("price")
     try:
         numeric_price = float(original_price)
-    except (TypeError, ValueError):
+        if isinstance(original_price, bool) or not math.isfinite(numeric_price) or numeric_price <= 0:
+            raise ValueError("invalid price")
+    except (TypeError, ValueError, OverflowError):
         product["price"] = None
-        product["currency"] = "TWD"
+        product["currency"] = explicit_currency or None
         return product
 
-    rate = _TWD_EXCHANGE_RATES.get(original_currency, 1.0)
     product["original_price"] = numeric_price
     product["original_currency"] = original_currency
+    if original_currency not in _TWD_EXCHANGE_RATES:
+        product.update(price=None, currency=None, price_is_estimate=True)
+        return product
+    rate = _TWD_EXCHANGE_RATES[original_currency]
+    if not math.isfinite(rate) or rate <= 0:
+        product.update(price=None, currency=None, price_is_estimate=True)
+        return product
     product["price"] = int(round(numeric_price * rate))
     product["currency"] = "TWD"
+    product["price_is_estimate"] = original_currency != "TWD"
+    if product["price_is_estimate"]:
+        recorded = product.get("recommendation_limitations") or []
+        limitations = [recorded] if isinstance(recorded, str) else list(recorded) if isinstance(recorded, (list, tuple)) else []
+        note = "外幣按參考匯率估算，實際台幣售價、運費與稅額待核對"
+        if note not in limitations: limitations.append(note)
+        product["recommendation_limitations"] = limitations
     return product
 
 
@@ -503,79 +528,13 @@ def _log(stage: str, msg: str):
     print(f"[ProductAgent/{stage}] {msg}")
 
 
-_RANKING_WEIGHT_KEYS = (
-    "safety_score",
-    "price_value_score",
-    "review_score",
-    "ingredient_match_score",
-    "brand_score",
-)
+from app.services.product_personalization import DEFAULT_WEIGHTS, apply_scores, normalize_context
 
-
-def _safe_score(value, default: float = 0.5) -> float:
-    try:
-        number = float(value)
-    except (TypeError, ValueError):
-        return default
-    if number > 1.0 and number <= 5.0:
-        number = number / 5.0
-    return max(0.0, min(number, 1.0))
+_RANKING_WEIGHT_KEYS = tuple(DEFAULT_WEIGHTS)
 
 
 def _normalize_personalization_context(value: dict = None) -> dict:
-    """Accept only the small set of fields needed by deterministic ranking."""
-    context = value if isinstance(value, dict) else {}
-    customer_type = str(context.get("customer_type") or "").strip()
-    supplied = context.get("ranking_weights")
-    has_preference_signal = bool(
-        customer_type
-        or context.get("preferred_brands")
-        or context.get("avoided_brands")
-        or context.get("preferred_effects")
-        or context.get("preferred_textures")
-        or context.get("budget_min")
-        or context.get("budget_max")
-    )
-    if not has_preference_signal:
-        return {"enabled": False}
-
-    if not isinstance(supplied, dict):
-        supplied = {
-            "safety_score": 0.35,
-            "price_value_score": 0.20,
-            "review_score": 0.10,
-            "ingredient_match_score": 0.25,
-            "brand_score": 0.10,
-        }
-
-    weights = {}
-    for key in _RANKING_WEIGHT_KEYS:
-        try:
-            weights[key] = max(float(supplied.get(key, 0)), 0.0)
-        except (TypeError, ValueError):
-            weights[key] = 0.0
-    total = sum(weights.values())
-    if total <= 0:
-        return {"enabled": False}
-
-    return {
-        "enabled": True,
-        "customer_type": customer_type or "known_preferences",
-        "customer_type_label": str(
-            context.get("customer_type_label") or customer_type or "已知偏好"
-        ),
-        "weights": {key: weights[key] / total for key in _RANKING_WEIGHT_KEYS},
-        "preferred_brands": {
-            str(item).strip().casefold()
-            for item in (context.get("preferred_brands") or [])
-            if str(item).strip()
-        },
-        "avoided_brands": {
-            str(item).strip().casefold()
-            for item in (context.get("avoided_brands") or [])
-            if str(item).strip()
-        },
-    }
+    return normalize_context(value)
 
 
 def _normalized_ingredient_text(values) -> str:
@@ -661,86 +620,10 @@ def _warned_product_ids(warnings: list, graph_rows: list[dict]) -> set[str]:
     return warned_ids
 
 
-def _apply_personalization_scores(
-    candidates: list,
-    context: dict,
-    warned_ids: set,
-    explicit_brands: list = None,
-) -> bool:
-    """Add a secondary score without weakening safety/budget hard ordering."""
-    normalized = _normalize_personalization_context(context)
-    if not normalized.get("enabled") or not candidates:
-        return False
-
-    prices = []
-    for product in candidates:
-        try:
-            price = float(product.get("price"))
-            if price >= 0:
-                prices.append(price)
-        except (TypeError, ValueError):
-            pass
-    min_price = min(prices) if prices else None
-    max_price = max(prices) if prices else None
-    max_hits = max((int(p.get("concern_hits", 0) or 0) for p in candidates), default=0)
-
-    preferred_brands = set(normalized["preferred_brands"])
-    preferred_brands.update(
-        str(item).strip().casefold()
-        for item in (explicit_brands or [])
-        if str(item).strip()
-    )
-
-    for product in candidates:
-        try:
-            price = float(product.get("price"))
-        except (TypeError, ValueError):
-            price = None
-        if price is None or min_price is None or max_price is None:
-            price_value = 0.5
-        elif max_price == min_price:
-            price_value = 0.5
-        else:
-            price_value = 1.0 - ((price - min_price) / (max_price - min_price))
-
-        rating = product.get("review_score", product.get("rating"))
-        review_score = _safe_score(rating, default=0.5)
-        if max_hits > 0:
-            ingredient_match = min(
-                float(product.get("concern_hits", 0) or 0) / max_hits,
-                1.0,
-            )
-        else:
-            ingredient_match = _safe_score(product.get("score"), default=0.5)
-
-        brand = str(product.get("brand") or "").strip().casefold()
-        if brand and brand in normalized["avoided_brands"]:
-            brand_score = 0.0
-        elif preferred_brands:
-            brand_score = 1.0 if brand in preferred_brands else 0.0
-        else:
-            brand_score = 0.5
-
-        components = {
-            "safety_score": 0.0 if product.get("id") in warned_ids else 1.0,
-            "price_value_score": max(0.0, min(price_value, 1.0)),
-            "review_score": review_score,
-            "ingredient_match_score": ingredient_match,
-            "brand_score": brand_score,
-        }
-        score = sum(
-            normalized["weights"][key] * components[key]
-            for key in _RANKING_WEIGHT_KEYS
-        )
-        product["personalization_score"] = round(score, 4)
-        product["personalization_customer_type"] = normalized["customer_type"]
-
-    return True
+def _apply_personalization_scores(candidates, context, warned_ids, explicit_brands=None):
+    return apply_scores(candidates, context, warned_ids, explicit_brands)
 
 
-# ──────────────────────────────────────────
-# Step 1：Neo4j 向量搜尋
-# ──────────────────────────────────────────
 
 def product_search(
     query: str,
@@ -838,6 +721,35 @@ def product_search(
                         THEN true ELSE false
                     END AS is_partner,
                     node.ingredients_list AS ingredients_list,
+                    node.ingredients_inci AS ingredients_inci,
+                    node.inci_status AS inci_status,
+                    node.ingredient_evidence_level AS ingredient_evidence_level,
+                    node.ingredient_source_url AS ingredient_source_url,
+                    node.inci_source_url AS inci_source_url,
+                    node.formula_market AS formula_market,
+                    node.recommendation_scope AS recommendation_scope,
+                    node.recommendation_limitations AS recommendation_limitations,
+                    node.skin_types AS skin_types,
+                    node.suitable_skin_types AS suitable_skin_types,
+                    node.skin_types_source_url AS skin_types_source_url,
+                    node.skin_types_verification_status AS skin_types_verification_status,
+                    node.texture AS texture,
+                    node.texture_source_url AS texture_source_url,
+                    node.texture_verification_status AS texture_verification_status,
+                    node.price_observed_at AS price_observed_at,
+                    node.price_source_url AS price_source_url,
+                    node.currency AS currency,
+                    node.product_version AS product_version,
+                    node.capacity AS capacity,
+                    node.source_title AS source_title,
+                    node.evidence_status AS evidence_status,
+                    coalesce(node.evidence_updated_at, node.updated_at) AS evidence_updated_at,
+                    node.review_count AS review_count,
+                    node.rating AS rating,
+                    node.rating_source_url AS rating_source_url,
+                    node.review_source_url AS review_source_url,
+                    node.review_sponsored AS review_sponsored,
+                    node.is_sponsored_review AS is_sponsored_review,
                     coalesce(node.key_ingredients, []) AS key_ingredients,
                     coalesce(node.description, '') AS description,
                     coalesce(node.concerns, [])         AS concerns,
@@ -852,7 +764,7 @@ def product_search(
                     coalesce(node.trend_evidence, [])   AS trend_evidence,
                     coalesce(node.popularity_score, 0.0) AS popularity_score,
                     coalesce(node.evidence_count, 0)    AS evidence_count,
-                    coalesce(node.review_score, node.rating, 0.5) AS review_score,
+                    coalesce(node.review_score, node.rating) AS review_score,
                     score
                 ORDER BY
                     CASE WHEN $require_trend_evidence
@@ -920,6 +832,35 @@ def product_search(
                         THEN true ELSE false
                     END AS is_partner,
                     node.ingredients_list AS ingredients_list,
+                    node.ingredients_inci AS ingredients_inci,
+                    node.inci_status AS inci_status,
+                    node.ingredient_evidence_level AS ingredient_evidence_level,
+                    node.ingredient_source_url AS ingredient_source_url,
+                    node.inci_source_url AS inci_source_url,
+                    node.formula_market AS formula_market,
+                    node.recommendation_scope AS recommendation_scope,
+                    node.recommendation_limitations AS recommendation_limitations,
+                    node.skin_types AS skin_types,
+                    node.suitable_skin_types AS suitable_skin_types,
+                    node.skin_types_source_url AS skin_types_source_url,
+                    node.skin_types_verification_status AS skin_types_verification_status,
+                    node.texture AS texture,
+                    node.texture_source_url AS texture_source_url,
+                    node.texture_verification_status AS texture_verification_status,
+                    node.price_observed_at AS price_observed_at,
+                    node.price_source_url AS price_source_url,
+                    node.currency AS currency,
+                    node.product_version AS product_version,
+                    node.capacity AS capacity,
+                    node.source_title AS source_title,
+                    node.evidence_status AS evidence_status,
+                    coalesce(node.evidence_updated_at, node.updated_at) AS evidence_updated_at,
+                    node.review_count AS review_count,
+                    node.rating AS rating,
+                    node.rating_source_url AS rating_source_url,
+                    node.review_source_url AS review_source_url,
+                    node.review_sponsored AS review_sponsored,
+                    node.is_sponsored_review AS is_sponsored_review,
                     coalesce(node.key_ingredients, []) AS key_ingredients,
                     coalesce(node.description, '') AS description,
                     coalesce(node.concerns, [])         AS concerns,
@@ -934,7 +875,7 @@ def product_search(
                     coalesce(node.trend_evidence, [])   AS trend_evidence,
                     coalesce(node.popularity_score, 0.0) AS popularity_score,
                     coalesce(node.evidence_count, 0)    AS evidence_count,
-                    coalesce(node.review_score, node.rating, 0.5) AS review_score,
+                    coalesce(node.review_score, node.rating) AS review_score,
                     score
                 ORDER BY
                     CASE WHEN $require_trend_evidence
@@ -996,6 +937,36 @@ def partner_product_search(query: str, top_k: int = 60) -> list:
                 node.source AS source,
                 coalesce(node.is_partner, false) AS is_partner,
                 node.ingredients_list AS ingredients_list,
+                node.ingredients_inci AS ingredients_inci,
+                node.inci_status AS inci_status,
+                node.ingredient_evidence_level AS ingredient_evidence_level,
+                node.ingredient_source_url AS ingredient_source_url,
+                node.inci_source_url AS inci_source_url,
+                node.formula_market AS formula_market,
+                node.recommendation_scope AS recommendation_scope,
+                node.recommendation_limitations AS recommendation_limitations,
+                node.skin_types AS skin_types,
+                node.suitable_skin_types AS suitable_skin_types,
+                node.skin_types_source_url AS skin_types_source_url,
+                node.skin_types_verification_status AS skin_types_verification_status,
+                node.texture AS texture,
+                node.texture_source_url AS texture_source_url,
+                node.texture_verification_status AS texture_verification_status,
+                node.price_observed_at AS price_observed_at,
+                node.price_source_url AS price_source_url,
+                node.currency AS currency,
+                node.product_version AS product_version,
+                node.capacity AS capacity,
+                node.source_title AS source_title,
+                node.evidence_status AS evidence_status,
+                coalesce(node.evidence_updated_at, node.updated_at) AS evidence_updated_at,
+                node.review_count AS review_count,
+                node.rating AS rating,
+                node.rating_source_url AS rating_source_url,
+                node.review_source_url AS review_source_url,
+                node.review_sponsored AS review_sponsored,
+                node.is_sponsored_review AS is_sponsored_review,
+                coalesce(node.review_score, node.rating) AS review_score,
                 coalesce(node.description, '') AS description,
                 coalesce(node.concerns, []) AS concerns,
                 coalesce(node.functional_categories, []) AS functional_categories,
@@ -1058,6 +1029,35 @@ def product_search_by_brands(
                 node.source                      AS source,
                 coalesce(node.is_partner, false) AS is_partner,
                 node.ingredients_list AS ingredients_list,
+                node.ingredients_inci AS ingredients_inci,
+                node.inci_status AS inci_status,
+                node.ingredient_evidence_level AS ingredient_evidence_level,
+                node.ingredient_source_url AS ingredient_source_url,
+                node.inci_source_url AS inci_source_url,
+                node.formula_market AS formula_market,
+                node.recommendation_scope AS recommendation_scope,
+                node.recommendation_limitations AS recommendation_limitations,
+                node.skin_types AS skin_types,
+                node.suitable_skin_types AS suitable_skin_types,
+                node.skin_types_source_url AS skin_types_source_url,
+                node.skin_types_verification_status AS skin_types_verification_status,
+                node.texture AS texture,
+                node.texture_source_url AS texture_source_url,
+                node.texture_verification_status AS texture_verification_status,
+                node.price_observed_at AS price_observed_at,
+                node.price_source_url AS price_source_url,
+                node.currency AS currency,
+                node.product_version AS product_version,
+                node.capacity AS capacity,
+                node.source_title AS source_title,
+                node.evidence_status AS evidence_status,
+                coalesce(node.evidence_updated_at, node.updated_at) AS evidence_updated_at,
+                node.review_count AS review_count,
+                node.rating AS rating,
+                node.rating_source_url AS rating_source_url,
+                node.review_source_url AS review_source_url,
+                node.review_sponsored AS review_sponsored,
+                node.is_sponsored_review AS is_sponsored_review,
                 coalesce(node.key_ingredients, []) AS key_ingredients,
                 coalesce(node.description, '') AS description,
                 coalesce(node.concerns, [])         AS concerns,
@@ -1072,7 +1072,7 @@ def product_search_by_brands(
                 coalesce(node.trend_evidence, [])   AS trend_evidence,
                 coalesce(node.popularity_score, 0.0) AS popularity_score,
                 coalesce(node.evidence_count, 0)    AS evidence_count,
-                coalesce(node.review_score, node.rating, 0.5) AS review_score,
+                coalesce(node.review_score, node.rating) AS review_score,
                 1.0                              AS score
             ORDER BY node.name
             LIMIT $limit
@@ -1137,13 +1137,41 @@ def find_product_by_identity(
               node.source AS source,
               coalesce(node.is_partner, false) AS is_partner,
               node.ingredients_list AS ingredients_list,
+              node.ingredients_inci AS ingredients_inci,
+              node.inci_status AS inci_status,
+              node.ingredient_evidence_level AS ingredient_evidence_level,
+              node.ingredient_source_url AS ingredient_source_url,
+              node.inci_source_url AS inci_source_url,
+              node.formula_market AS formula_market,
+              node.recommendation_scope AS recommendation_scope,
+              node.recommendation_limitations AS recommendation_limitations,
+              node.skin_types AS skin_types,
+              node.suitable_skin_types AS suitable_skin_types,
+              node.skin_types_source_url AS skin_types_source_url,
+              node.skin_types_verification_status AS skin_types_verification_status,
+              node.texture AS texture,
+              node.texture_source_url AS texture_source_url,
+              node.texture_verification_status AS texture_verification_status,
+              node.price_observed_at AS price_observed_at,
+              node.price_source_url AS price_source_url,
+              node.product_version AS product_version,
+              node.capacity AS capacity,
+              node.source_title AS source_title,
+              node.evidence_status AS evidence_status,
+              coalesce(node.evidence_updated_at, node.updated_at) AS evidence_updated_at,
+              node.review_count AS review_count,
+              node.rating AS rating,
+              node.rating_source_url AS rating_source_url,
+              node.review_source_url AS review_source_url,
+              node.review_sponsored AS review_sponsored,
+              node.is_sponsored_review AS is_sponsored_review,
+              coalesce(node.review_score, node.rating) AS review_score,
               coalesce(node.key_ingredients, []) AS key_ingredients,
               coalesce(node.description, '') AS description,
               coalesce(node.concerns, []) AS concerns,
               coalesce(node.functional_categories, []) AS functional_categories,
               coalesce(node.common_names, []) AS common_names,
               coalesce(node.canonical_key, '') AS canonical_key,
-              coalesce(node.skin_types, node.suitable_skin_types, []) AS skin_types,
               coalesce(node.usage, node.directions, '') AS usage,
               coalesce(node.warnings, node.precautions, []) AS warnings,
               CASE
@@ -1399,15 +1427,24 @@ def _product_rank_key(
         ) else 0,
         0 if _product_data_quality(product) == "verified" else 1,
     )
-    if trend_first:
-        base += (
-            0 if _has_trend_evidence(product) else 1,
-            -product.get("popularity_score", 0),
-            -_trend_evidence_count(product),
-        )
-    base += (-product.get("concern_hits", 0),)
     if personalization_applied:
-        base += (-product.get("personalization_score", 0),)
+        # Hard safety/budget tiers remain first; soft preference fit is no
+        # longer suppressed by a lexicographic concern-hit count or fame.
+        base = base[:2]
+        if trend_first:
+            base += (0 if _has_trend_evidence(product) else 1,)
+        base += (-product.get("personalization_score", 0),
+                 0 if _product_data_quality(product) == "verified" else 1,
+                 -product.get("concern_hits", 0))
+        return base + (
+            -product.get("popularity_score", 0) if trend_first and _has_trend_evidence(product) else 0,
+            -product.get("score", 0), str(product.get("id") or ""),
+        )
+    else:
+        if trend_first:
+            base += (0 if _has_trend_evidence(product) else 1,
+                     -product.get("popularity_score", 0), -_trend_evidence_count(product))
+        base += (-product.get("concern_hits", 0),)
     return base + (
         -product.get("efficacy_score", 0),
         0 if product.get("has_ingredient_evidence") else 1,
@@ -1428,10 +1465,17 @@ def run(
     藥妝保養品推薦主流程（含內部 Orchestration）
 
     決策流程：
-    search → 分流(partner/external) → A2A知識庫(有成分才查) → 過濾
-    → 排序(警告→預算→partner→分數) → 文案 → 輸出
+    search/Web → 共用硬條件 → 圖譜補充再驗證 → 個人化排序 → 文案 → 輸出
     """
-    disliked_ingredients = disliked_ingredients or []
+    from app.services.product_candidate_guards import (
+        apply_product_hard_guards, positive_amount, recommendation_metadata,
+    )
+    from copy import deepcopy
+
+    disliked_ingredients = list(disliked_ingredients or [])
+    for value in (preference_context or {}).get("avoid_ingredients", []) or []:
+        if value not in disliked_ingredients:
+            disliked_ingredients.append(value)
     excluded_product_ids = {str(product_id) for product_id in (excluded_product_ids or [])}
 
     query     = ' '.join(intent.query_expansion) if intent.query_expansion else intent.raw_query
@@ -1443,7 +1487,12 @@ def run(
     category  = intent.product_category.value if intent.product_category.value != "不明" else None
     skin_type = intent.skin_type.value if intent.skin_type.value != "unknown" else None
     concerns  = intent.concern or []
-    budget_val = _parse_budget(getattr(intent, 'budget_range', None))
+    budget_val = positive_amount(_parse_budget(getattr(intent, 'budget_range', None)))
+    unlimited_budget = any(term in (intent.raw_query or "") for term in ("價格不限", "價錢不限", "預算不限", "不限預算", "沒有預算限制", "不設預算"))
+    if unlimited_budget:
+        budget_val = None
+    elif budget_val is None:
+        budget_val = positive_amount((preference_context or {}).get("budget_max"))
 
     trend_request = is_trending_product_query(intent)
     candidate_pool = int(os.getenv("PRODUCT_CANDIDATE_POOL_SIZE", "40"))
@@ -1463,6 +1512,18 @@ def run(
         if str(brand).strip()
     ]
 
+    def hard_candidates(products, graph_rows=()):
+        return apply_product_hard_guards(
+            products, excluded_product_ids=excluded_product_ids,
+            avoided_brands=(preference_context or {}).get("avoided_brands", []),
+            required_brands=explicit_brands, budget_max=budget_val,
+            disliked_ingredients=disliked_ingredients, graph_rows=graph_rows,
+            stable_key=product_stable_key, ingredient_filter=_filter_disliked_ingredients,
+        )
+
+    web_fallback = False
+    fallback_reason = ""
+
     if explicit_brands:
         _log(
             "STEP1",
@@ -1480,7 +1541,7 @@ def run(
             top_k=candidate_pool,
             require_trend_evidence=trend_request,
         )
-    candidates = filter_unseen_products(candidates, excluded_product_ids)
+    candidates = hard_candidates(candidates)
     candidates = [
         product
         for product in candidates
@@ -1516,28 +1577,17 @@ def run(
                 ],
                 fallback_reason="insufficient_local_trend_evidence",
             )
-            web_products = list(web_result.get("products") or [])
-            # budget_range 只會在使用者明確提出預算（含上一輪沿用）時存在；
-            # Web 結果價格未知時不可冒充為符合預算。
-            hard_budget_request = bool(budget_val)
-            if hard_budget_request:
-                web_products = [
-                    product
-                    for product in web_products
-                    if 0 < float(product.get("price") or 0) <= budget_val
-                ]
+            web_products = [product for product in hard_candidates(web_result.get("products") or [])
+                            if _is_usable_product(product) and _matches_requested_category(product, category)
+                            and _has_trend_evidence(product)]
             if web_products:
-                web_result["products"] = web_products
-                web_result["fallback_reason"] = "insufficient_local_trend_evidence"
-                web_result["message"] = (
-                    "本地商品庫沒有足夠的知名度證據，以下改用可追溯的網路來源補充；"
-                    "結果不會自動寫入正式商品庫。"
-                )
+                candidates = web_products
+                web_fallback = True
+                fallback_reason = "insufficient_local_trend_evidence"
                 _log(
                     "WEB_FALLBACK",
                     f"本地缺少熱門證據，Web Search 補入 {len(web_products)} 筆",
                 )
-                return web_result
 
     # 品類已在 retrieval 層使用 category hard constraint，
     # 不再以商品名稱做第二次猜測式過濾。
@@ -1566,33 +1616,42 @@ def run(
                 brand_hint="、".join(explicit_brands),
                 max_results=3,
             )
-            if web_result.get("products"):
+            web_products = [product for product in hard_candidates(web_result.get("products") or [])
+                            if _is_usable_product(product) and _matches_requested_category(product, category)]
+            if web_products:
                 _log(
                     "WEB_FALLBACK",
                     "指定品牌不在本地商品庫，改用網路來源",
                 )
-                return web_result
+                candidates = web_products
+                web_fallback = True
+                fallback_reason = "local_catalogue_miss"
 
-            brand_text = "、".join(explicit_brands)
+            if not candidates:
+                brand_text = "、".join(explicit_brands)
+                return {
+                    "products": [],
+                    "graph_summary": "",
+                    "warnings": [],
+                    "total_candidates": 0,
+                    "message": (
+                        f"目前找不到同時符合「{brand_text}」品牌與個人條件、且資料可核對的商品。"
+                        "我不會自動改推其他品牌。"
+                        "如果你願意，我可以幫你取消品牌限制，改找其他符合需求的商品。"
+                    ),
+                }
+
+        if not candidates:
             return {
                 "products": [],
                 "graph_summary": "",
                 "warnings": [],
                 "total_candidates": 0,
                 "message": (
-                    f"目前商品資料庫中找不到符合「{brand_text}」品牌條件的商品。"
-                    "我不會自動改推其他品牌。"
-                    "如果你願意，我可以幫你取消品牌限制，改找其他符合需求的商品。"
+                    "已套用你的過敏／禁忌成分，但目前沒有具完整 INCI 可核對的合適商品。"
+                    if disliked_ingredients else "找不到符合條件的保養品，請試試調整搜尋條件。"
                 ),
             }
-
-        return {
-            "products": [],
-            "graph_summary": "",
-            "warnings": [],
-            "total_candidates": 0,
-            "message": "找不到符合條件的保養品，請試試調整搜尋條件。",
-        }
 
     # ── Step 2：分流 partner / external ──
     partner_products  = [p for p in candidates if p.get('is_partner')]
@@ -1605,7 +1664,7 @@ def run(
     # Step 2a：Partner 商品走 graph_search
     stage_started = time.perf_counter()
     graph_result = _enrich_partner_products(
-        partner_ids or all_ids[:10],
+        [product_id for product_id in (partner_ids or all_ids[:10]) if not any(p.get("id") == product_id and p.get("is_web_result") for p in candidates)],
         skin_type,
     )
     observe_pipeline_stage(
@@ -1648,12 +1707,8 @@ def run(
     # ── Step 4：過濾禁忌成分 ──
     global_warnings = graph_result.get('warnings', [])
 
+    candidates = hard_candidates(candidates, graph_result.get('ingredients', []))
     if disliked_ingredients:
-        candidates = _filter_disliked_ingredients(
-            candidates,
-            disliked_ingredients,
-            graph_result.get('ingredients', []),
-        )
         _log("STEP4", f"過濾禁忌成分後剩 {len(candidates)} 筆")
         if not candidates:
             return {
@@ -1690,32 +1745,7 @@ def run(
     )
 
     if budget_val:
-        hard_budget = bool(re.search(
-            r"(以下|以內|不超過|最多|低於|少於|under|below|up\s+to)",
-            getattr(intent, "raw_query", "") or "",
-            re.IGNORECASE,
-        ))
-        if hard_budget:
-            candidates = [
-                product
-                for product in candidates
-                if 0 < (product.get("price") or 0) <= budget_val
-            ]
-            _log("STEP5", f"預算硬條件 {budget_val} 元內，剩 {len(candidates)} 筆")
-            if not candidates:
-                return {
-                    "products": [],
-                    "graph_summary": "",
-                    "warnings": global_warnings,
-                    "total_candidates": 0,
-                    "message": {
-                        "main": f"目前找不到價格在 {budget_val:g} 元以內且符合條件的商品。",
-                        "sub": "你可以提高預算、放寬品類，或指定品牌再試一次。",
-                    },
-                }
-        else:
-            over_budget = sum(1 for p in candidates if (p.get('price') or 0) > budget_val)
-            _log("STEP5", f"預算 {budget_val} 元，{over_budget} 筆超預算往後排")
+        _log("STEP5", f"已套用有效預算上限，剩 {len(candidates)} 筆")
 
     # concern 匹配：商品名稱含訴求關鍵字 + graph suitable_concerns 命中
     CONCERN_SYNONYM = {
@@ -1728,10 +1758,10 @@ def run(
         '抗老': ['抗老', '緊緻', '撫紋', '彈力'],
     }
     suit_map = {}
-    for sc in graph_result.get('suitable_concerns', []):
+    for sc in graph_result.get('product_suits', []):
         pid = sc.get('product_id')
         if pid:
-            suit_map.setdefault(pid, set()).add(str(sc.get('concern_name_zh', '')))
+            suit_map.setdefault(pid, set()).update(str(value) for value in (sc.get('suits') or []) if value)
 
     EFFICACY_INGREDIENT_TERMS = {
         '保濕': ('glycerin', 'hyaluronic', 'sodium hyaluronate', 'ceramide', 'panthenol', 'squalane', 'beta-glucan', '尿囊素'),
@@ -1797,9 +1827,16 @@ def run(
         )
         p['concern_hits'] = efficacy_score
 
+    ranking_context = dict(preference_context or {})
+    ranking_context.update(
+        current_skin_type=skin_type,
+        current_concerns=list(concerns),
+        current_texture=getattr(intent.texture_preference, "value", intent.texture_preference),
+        current_budget_max=budget_val,
+    )
     personalization_applied = _apply_personalization_scores(
         candidates,
-        preference_context,
+        ranking_context,
         warned_ids,
         explicit_brands=getattr(intent, "brand_preference", None),
     )
@@ -1816,8 +1853,7 @@ def run(
         )
         _log(
             "STEP5",
-            "已套用消費人格排序："
-            + str((preference_context or {}).get("customer_type_label") or ""),
+            "已套用目前條件與已知偏好排序",
         )
     else:
         candidates.sort(
@@ -1894,14 +1930,31 @@ def run(
             dict.fromkeys(matched_claim_terms)
         )[:4]
 
+        primary_source_url = next(
+            (
+                url for url in _product_source_urls(p)
+                if str(url).startswith(("http://", "https://"))
+            ),
+            "",
+        )
+        source_metadata = {"url": primary_source_url}
+        if str(p.get("source_title") or "").strip():
+            source_metadata["title"] = str(p["source_title"]).strip()
+
         output_products.append({
+            **recommendation_metadata(p),
+            **{key: deepcopy(p[key]) for key in (
+                "personalization_policy_version", "personalization_reasons", "personalization_missing",
+                "personalization_components", "personalization_weights",
+            ) if key in p},
             'id':          p['id'],
             'name':        (str(p.get('name_zh') or '').strip() or name_text),
             'brand':       str(p.get('brand') or '').strip() or '未標示',
             'category':    p.get('category', ''),
-            'price':       p.get('price', 0),
+            'price':       p.get('price'),
             'copy':        copy_text,
             'is_partner':  p.get('is_partner', False),
+            **({'is_web_result': True} if p.get('is_web_result') else {}),
             'score':       round(p.get('score', 0), 3),
             'ingredients': ing_for_copy,
             'concern_hits': p.get('concern_hits', 0),
@@ -1917,15 +1970,18 @@ def run(
             "data_quality": _product_data_quality(p),
             'popularity_score': p.get('popularity_score', 0.0),
             'trending': (p.get('trend_evidence') or [''])[0],
-            'sources': [
-                {'url': url}
-                for url in (p.get('source_urls') or [])[:1]
-                if str(url).startswith(('http://', 'https://'))
-            ],
+            'sources': [source_metadata] if primary_source_url else [],
+            **({'source_url': primary_source_url} if primary_source_url else {}),
         })
 
     # 一次 TAIDE 呼叫批次生成文案與排序理由。
     # 不生成商品間比較，避免回覆出現「和上一款相比」。
+    ranking_evidence = {p['id']: {
+        key: deepcopy(p[key]) for key in (
+            "personalization_policy_version", "personalization_reasons", "personalization_missing",
+            "personalization_components", "personalization_weights",
+        ) if key in p
+    } for p in output_products}
     stage_started = time.perf_counter()
     output_products = _batch_generate_rank_content(
         output_products,
@@ -1934,6 +1990,8 @@ def run(
         global_warnings,
         memory_context=memory_context,
     )
+    for product in output_products:
+        product.update(ranking_evidence.get(product.get('id'), {}))
     observe_pipeline_stage(
         "product",
         "batch_copy_generation",
@@ -1944,7 +2002,9 @@ def run(
 
     return {
         "products":         output_products,
-        "terra_intro": generate_product_intro(intent.raw_query, category).get("intro", ""),
+        # The website composes its introduction from the verified product data.
+        # Keep the legacy field without an unused completion on every search.
+        "terra_intro": "",
         "graph_summary":    format_graph_result(graph_result),
         "warnings":         global_warnings,
         "knowledge_result": knowledge_result,
@@ -1955,6 +2015,7 @@ def run(
             if personalization_applied
             else None
         ),
+        **({"source": "web", "fallback_reason": fallback_reason} if web_fallback else {}),
     }
 # ──────────────────────────────────────────
 # 批次生成：排序理由 + 商品比較 + 文案（一次 TAIDE 呼叫）
@@ -2017,7 +2078,8 @@ def _batch_generate_rank_content(
                     )
 
             # 功效證據永遠在熱門度之前；熱門只說明接受度。
-            reason_parts = list(p.get("efficacy_reasons") or [])
+            personal = list(p.get("personalization_reasons") or [])[:2]
+            reason_parts = personal + list(p.get("efficacy_reasons") or [])[:1 if personal else 3]
 
             if not reason_parts and p.get("concern_hits", 0) > 0:
                 if p.get("data_quality") == "verified" or bool(p.get("ingredients")):
@@ -2032,15 +2094,6 @@ def _batch_generate_rank_content(
                     )
 
             if not reason_parts:
-                name_text = str(p.get("name") or "").strip()
-                texture_term = next(
-                    (term for term in ("水感", "水凝", "凝乳", "清爽", "輕盈") if term in name_text),
-                    "",
-                )
-                if texture_term:
-                    reason_parts.append(
-                        f"商品名稱標示「{texture_term}」質地，可作為比較清爽度的具體依據"
-                    )
                 if category_label and category_label not in {"其他", "臉部保養", "保養商品"}:
                     reason_parts.append(f"商品名稱與類型明確對應本輪{category_label}需求")
 

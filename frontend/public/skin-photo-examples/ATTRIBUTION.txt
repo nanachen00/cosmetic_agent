@@ -1,0 +1,10 @@
+PUBLIC FUNCTIONAL PHOTO EXAMPLES
+
+NASA portrait: public domain per scikit-image official astronaut documentation; head crop, JPEG conversion and listed dark/blur/bright stress transformations. Not a skin reference label or endorsement.
+https://scikit-image.org/docs/0.25.x/api/skimage.data.html#skimage.data.astronaut
+
+MEMI-DS v1: Zhenwei Zhai, DOI 10.6084/m9.figshare.29209229.v1, CC BY 4.0 https://creativecommons.org/licenses/by/4.0/ . Resized and re-encoded; original eye privacy mask retained. No clinical reference labels assigned.
+
+SCIN: Google Research / SCIN contributors, https://github.com/google-research-datasets/scin . SCIN Data Use License applies; complete license including warranty disclaimer is provided in SCIN-LICENSE.txt. Images resized and re-encoded; original de-identification masks preserved. No identity inference or re-identification.
+
+All photos are functional examples only. No claim about disease, demographics, phone capture, or model correctness. These photos are excluded from training. Original and distributed file hashes and transformations are recorded in manifest.json.

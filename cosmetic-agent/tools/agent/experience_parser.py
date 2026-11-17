@@ -10,26 +10,23 @@ import json
 from typing import Optional
 
 from dotenv import load_dotenv
-from openai import OpenAI
+from app.clients.terra_completion_client import TerraCompletionClient
 
 
 # 載入專案環境變數
 load_dotenv()
 
-# OpenAI 設定
-# 請填入「新建立」的 API Key
-# 剛才公開過的 Key 不可繼續使用
+# The production launcher loads the single canonical backend .env.
 API_KEY = os.getenv("OPENAI_API_KEY", "").strip()
 
-MODEL_NAME = "gpt-5.6-terra"
+MODEL_NAME = os.getenv("TERRA_MODEL", TerraCompletionClient.DEFAULT_MODEL).strip() or TerraCompletionClient.DEFAULT_MODEL
+TIMEOUT_SECONDS = float(os.getenv("TERRA_TIMEOUT_SECONDS", "20"))
 
 if not API_KEY:
     raise RuntimeError("缺少 OPENAI_API_KEY 環境變數")
 
 
-client = OpenAI(
-    api_key=API_KEY,
-)
+client = TerraCompletionClient.from_env()
 
 
 SYSTEM_PROMPT = """你是台灣藥妝保養對話中的「商品使用經驗理解器」。
@@ -356,17 +353,16 @@ def parse_product_experience(
     ]
 
     try:
-        response = client.chat.completions.create(
+        raw_content = client.complete(
             model=MODEL_NAME,
             messages=messages,
             reasoning_effort="none",
-            max_completion_tokens=700,
+            max_tokens=700,
+            timeout_seconds=TIMEOUT_SECONDS,
             response_format={
                 "type": "json_object",
             },
         )
-
-        raw_content = response.choices[0].message.content or ""
 
         parsed = _extract_json(raw_content)
 

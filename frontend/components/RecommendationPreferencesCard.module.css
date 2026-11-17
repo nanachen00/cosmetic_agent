@@ -1,0 +1,283 @@
+.card {
+  display: grid;
+  gap: 22px;
+}
+
+.heading h2 {
+  margin: 0 0 7px;
+  color: #624e55;
+  font-size: clamp(20px, 3vw, 25px);
+}
+
+.heading p {
+  margin: 0;
+  max-width: 720px;
+  color: #8b747b;
+  line-height: 1.65;
+}
+
+.content {
+  display: grid;
+  gap: 24px;
+}
+
+.state {
+  display: grid;
+  justify-items: start;
+  gap: 12px;
+  min-height: 92px;
+  padding: 20px;
+  color: #806b72;
+  background: #fffaf7;
+  border: 1px solid #eadde0;
+  border-radius: 18px;
+}
+
+.state p {
+  margin: 0;
+}
+
+.budgetField,
+.brandField {
+  display: grid;
+  align-content: start;
+  gap: 9px;
+  color: #6e5960;
+  font-weight: 800;
+}
+
+.budgetField small,
+.brandField small {
+  color: #9a858b;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.5;
+}
+
+.moneyInput {
+  display: flex;
+  align-items: center;
+  width: min(320px, 100%);
+  overflow: hidden;
+  background: #fff;
+  border: 1px solid #d9c8ce;
+  border-radius: 14px;
+  box-shadow: 0 3px 0 rgba(121, 92, 104, 0.08);
+}
+
+.moneyInput:focus-within {
+  border-color: #9c7fac;
+  box-shadow: 0 0 0 3px rgba(156, 127, 172, 0.16);
+}
+
+.moneyInput b {
+  padding-left: 14px;
+  color: #7a6570;
+}
+
+.moneyInput input {
+  width: 100%;
+  min-width: 0;
+  padding: 12px 14px 12px 8px;
+  color: #604c54;
+  font: inherit;
+  background: transparent;
+  border: 0;
+  outline: 0;
+}
+
+.textureField {
+  min-width: 0;
+  padding: 0;
+  margin: 0;
+  border: 0;
+}
+
+.textureField legend {
+  margin-bottom: 10px;
+  color: #6e5960;
+  font-weight: 800;
+}
+
+.textureChoices {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.textureChoices button,
+.chip,
+.addButton,
+.secondaryButton,
+.dangerButton,
+.saveButton {
+  min-height: 42px;
+  padding: 9px 15px;
+  color: #705b64;
+  font: inherit;
+  font-weight: 800;
+  background: #fff;
+  border: 1px solid #d9c7ce;
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.textureChoices button:hover,
+.textureChoices button:focus-visible,
+.chip:hover,
+.chip:focus-visible,
+.secondaryButton:hover,
+.secondaryButton:focus-visible {
+  border-color: #9f82ae;
+  outline: 3px solid rgba(159, 130, 174, 0.14);
+}
+
+.textureChoices .selected {
+  color: #fff;
+  background: #9676a7;
+  border-color: #80628f;
+  box-shadow: 0 3px 0 #765681;
+}
+
+.brandGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 36px;
+  padding: 6px 11px;
+  color: #705b64;
+  background: #f9f1f5;
+}
+
+.chip span {
+  font-size: 17px;
+  line-height: 1;
+}
+
+.brandComposer {
+  display: flex;
+  gap: 8px;
+}
+
+.brandComposer input {
+  width: 100%;
+  min-width: 0;
+  padding: 11px 13px;
+  color: #604c54;
+  font: inherit;
+  background: #fff;
+  border: 1px solid #d9c8ce;
+  border-radius: 13px;
+}
+
+.brandComposer input:focus {
+  border-color: #9c7fac;
+  outline: 3px solid rgba(156, 127, 172, 0.16);
+}
+
+.addButton {
+  flex: 0 0 auto;
+  min-height: 44px;
+  color: #fff;
+  background: #9c82aa;
+  border-color: #866e94;
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding-top: 4px;
+}
+
+.saveButton {
+  color: #fff;
+  background: #80638f;
+  border-color: #6f557e;
+  box-shadow: 0 4px 0 #654b73;
+}
+
+.dangerButton {
+  color: #9a465c;
+  border-color: #dfa8b6;
+  background: #fff5f7;
+}
+
+.resetConfirm {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  flex-wrap: wrap;
+  margin-right: auto;
+  color: #7b626a;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.notice,
+.error,
+.dirty,
+.fieldError {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.notice {
+  color: #467a62;
+}
+
+.error,
+.fieldError {
+  color: #ad405b !important;
+}
+
+.dirty {
+  color: #80638f;
+}
+
+.textureChoices button:disabled,
+.chip:disabled,
+.addButton:disabled,
+.secondaryButton:disabled,
+.dangerButton:disabled,
+.saveButton:disabled,
+.brandComposer input:disabled,
+.moneyInput input:disabled {
+  cursor: not-allowed;
+  opacity: 0.56;
+}
+
+@media (max-width: 720px) {
+  .brandGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .brandComposer {
+    align-items: stretch;
+  }
+
+  .actions,
+  .resetConfirm {
+    align-items: stretch;
+  }
+
+  .actions > button,
+  .resetConfirm button {
+    flex: 1 1 auto;
+  }
+}

@@ -53,6 +53,8 @@ ops/**/runs/
 
 # Dependencies and builds
 node_modules/
+.venv/
+.runtime/
 .next/
 .next-*/
 dist/

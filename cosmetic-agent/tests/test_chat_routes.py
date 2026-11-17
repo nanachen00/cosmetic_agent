@@ -56,6 +56,29 @@ def _request(*headers: tuple[str, str]) -> Request:
     )
 
 
+@pytest.mark.asyncio
+async def test_stream_releases_guard_when_job_store_start_fails(monkeypatch):
+    finished = []
+
+    class UnavailableStore:
+        async def start(self, *args, **kwargs):
+            raise ConnectionError("redis unavailable")
+
+    async def begin(*args):
+        return "guard-ticket"
+
+    async def finish(ticket):
+        finished.append(ticket)
+
+    from dataclasses import replace
+    deps = replace(_deps(begin), finish_chat_security=finish)
+    monkeypatch.setattr("app.api.routes.chat.chat_job_store", UnavailableStore())
+    endpoint = _stream_endpoint(create_chat_router(deps))
+    with pytest.raises(ConnectionError):
+        await endpoint(ChatRequest(message="hello", user_id="user-1"), _request(("Idempotency-Key", "request-store-failure")))
+    assert finished == ["guard-ticket"]
+
+
 def _deps(begin_chat_security):
     def fail(*args, **kwargs):
         raise AssertionError("unexpected dependency call")
@@ -140,3 +163,117 @@ async def test_stream_duplicate_without_last_event_id_still_returns_409():
 
     assert caught.value.status_code == 409
     assert caught.value.detail == "This message request was already accepted"
+
+
+class _AdmissionTicket:
+    def __init__(self, *, acquired: bool = True) -> None:
+        self.acquired = acquired
+        self.release_count = 0
+
+    async def release(self) -> None:
+        self.release_count += 1
+
+
+def _stream_dependencies(*, ticket, get_agent, calls, finished):
+    async def begin(*args, **kwargs):
+        return "guard-1"
+
+    async def reserve():
+        calls.append("reserve")
+        return ticket
+
+    async def wait(admission_ticket):
+        assert admission_ticket is ticket
+        calls.append("wait")
+        return 0.0
+
+    async def enforce(**kwargs):
+        calls.append("history")
+        return ["existing"]
+
+    async def guard_creation(*args, **kwargs):
+        raise AssertionError("history is non-empty")
+
+    async def finish(guard_ticket):
+        assert guard_ticket == "guard-1"
+        finished.append(guard_ticket)
+
+    return ChatRouteDependencies(
+        chat_user_id=lambda request, requested_user_id: "user-1",
+        begin_chat_security=begin,
+        get_agent_with_profile=get_agent,
+        enforce_conversation_limit=enforce,
+        guard_conversation_creation=guard_creation,
+        reserve_chat_ticket=reserve,
+        wait_for_chat_ticket=wait,
+        completed_conversation_limit=lambda *args: {},
+        finish_chat_security=finish,
+        stage_to_route=lambda value: value,
+        get_agent=lambda *args, **kwargs: None,
+    )
+
+
+@pytest.mark.asyncio
+async def test_stream_waits_for_admission_before_loading_agent_and_cleans_setup_failure():
+    ticket = _AdmissionTicket()
+    calls = []
+    finished = []
+
+    def get_agent(**kwargs):
+        calls.append("agent")
+        raise RuntimeError("profile unavailable")
+
+    endpoint = _stream_endpoint(
+        create_chat_router(
+            _stream_dependencies(
+                ticket=ticket,
+                get_agent=get_agent,
+                calls=calls,
+                finished=finished,
+            )
+        )
+    )
+    response = await endpoint(
+        ChatRequest(message="hello", session_id="user-1", conversation_id="chat-1"),
+        _request(),
+    )
+    chunks = [chunk async for chunk in response.body_iterator]
+    body = b"".join(
+        chunk if isinstance(chunk, bytes) else chunk.encode() for chunk in chunks
+    ).decode()
+
+    assert "event: error" in body
+    assert calls == ["reserve", "wait", "agent"]
+    assert ticket.release_count == 1
+    assert finished == ["guard-1"]
+
+
+@pytest.mark.asyncio
+async def test_stream_background_cleans_unconsumed_response():
+    ticket = _AdmissionTicket()
+    calls = []
+    finished = []
+
+    def get_agent(**kwargs):
+        raise AssertionError("unconsumed response must not load an agent")
+
+    endpoint = _stream_endpoint(
+        create_chat_router(
+            _stream_dependencies(
+                ticket=ticket,
+                get_agent=get_agent,
+                calls=calls,
+                finished=finished,
+            )
+        )
+    )
+    response = await endpoint(
+        ChatRequest(message="hello", session_id="user-1", conversation_id="chat-1"),
+        _request(),
+    )
+    assert response.background is not None
+    await response.background()
+
+    assert calls == ["reserve"]
+    assert ticket.release_count == 1
+    assert finished == ["guard-1"]

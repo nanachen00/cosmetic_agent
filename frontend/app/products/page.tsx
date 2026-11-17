@@ -5,10 +5,10 @@ import { Icon } from "@/components/Icon";
 import { PageHeader } from "@/components/PageHeader";
 
 const products = [
-  { id: 1, brand: "MINT LAB", name: "清爽平衡保濕凝露", skin: "油性肌", effect: "保濕", price: 499, match: 94, notes: ["質地清爽", "無香料"] },
-  { id: 2, brand: "LAVENDER DAY", name: "舒緩修護精華", skin: "敏感肌", effect: "舒緩", price: 680, match: 90, notes: ["屏障照護", "低刺激"] },
-  { id: 3, brand: "COCOA SKIN", name: "溫和淨膚化妝水", skin: "油性肌", effect: "粉刺照護", price: 420, match: 86, notes: ["日常清潔", "清爽"] },
-  { id: 4, brand: "MELLOW DEW", name: "水感防曬乳 SPF50", skin: "混合肌", effect: "防曬", price: 550, match: 82, notes: ["不黏膩", "易補擦"] }
+  { id: 1, brand: "MINT LAB", name: "清爽平衡保濕凝露", skin: "油性肌", effect: "保濕", price: 499, notes: ["質地清爽", "無香料"] },
+  { id: 2, brand: "LAVENDER DAY", name: "舒緩修護精華", skin: "敏感肌", effect: "舒緩", price: 680, notes: ["屏障照護", "低刺激"] },
+  { id: 3, brand: "COCOA SKIN", name: "溫和淨膚化妝水", skin: "油性肌", effect: "粉刺照護", price: 420, notes: ["日常清潔", "清爽"] },
+  { id: 4, brand: "MELLOW DEW", name: "水感防曬乳 SPF50", skin: "混合肌", effect: "防曬", price: 550, notes: ["不黏膩", "易補擦"] }
 ];
 
 function tokenizeSearch(value: string) {
@@ -49,13 +49,15 @@ export default function ProductsPage() {
         };
       })
       .filter(({ matchesSkin, matchedTerms }) => matchesSkin && matchedTerms === terms.length)
-      .sort((left, right) => right.matchedTerms - left.matchedTerms || right.item.match - left.item.match)
+      .sort((left, right) => right.matchedTerms - left.matchedTerms || left.item.id - right.item.id)
       .map(({ item }) => item);
   }, [query, skin]);
 
   return (
     <div className="content-wrap products-page">
-      <PageHeader eyebrow="BEAUTY PICK" title="找產品" description="先收集需求，再交給商品搜尋與適配分析流程。"/>
+      <PageHeader eyebrow="BEAUTY PICK" title="找產品" description="示範商品頁，使用固定虛構資料展示介面；未讀取你的個人資料，也不是個人化推薦。"/>
+
+      <p className="search-context" role="note"><strong>示範資料</strong>：商品、價格與分析皆為介面展示，不能作為實際選購依據。個人化推薦請使用首頁的「找產品」對話。</p>
 
       <section className="retro-frame product-search-panel">
         <form className="product-search-row" onSubmit={(event) => { event.preventDefault(); setQuery(draftQuery.trim()); }}>
@@ -67,11 +69,11 @@ export default function ProductsPage() {
         {incoming ? <p className="search-context">已帶入首頁需求：「{incoming}」</p> : null}
       </section>
 
-      <div className="result-heading"><div><span>AI MATCH RESULT</span><h2>推薦結果</h2></div><strong>{results.length} 項商品</strong></div>
+      <div className="result-heading"><div><span>DEMO CATALOG</span><h2>示範商品</h2></div><strong>{results.length} 項商品</strong></div>
       <section className="product-grid">
         {results.map((product) => (
           <article className="product-card" key={product.id}>
-            <div className="match-badge">{product.match}%<span>MATCH</span></div>
+            <div className="match-badge">示範<span>DEMO</span></div>
             <div className="product-visual"><span>♡</span><small>{product.effect}</small></div>
             <p className="product-brand">{product.brand}</p>
             <h2>{product.name}</h2>
@@ -97,12 +99,12 @@ export default function ProductsPage() {
               aria-label="關閉產品分析"
               onClick={() => setSelectedProduct(null)}
             >×</button>
-            <span className="product-analysis-eyebrow">PERSONAL FIT NOTE</span>
+            <span className="product-analysis-eyebrow">DEMO PRODUCT NOTE</span>
             <h2 id="product-analysis-title">{selectedProduct.name}</h2>
-            <p className="product-analysis-score"><strong>{selectedProduct.match}% 適配</strong>・{selectedProduct.skin}</p>
+            <p className="product-analysis-score"><strong>示範資料</strong>・{selectedProduct.skin}</p>
             <dl className="product-analysis-list">
               <div><dt>主要訴求</dt><dd>{selectedProduct.effect}</dd></div>
-              <div><dt>適合理由</dt><dd>{selectedProduct.notes.join("、")}</dd></div>
+              <div><dt>示範特色</dt><dd>{selectedProduct.notes.join("、")}</dd></div>
               <div><dt>參考價格</dt><dd>NT${selectedProduct.price}</dd></div>
             </dl>
             <p className="product-analysis-note">目前為展示商品資料；正式選購前仍建議確認完整成分表，並先做局部測試。</p>
